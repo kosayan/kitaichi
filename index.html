@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="回転解析">
+<title>回転数解析システム</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#0a0a0a; --card:#141414; --card2:#1c1c1c;
+  --border:#252525; --border2:#333;
+  --amber:#f59e0b; --amber-dim:#92600a;
+  --cyan:#22d3ee; --green:#4ade80; --red:#f87171; --yellow:#facc15;
+  --text:#e5e5e5; --sub:#737373; --sub2:#525252;
+  --mono:'IBM Plex Mono',monospace; --sans:'Noto Sans JP',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+body{overflow-x:hidden}
+#app{max-width:480px;margin:0 auto;padding:0 0 120px}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--sub2);transition:background .3s}
+.dot.live{background:var(--green);box-shadow:0 0 8px var(--green)}
+.hdr-title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.1em}
+.hdr-n{font-family:var(--mono);font-size:12px;color:var(--sub)}
+.gear-btn{background:none;border:none;color:var(--sub);font-size:18px;padding:4px;cursor:pointer;line-height:1;transition:color .2s}
+.gear-btn:active{color:var(--amber)}
+
+/* INPUT */
+#input-sec{padding:16px;border-bottom:1px solid var(--border)}
+.input-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--sub);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.input-lbl::before{content:'01';color:var(--amber-dim)}
+.input-row{display:flex;gap:8px}
+.rot-in{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:20px;font-weight:600;padding:12px 14px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.rot-in:focus{border-color:var(--amber)}
+.rot-in::placeholder{color:var(--sub2);font-size:14px}
+.add-btn{background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:0 20px;cursor:pointer;transition:opacity .15s;letter-spacing:.05em}
+.add-btn:active{opacity:.7}
+
+/* EMPTY */
+#empty-state{padding:48px 16px;text-align:center}
+.empty-title{font-family:var(--mono);font-size:12px;color:var(--sub);margin-bottom:8px}
+.empty-sub{font-size:12px;color:var(--sub2);line-height:1.8}
+
+/* SECTION TAG */
+.stag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--sub);padding:14px 16px 0;display:flex;align-items:center;gap:8px}
+.stag .sn{color:var(--amber-dim);min-width:18px}
+.stag::after{content:'';flex:1;height:1px;background:var(--border);margin-left:8px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative;overflow:hidden}
+.kpi.hi{border-color:var(--amber-dim)}
+.kpi.hi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--amber)}
+.kpi-lbl{font-size:10px;color:var(--sub);margin-bottom:6px}
+.kpi-val{font-family:var(--mono);font-size:22px;font-weight:700;line-height:1}
+.kpi.hi .kpi-val{color:var(--amber)}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:4px}
+
+/* CARD */
+.card{margin:4px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+
+/* SUCCESS */
+.succ-wrap{padding:14px}
+.succ-pct{font-family:var(--mono);font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
+.succ-lbl{font-size:11px;color:var(--sub);margin-bottom:12px}
+.bar-track{height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.succ-verdict{margin-top:10px;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:12px;color:var(--sub)}
+.succ-verdict strong{color:var(--text)}
+
+/* LIKELIHOOD */
+.lk-table{width:100%;border-collapse:collapse}
+.lk-table td{padding:10px 14px;border-bottom:1px solid var(--border)}
+.lk-table tr:last-child td{border-bottom:none}
+.lk-range{font-family:var(--mono);font-size:12px;color:var(--sub)}
+.lk-bar-cell{width:40%}
+.lk-track{height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.lk-fill{height:100%;border-radius:2px;transition:width .6s}
+.lk-pct{font-family:var(--mono);font-size:13px;font-weight:600;text-align:right;width:50px}
+
+/* BAYES GRID */
+.bayes-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.bayes-cell{background:var(--card);padding:12px 14px}
+.bayes-lbl{font-size:10px;color:var(--sub);margin-bottom:4px}
+.bayes-val{font-family:var(--mono);font-size:16px;font-weight:600}
+.bayes-desc{font-size:10px;color:var(--sub2);margin-top:3px}
+
+/* CI */
+.ci-row{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ci-row:last-child{border-bottom:none}
+.ci-type{font-size:11px;color:var(--sub)}
+.ci-type strong{display:block;font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px}
+.ci-range{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--cyan);text-align:right}
+
+/* VARIANCE */
+.var-wrap{padding:14px}
+.var-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.var-metrics{display:flex;gap:18px}
+.vm .v-lbl{font-size:10px;color:var(--sub);margin-bottom:3px}
+.vm .v-val{font-family:var(--mono);font-size:14px;font-weight:600}
+.vbadge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.var-desc{font-size:12px;color:var(--sub);line-height:1.7}
+
+/* CHARTS */
+.ctabs{display:flex;padding:0 16px;gap:4px;margin-bottom:8px}
+.ctab{flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--sub);font-family:var(--mono);font-size:11px;padding:7px 4px;cursor:pointer;text-align:center;transition:all .15s}
+.ctab.on{background:var(--amber);border-color:var(--amber);color:#000;font-weight:700}
+.cwrap{display:none;padding:0 16px}
+.cwrap.on{display:block}
+.cwrap canvas{border-radius:8px}
+
+/* HISTORY */
+#hist-sec{padding:4px 16px}
+.hist-hdr{font-family:var(--mono);font-size:10px;color:var(--sub);letter-spacing:.1em;padding:12px 0 8px;display:flex;justify-content:space-between}
+.hist-item{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px}
+.hist-n{font-family:var(--mono);font-size:11px;color:var(--sub2);width:28px}
+.hist-v{font-family:var(--mono);font-size:16px;font-weight:600;flex:1}
+.hist-dev{font-family:var(--mono);font-size:11px;flex:1;text-align:right}
+.hist-del{background:none;border:none;color:var(--sub2);font-size:16px;padding:0 0 0 12px;cursor:pointer;line-height:1}
+.hist-del:active{color:var(--red)}
+
+/* SETTINGS MODAL */
+#settings-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center}
+#settings-modal.open{display:flex}
+.sheet{background:var(--card);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:20px 20px 40px;width:100%;max-width:480px}
+.sheet-title{font-family:var(--mono);font-size:13px;font-weight:700;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.close-btn{background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer}
+.set-row{margin-bottom:14px}
+.set-lbl{font-size:12px;color:var(--sub);margin-bottom:6px}
+.set-in{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:16px;padding:10px 12px;outline:none}
+.set-in:focus{border-color:var(--amber)}
+.reset-btn{width:100%;background:transparent;border:1px solid var(--red);border-radius:8px;color:var(--red);font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer;margin-top:8px;letter-spacing:.05em}
+.reset-btn:active{background:rgba(248,113,113,.1)}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div class="header-left">
+    <div class="dot" id="dot"></div>
+    <span class="hdr-title">KAITEN ANALYTICS</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="hdr-n" id="hdrN">N=0</span>
+    <button class="gear-btn" onclick="openSettings()">⚙</button>
+  </div>
+</header>
+
+<section id="input-sec">
+  <div class="input-lbl">DATA INPUT — 1000円あたりの回転数</div>
+  <div class="input-row">
+    <input type="number" class="rot-in" id="rotIn" placeholder="例: 18.5" inputmode="decimal" step="0.1" min="1" max="99">
+    <button class="add-btn" onclick="addEntry()">ADD</button>
+  </div>
+</section>
+
+<div id="empty-state">
+  <div class="empty-title">// AWAITING DATA INPUT</div>
+  <div class="empty-sub">1000円を投入するたびに<br>回転数を入力してください<br><br>データが増えるほど推定精度が向上します</div>
+</div>
+
+<div id="stats-sec" class="hidden">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi hi"><div class="kpi-lbl">事後分布 μ*</div><div class="kpi-val" id="kpiMuPost">—</div><div class="kpi-sub">ベイズ推定値</div></div>
+    <div class="kpi hi"><div class="kpi-lbl">成功確率</div><div class="kpi-val" id="kpiSuccess">—</div><div class="kpi-sub" id="kpiSuccessLbl">ボーダー超え</div></div>
+    <div class="kpi"><div class="kpi-lbl">標本平均 x̄</div><div class="kpi-val" id="kpiMean">—</div><div class="kpi-sub" id="kpiN">N=0</div></div>
+    <div class="kpi"><div class="kpi-lbl">標準偏差 s</div><div class="kpi-val" id="kpiSD">—</div><div class="kpi-sub" id="kpiCV">CV: —</div></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="stag"><span class="sn">02</span>合計成功率推定</div>
+  <div class="card">
+    <div class="succ-wrap">
+      <div class="succ-pct" id="succPct">—</div>
+      <div class="succ-lbl" id="succLbl">ボーダー超えの確率</div>
+      <div class="bar-track"><div class="bar-fill" id="succBar"></div></div>
+      <div class="succ-verdict" id="succVerdict"></div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="stag"><span class="sn">03</span>尤度計算（回転数帯別）</div>
+  <div class="card">
+    <table class="lk-table" id="lkTable"></table>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="stag"><span class="sn">04</span>ベイズ更新</div>
+  <div class="card">
+    <div class="bayes-grid" id="bayesGrid"></div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="stag"><span class="sn">05</span>信頼区間 / 信用区間</div>
+  <div class="card" id="ciCard"></div>
+
+  <!-- STEP 6 -->
+  <div class="stag"><span class="sn">06</span>分散チェック</div>
+  <div class="card" id="varCard"></div>
+
+  <!-- STEP 7 -->
+  <div class="stag"><span class="sn">07</span>グラフ表示</div>
+  <div class="ctabs">
+    <button class="ctab on" onclick="switchTab(0)">履歴</button>
+    <button class="ctab" onclick="switchTab(1)">分布</button>
+    <button class="ctab" onclick="switchTab(2)">尤度帯</button>
+  </div>
+  <div class="cwrap on" id="cw0"><canvas id="histChart" height="200"></canvas></div>
+  <div class="cwrap" id="cw1"><canvas id="distChart" height="200"></canvas></div>
+  <div class="cwrap" id="cw2"><canvas id="likeChart" height="200"></canvas></div>
+
+  <!-- HISTORY -->
+  <section id="hist-sec">
+    <div class="hist-hdr"><span>// 入力履歴</span><span id="histAvg"></span></div>
+    <div id="histList"></div>
+  </section>
+
+</div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings-modal">
+  <div class="sheet">
+    <div class="sheet-title">
+      <span>// SETTINGS</span>
+      <button class="close-btn" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="set-row">
+      <div class="set-lbl">ボーダー回転数（デフォルト: 17）</div>
+      <input type="number" class="set-in" id="setBorder" value="17" inputmode="decimal" step="0.5">
+    </div>
+    <div class="set-row">
+      <div class="set-lbl">事前分布の中心 μ₀（デフォルト: 18）</div>
+      <input type="number" class="set-in" id="setPriorMu" value="18" inputmode="decimal" step="0.5">
+    </div>
+    <div class="set-row">
+      <div class="set-lbl">事前分布の広がり σ₀（デフォルト: 8）</div>
+      <input type="number" class="set-in" id="setPriorSigma" value="8" inputmode="decimal" step="0.5">
+    </div>
+    <button class="reset-btn" onclick="confirmReset()">全データをリセット</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+let entries = JSON.parse(localStorage.getItem('kt_data')||'[]');
+let cfg = JSON.parse(localStorage.getItem('kt_cfg')||'{"border":17,"priorMu":18,"priorSigma":8}');
+let charts = {};
+let activeTab = 0;
+
+// ── MATH ───────────────────────────────────────────────
+function erf(x){
+  const s=x>=0?1:-1; x=Math.abs(x);
+  const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x));
+  return s*y;
+}
+const SQRT2=Math.SQRT2, PI2=Math.sqrt(2*Math.PI);
+function ncdf(x,m=0,s=1){return .5*(1+erf((x-m)/(s*SQRT2)))}
+function npdf(x,m=0,s=1){return Math.exp(-.5*((x-m)/s)**2)/(s*PI2)}
+
+const TT={1:12.706,2:4.303,3:3.182,4:2.776,5:2.571,6:2.447,7:2.365,8:2.306,9:2.262,10:2.228,15:2.131,20:2.086,30:2.042};
+function tc(df){const ks=Object.keys(TT).map(Number).sort((a,b)=>a-b);for(const k of ks)if(df<=k)return TT[k];return 1.96}
+
+function calcStats(){
+  const n=entries.length; if(!n)return null;
+  const {border,priorMu,priorSigma}=cfg;
+  const mean=entries.reduce((a,b)=>a+b,0)/n;
+  let sVar=null,sSD=null;
+  if(n>=2){sVar=entries.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);sSD=Math.sqrt(sVar)}
+  let freqCI=null;
+  if(n>=2){const t=tc(n-1),m=t*sSD/Math.sqrt(n);freqCI=[mean-m,mean+m]}
+  const sigma=(n>=2&&sSD>0)?sSD:5;
+  const pp=1/(priorSigma**2), pd=n/(sigma**2), ppost=pp+pd;
+  const muPost=(priorMu*pp+mean*pd)/ppost, tauPost=Math.sqrt(1/ppost);
+  const bayesCI=[muPost-1.96*tauPost,muPost+1.96*tauPost];
+  const pSuccess=1-ncdf(border,muPost,tauPost);
+  const lk={
+    b15:ncdf(15,muPost,tauPost),
+    r1520:ncdf(20,muPost,tauPost)-ncdf(15,muPost,tauPost),
+    r2025:ncdf(25,muPost,tauPost)-ncdf(20,muPost,tauPost),
+    a25:1-ncdf(25,muPost,tauPost)
+  };
+  const cv=n>=2?sSD/mean:null;
+  let vj=null;
+  if(cv!==null){
+    if(cv<.08)vj={label:'非常に安定',color:'#4ade80',bg:'rgba(74,222,128,.1)'};
+    else if(cv<.15)vj={label:'安定',color:'#86efac',bg:'rgba(134,239,172,.1)'};
+    else if(cv<.25)vj={label:'やや不安定',color:'#facc15',bg:'rgba(250,204,21,.1)'};
+    else vj={label:'不安定',color:'#f87171',bg:'rgba(248,113,113,.1)'};
+  }
+  return{n,mean,sVar,sSD,freqCI,muPost,tauPost,bayesCI,pSuccess,lk,cv,vj,sigma,border};
+}
+
+// ── RENDER ─────────────────────────────────────────────
+function fmt(v,d=1){return v===null||v===undefined?'—':v.toFixed(d)}
+function pct(v){return(v*100).toFixed(1)+'%'}
+
+function render(){
+  const s=calcStats();
+  document.getElementById('hdrN').textContent=`N=${entries.length}`;
+  document.getElementById('dot').classList.toggle('live',!!s);
+  document.getElementById('empty-state').classList.toggle('hidden',!!s);
+  document.getElementById('stats-sec').classList.toggle('hidden',!s);
+  if(!s)return;
+  renderKPI(s); renderSuccess(s); renderLikelihood(s);
+  renderBayes(s); renderCI(s); renderVariance(s);
+  renderHistory(s); renderCharts(s);
+}
+
+function renderKPI(s){
+  document.getElementById('kpiMuPost').textContent=fmt(s.muPost);
+  const sc=s.pSuccess>=.6?'#4ade80':s.pSuccess>=.4?'#facc15':'#f87171';
+  const el=document.getElementById('kpiSuccess');
+  el.textContent=pct(s.pSuccess); el.style.color=sc;
+  document.getElementById('kpiSuccessLbl').textContent=`ボーダー(${s.border}回転)超え`;
+  document.getElementById('kpiMean').textContent=fmt(s.mean);
+  document.getElementById('kpiN').textContent=`N=${s.n}`;
+  document.getElementById('kpiSD').textContent=s.sSD?fmt(s.sSD):'—';
+  document.getElementById('kpiCV').textContent=s.cv?`CV: ${(s.cv*100).toFixed(1)}%`:'—';
+}
+
+function renderSuccess(s){
+  const c=s.pSuccess>=.6?'#4ade80':s.pSuccess>=.4?'#facc15':'#f87171';
+  document.getElementById('succPct').textContent=pct(s.pSuccess);
+  document.getElementById('succPct').style.color=c;
+  document.getElementById('succLbl').textContent=`ボーダー（${s.border}回転）を超えている確率（ベイズ事後分布より）`;
+  document.getElementById('succBar').style.cssText=`width:${s.pSuccess*100}%;background:${c}`;
+  let m='';
+  if(s.pSuccess>=.75)m='<strong>高確率でボーダー越え。</strong>このまま継続を推奨。';
+  else if(s.pSuccess>=.55)m='<strong>やや有利寄り。</strong>データを積んで精度向上を。';
+  else if(s.pSuccess>=.40)m='<strong>判定保留。</strong>データ不足か境界ライン付近。';
+  else if(s.pSuccess>=.25)m='<strong>やや不利寄り。</strong>移動を検討してください。';
+  else m='<strong>ボーダー割れの可能性大。</strong>移動を推奨します。';
+  document.getElementById('succVerdict').innerHTML=m;
+}
+
+function renderLikelihood(s){
+  const rows=[
+    {label:'< 15回転 (低)',  val:s.lk.b15,   color:'#f87171'},
+    {label:'15〜20回転',     val:s.lk.r1520, color:'#facc15'},
+    {label:'20〜25回転',     val:s.lk.r2025, color:'#4ade80'},
+    {label:'> 25回転 (高)',  val:s.lk.a25,   color:'#22d3ee'},
+  ];
+  document.getElementById('lkTable').innerHTML=rows.map(r=>`
+    <tr>
+      <td class="lk-range">${r.label}</td>
+      <td class="lk-bar-cell"><div class="lk-track"><div class="lk-fill" style="width:${r.val*100}%;background:${r.color}"></div></div></td>
+      <td class="lk-pct" style="color:${r.color}">${pct(r.val)}</td>
+    </tr>`).join('');
+}
+
+function renderBayes(s){
+  const cells=[
+    {l:'事前分布 μ₀', v:fmt(cfg.priorMu), d:`σ₀=${fmt(cfg.priorSigma)} (確信の広さ)`},
+    {l:'事後分布 μ*',  v:fmt(s.muPost),   d:`τ*=${fmt(s.tauPost,2)} (事後の不確かさ)`},
+    {l:'標本平均 x̄',  v:fmt(s.mean),      d:`N=${s.n} サンプル`},
+    {l:'想定σ(機差)', v:fmt(s.sigma),     d:s.n>=2?'標本SDより推定':'事前値(固定)'},
+  ];
+  document.getElementById('bayesGrid').innerHTML=cells.map(c=>`
+    <div class="bayes-cell">
+      <div class="bayes-lbl">${c.l}</div>
+      <div class="bayes-val">${c.v}</div>
+      <div class="bayes-desc">${c.d}</div>
+    </div>`).join('');
+}
+
+function renderCI(s){
+  let h='';
+  if(s.freqCI){
+    h+=`<div class="ci-row">
+      <div class="ci-type"><strong>頻度論的 95% CI</strong>t分布（自由度${s.n-1}）</div>
+      <div class="ci-range">${fmt(s.freqCI[0])} 〜 ${fmt(s.freqCI[1])}</div>
+    </div>`;
+  }else{
+    h+=`<div class="ci-row">
+      <div class="ci-type"><strong>頻度論的 95% CI</strong></div>
+      <div class="ci-range" style="color:var(--sub)">N≥2で算出</div>
+    </div>`;
+  }
+  h+=`<div class="ci-row">
+    <div class="ci-type"><strong>ベイズ 95% 信用区間</strong>事後分布 N(μ*,τ*)</div>
+    <div class="ci-range">${fmt(s.bayesCI[0])} 〜 ${fmt(s.bayesCI[1])}</div>
+  </div>`;
+  document.getElementById('ciCard').innerHTML=h;
+}
+
+function renderVariance(s){
+  if(s.n<2){
+    document.getElementById('varCard').innerHTML='<div style="padding:14px;color:var(--sub);font-size:12px">N≥2で分散チェックが有効になります</div>';
+    return;
+  }
+  const desc={
+    '非常に安定':'回転数のばらつきが極めて小さく、台の挙動が一定です。平均値の信頼性が非常に高いです。',
+    '安定':'標準的な範囲内のばらつきです。平均値は十分に信頼できます。',
+    'やや不安定':'ばらつきがやや大きいです。もう数回計測して確認することを推奨します。',
+    '不安定':'回転数の変動が大きく、台の状態が不安定です。偶発的な影響が出ている可能性があります。',
+  }[s.vj.label];
+  document.getElementById('varCard').innerHTML=`
+    <div class="var-wrap">
+      <div class="var-top">
+        <div class="var-metrics">
+          <div class="vm"><div class="v-lbl">分散 s²</div><div class="v-val">${fmt(s.sVar,2)}</div></div>
+          <div class="vm"><div class="v-lbl">標準偏差 s</div><div class="v-val">±${fmt(s.sSD,2)}</div></div>
+          <div class="vm"><div class="v-lbl">変動係数 CV</div><div class="v-val">${(s.cv*100).toFixed(1)}%</div></div>
+        </div>
+        <div class="vbadge" style="color:${s.vj.color};background:${s.vj.bg}">${s.vj.label}</div>
+      </div>
+      <div class="var-desc">${desc}</div>
+    </div>`;
+}
+
+function renderHistory(s){
+  document.getElementById('histAvg').textContent=`平均 ${fmt(s.mean)} 回転`;
+  document.getElementById('histList').innerHTML=[...entries].reverse().map((v,i)=>{
+    const ri=entries.length-1-i;
+    const dev=s.sSD!==null?v-s.mean:null;
+    const ds=dev!==null?(dev>=0?`+${fmt(dev)}`:`${fmt(dev)}`):'';
+    const dc=dev===null?'var(--sub)':dev>0?'#4ade80':'#f87171';
+    return `<div class="hist-item">
+      <span class="hist-n">#${ri+1}</span>
+      <span class="hist-v">${v} <span style="font-size:11px;color:var(--sub)">回転</span></span>
+      <span class="hist-dev" style="color:${dc}">${ds}</span>
+      <button class="hist-del" onclick="deleteEntry(${ri})">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ── CHARTS ─────────────────────────────────────────────
+const CO={responsive:true,animation:{duration:400},plugins:{legend:{display:false}}};
+const GRID={color:'#1c1c1c'};
+const TICK={color:'#525252',font:{family:'IBM Plex Mono',size:10}};
+
+function renderCharts(s){
+  renderHistChart(s);
+  if(activeTab===1)renderDistChart(s);
+  if(activeTab===2)renderLikeChart(s);
+}
+
+function renderHistChart(s){
+  const ctx=document.getElementById('histChart').getContext('2d');
+  if(charts.hist)charts.hist.destroy();
+  const labels=entries.map((_,i)=>`#${i+1}`);
+  const runAvg=entries.map((_,i)=>entries.slice(0,i+1).reduce((a,b)=>a+b,0)/(i+1));
+  charts.hist=new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {label:'回転数',data:entries,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',pointBackgroundColor:'#f59e0b',pointRadius:5,tension:.2,fill:true},
+    {label:'累積平均',data:runAvg,borderColor:'#22d3ee',borderDash:[5,3],pointRadius:0,tension:.3,borderWidth:1.5},
+    {label:'ボーダー',data:entries.map(()=>s.border),borderColor:'#f87171',borderDash:[3,3],pointRadius:0,borderWidth:1},
+  ]},options:{...CO,scales:{x:{ticks:TICK,grid:GRID},y:{ticks:TICK,grid:GRID}},
+    plugins:{legend:{display:true,labels:{color:'#737373',font:{family:'IBM Plex Mono',size:10},boxWidth:12,padding:10}}}}});
+}
+
+function renderDistChart(s){
+  const ctx=document.getElementById('distChart').getContext('2d');
+  if(charts.dist)charts.dist.destroy();
+  const mn=Math.max(1,Math.min(s.muPost,cfg.priorMu)-4*Math.max(s.tauPost,cfg.priorSigma));
+  const mx=Math.max(s.muPost,cfg.priorMu)+4*Math.max(s.tauPost,cfg.priorSigma);
+  const xs=Array.from({length:121},(_,i)=>+(mn+(mx-mn)*i/120).toFixed(2));
+  charts.dist=new Chart(ctx,{type:'line',data:{labels:xs,datasets:[
+    {label:'事前分布',data:xs.map(x=>npdf(x,cfg.priorMu,cfg.priorSigma)),borderColor:'#525252',pointRadius:0,tension:.4,fill:false,borderWidth:1.5},
+    {label:'事後分布',data:xs.map(x=>npdf(x,s.muPost,s.tauPost)),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.12)',pointRadius:0,tension:.4,fill:true,borderWidth:2},
+  ]},options:{...CO,scales:{x:{ticks:{...TICK,maxTicksLimit:7},grid:GRID},y:{ticks:{display:false},grid:GRID}},
+    plugins:{legend:{display:true,labels:{color:'#737373',font:{family:'IBM Plex Mono',size:10},boxWidth:12,padding:10}}}}});
+}
+
+function renderLikeChart(s){
+  const ctx=document.getElementById('likeChart').getContext('2d');
+  if(charts.like)charts.like.destroy();
+  charts.like=new Chart(ctx,{type:'bar',data:{
+    labels:['< 15','15〜20','20〜25','> 25'],
+    datasets:[{data:[s.lk.b15*100,s.lk.r1520*100,s.lk.r2025*100,s.lk.a25*100],
+      backgroundColor:['rgba(248,113,113,.7)','rgba(250,204,21,.7)','rgba(74,222,128,.7)','rgba(34,211,238,.7)'],
+      borderColor:['#f87171','#facc15','#4ade80','#22d3ee'],borderWidth:1,borderRadius:4}]
+  },options:{...CO,scales:{
+    x:{ticks:{color:'#737373',font:{family:'IBM Plex Mono',size:11}},grid:{display:false}},
+    y:{ticks:{...TICK,callback:v=>v.toFixed(0)+'%'},grid:GRID,max:100}
+  }}});
+}
+
+function switchTab(i){
+  activeTab=i;
+  document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  document.querySelectorAll('.cwrap').forEach((w,j)=>w.classList.toggle('on',j===i));
+  const s=calcStats(); if(!s)return;
+  if(i===1&&!charts.dist)renderDistChart(s);
+  if(i===2&&!charts.like)renderLikeChart(s);
+}
+
+// ── ACTIONS ────────────────────────────────────────────
+function addEntry(){
+  const inp=document.getElementById('rotIn');
+  const v=parseFloat(inp.value);
+  if(isNaN(v)||v<=0||v>99){inp.style.borderColor='#f87171';setTimeout(()=>inp.style.borderColor='',800);return}
+  entries.push(v); save(); inp.value=''; inp.focus();
+  // Reset lazy-loaded charts so they re-render
+  if(charts.dist){charts.dist.destroy();charts.dist=null}
+  if(charts.like){charts.like.destroy();charts.like=null}
+  render();
+}
+
+function deleteEntry(i){
+  if(!confirm(`#${i+1} (${entries[i]}回転) を削除しますか？`))return;
+  entries.splice(i,1); save();
+  if(charts.dist){charts.dist.destroy();charts.dist=null}
+  if(charts.like){charts.like.destroy();charts.like=null}
+  render();
+}
+
+function save(){localStorage.setItem('kt_data',JSON.stringify(entries));localStorage.setItem('kt_cfg',JSON.stringify(cfg))}
+
+function openSettings(){
+  document.getElementById('setBorder').value=cfg.border;
+  document.getElementById('setPriorMu').value=cfg.priorMu;
+  document.getElementById('setPriorSigma').value=cfg.priorSigma;
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings(){
+  const b=parseFloat(document.getElementById('setBorder').value);
+  const m=parseFloat(document.getElementById('setPriorMu').value);
+  const sg=parseFloat(document.getElementById('setPriorSigma').value);
+  if(!isNaN(b)&&b>0)cfg.border=b;
+  if(!isNaN(m)&&m>0)cfg.priorMu=m;
+  if(!isNaN(sg)&&sg>0)cfg.priorSigma=sg;
+  save(); document.getElementById('settings-modal').classList.remove('open');
+  if(charts.dist){charts.dist.destroy();charts.dist=null}
+  if(charts.like){charts.like.destroy();charts.like=null}
+  render();
+}
+function confirmReset(){if(!confirm('全データを削除しますか？'))return;entries=[];save();closeSettings();render()}
+
+document.getElementById('rotIn').addEventListener('keydown',e=>{if(e.key==='Enter')addEntry()});
+document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings()});
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();
+</script>
+</body>
+</html>
