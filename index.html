@@ -25,11 +25,11 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 input,button,textarea{-webkit-appearance:none;appearance:none}
-html,body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;overflow-x:hidden;-webkit-text-size-adjust:100%}
+html,body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;overflow-x:hidden;-webkit-text-size-adjust:100%}
 
 /* HEADER */
-header{position:fixed;top:0;left:0;right:0;z-index:200;height:calc(var(–hdr) + env(safe-area-inset-top, 0px));padding-top:env(safe-area-inset-top, 0px);background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(–border);display:flex;align-items:center;padding-left:12px;padding-right:12px;gap:10px}
-#app{padding-top:calc(var(–hdr) + env(safe-area-inset-top, 0px));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
+header{position:fixed;top:0;left:0;right:0;z-index:200;height:calc(var(–hdr) + 52px);padding-top:52px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(–border);display:flex;align-items:center;padding-left:12px;padding-right:12px;gap:10px}
+#app{padding-top:calc(var(–hdr) + 52px);display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
 .menu-btn{background:none;border:none;color:var(–sub);font-size:20px;padding:6px;cursor:pointer;line-height:1;flex-shrink:0}
 .menu-btn:active{color:var(–amber)}
 .hdr-title{font-family:var(–mono);font-size:12px;font-weight:700;letter-spacing:.1em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -57,7 +57,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;height:calc(var(–hdr) +
 /* BODY LAYOUT */
 
 /* LEFT HISTORY PANEL */
-.hist-panel{width:var(–side);flex-shrink:0;position:fixed;top:calc(var(–hdr) + env(safe-area-inset-top, 0px));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(–border);background:var(–bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}tion:pan-y;overscroll-behavior:contain}tion:pan-y;overscroll-behavior:contain}
+.hist-panel{width:var(–side);flex-shrink:0;position:fixed;top:calc(var(–hdr) + 52px);left:0;bottom:0;overflow-y:auto;border-right:1px solid var(–border);background:var(–bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}tion:pan-y;overscroll-behavior:contain}tion:pan-y;overscroll-behavior:contain}
 .hist-panel::-webkit-scrollbar{display:none}
 .hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(–mono);font-size:9px;color:var(–sub2);letter-spacing:.08em}
 /* data item */
@@ -123,8 +123,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;height:calc(var(–hdr) +
 /* GRAPH */
 #graph-sec{padding:10px 12px;border-bottom:1px solid var(–border)}
 .ctabs{display:flex;gap:4px;margin-bottom:8px}
-.ctab{flex:1;background:var(–card);border:1px solid var(–border);border-radius:8px;color:var(–sub);font-family:var(–mono);font-size:14px;font-weight:600;padding:12px 4px;cursor:pointer;text-align:center;transition:all .15s;font-weight:600}px 4px;cursor:pointer;text-align:center;transition:all .15s;font-weight:600}px 2px;cursor:pointer;text-align:center;transition:all .15s}
-.ctab.on{background:var(–amber);border-color:var(–amber);color:#000;font-weight:700}
+.ctab{flex:1;background:var(–card);border:1px solid var(–border);border-radius:8px;color:var(–sub2);font-family:var(–mono);font-size:13px;font-weight:500;padding:10px 4px;cursor:pointer;text-align:center;transition:all .15s;opacity:.55}
+.ctab.on{background:var(–amber);border-color:var(–amber);color:#000;font-weight:700;opacity:1;box-shadow:0 0 12px rgba(245,158,11,.35)}
 .cwrap{display:none}.cwrap.on{display:block}
 .cwrap canvas{border-radius:8px}
 
