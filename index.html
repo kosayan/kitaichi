@@ -9,8 +9,6 @@
 <meta name="apple-mobile-web-app-title" content="回転解析">
 <title>回転数解析システム</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
@@ -19,14 +17,16 @@
   --amber:#f59e0b;--amber-dim:#92600a;
   --cyan:#22d3ee;--green:#4ade80;--red:#f87171;
   --text:#e8e8e8;--sub:#909090;--sub2:#707070;
-  --mono:'IBM Plex Mono',monospace;--sans:'Noto Sans JP',sans-serif;
-  --hdr:48px;--side:60px;
+  --mono:'ui-monospace','SF Mono','Menlo',monospace;--sans:'-apple-system','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+  --hdr:52px;--side:60px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;overflow-x:hidden}
+input,button,textarea{-webkit-appearance:none;appearance:none}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;overflow-x:hidden;-webkit-text-size-adjust:100%}
 
 /* HEADER */
-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(–hdr);background:rgba(10,10,10,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(–border);display:flex;align-items:center;padding:0 12px;gap:10px}
+header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(–hdr);background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(–border);display:flex;align-items:center;padding:0 12px;gap:10px}
+#app{padding-top:var(–hdr);display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
 .menu-btn{background:none;border:none;color:var(–sub);font-size:20px;padding:6px;cursor:pointer;line-height:1;flex-shrink:0}
 .menu-btn:active{color:var(–amber)}
 .hdr-title{font-family:var(–mono);font-size:12px;font-weight:700;letter-spacing:.1em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -52,10 +52,9 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(–hdr);backgr
 .machine-item-n{font-family:var(–mono);font-size:10px;color:var(–sub)}
 
 /* BODY LAYOUT */
-#app{padding-top:var(–hdr);display:flex;min-height:100vh}
 
 /* LEFT HISTORY PANEL */
-.hist-panel{width:var(–side);flex-shrink:0;position:sticky;top:var(–hdr);height:calc(100vh - var(–hdr));overflow-y:auto;border-right:1px solid var(–border);background:var(–bg);display:flex;flex-direction:column-reverse;scrollbar-width:none}
+.hist-panel{width:var(–side);flex-shrink:0;position:fixed;top:var(–hdr);left:0;bottom:0;overflow-y:auto;border-right:1px solid var(–border);background:var(–bg);display:flex;flex-direction:column-reverse;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch}
 .hist-panel::-webkit-scrollbar{display:none}
 .hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(–mono);font-size:9px;color:var(–sub2);letter-spacing:.08em}
 /* data item */
@@ -74,7 +73,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(–hdr);backgr
 .hp-base-val{font-family:var(–mono);font-size:10px;font-weight:600;color:var(–amber)}
 
 /* MAIN CONTENT */
-.main-content{flex:1;overflow-x:hidden;min-width:0;padding-bottom:80px}
+.main-content{flex:1;overflow-x:hidden;min-width:0;padding-bottom:80px;margin-left:var(–side)}
 
 /* SECTION TAG */
 .stag{font-family:var(–mono);font-size:10px;letter-spacing:.13em;color:var(–sub);padding:14px 12px 0;display:flex;align-items:center;gap:8px}
@@ -100,12 +99,13 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(–hdr);backgr
 .input-lbl{font-family:var(–mono);font-size:10px;letter-spacing:.1em;color:var(–sub);margin-bottom:7px;display:flex;align-items:center;gap:6px}
 .input-lbl::before{content:‘01’;color:var(–amber-dim)}
 .input-row{display:flex;gap:6px;margin-bottom:7px}
-.rot-in{flex:1;min-width:0;background:var(–card2);border:1px solid var(–border2);border-radius:8px;color:var(–text);font-family:var(–mono);font-size:18px;font-weight:600;padding:11px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.rot-in{flex:1;min-width:0;background:var(–card2);border:1px solid var(–border2);border-radius:8px;color:var(–text);font-family:var(–mono);font-size:18px;font-weight:600;padding:11px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(–text);opacity:1}
 .rot-in:focus{border-color:var(–amber)}
+.rot-in:-webkit-autofill,.rot-in:-webkit-autofill:hover,.rot-in:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(–card2) inset;-webkit-text-fill-color:var(–text);caret-color:var(–text)}
 .rot-in::placeholder{color:var(–sub2);font-size:12px}
-.add-btn{flex-shrink:0;background:var(–amber);border:none;border-radius:8px;color:#000;font-family:var(–mono);font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+.add-btn{flex-shrink:0;background:var(–amber);border:none;-webkit-appearance:none;appearance:none;border-radius:8px;color:#000;font-family:var(–mono);font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;white-space:nowrap;-webkit-appearance:none;transition:opacity .15s}
 .add-btn:active{opacity:.7}
-.hit-btn{width:100%;background:transparent;border:1px solid var(–red);border-radius:6px;color:var(–red);font-family:var(–mono);font-size:12px;font-weight:700;padding:8px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;transition:background .15s}:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
+.hit-btn{width:100%;background:transparent;-webkit-appearance:none;appearance:none;border:1px solid var(–red);border-radius:6px;color:var(–red);font-family:var(–mono);font-size:12px;font-weight:700;padding:8px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;transition:background .15s;-webkit-appearance:none}:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
 .hit-btn:active{background:rgba(248,113,113,.12)}
 .hit-btn:disabled{opacity:.35;cursor:not-allowed}
 
@@ -830,8 +830,8 @@ function renderHistPanel(s) {
   document.getElementById('hpEmpty').classList.toggle('hidden', !isEmpty);
   if (isEmpty) return;
 
-  // Append in oldest→newest order; column-reverse makes oldest appear at bottom
-  events.forEach(ev => {
+  // Insert newest first (prepend), so latest is at top
+  [...events].reverse().forEach(ev => {
     const div = document.createElement('div');
     if (ev.type === 'base') {
       div.className = 'hp-base';
@@ -856,6 +856,8 @@ function renderHistPanel(s) {
     }
     panel.appendChild(div);
   });
+    // Scroll to top so newest entry is visible
+  panel.scrollTop = 0;
 }
 
 // ══════════════════════════════════════════════════════
