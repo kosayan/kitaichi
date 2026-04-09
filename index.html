@@ -1245,6 +1245,21 @@ document.addEventListener('click', e => {
 });
 
 render();
+
+// ── HEADER HEIGHT FIX ──────────────────────────────────
+// CSSのenv()がPWAモードで効かないケースをJSで確実に補正する
+function fixHeaderOffset() {
+  const hdr = document.querySelector('header');
+  const app = document.getElementById('app');
+  const histPanel = document.getElementById('histPanel');
+  if (!hdr || !app) return;
+  const h = hdr.getBoundingClientRect().height;
+  app.style.paddingTop = h + 'px';
+  if (histPanel) histPanel.style.top = h + 'px';
+}
+window.addEventListener('load', fixHeaderOffset);
+window.addEventListener('resize', fixHeaderOffset);
+document.addEventListener('DOMContentLoaded', fixHeaderOffset);
 </script>
 
 </body>
