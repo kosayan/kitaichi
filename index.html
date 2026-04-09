@@ -20,191 +20,146 @@
   --amber:#f59e0b;--amber-dim:#92600a;
   --cyan:#22d3ee;--green:#4ade80;--red:#f87171;
   --text:#e8e8e8;--sub:#909090;--sub2:#707070;
-  --mono:'IBM Plex Mono','ui-monospace','SF Mono',Menlo,monospace;--sans:'Noto Sans JP','Hiragino Sans',-apple-system,sans-serif;
+  --mono:'IBM Plex Mono','ui-monospace','SF Mono',Menlo,monospace;
+  --sans:'Noto Sans JP','Hiragino Sans',-apple-system,sans-serif;
   --hdr:64px;--side:60px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 input,button,textarea{-webkit-appearance:none;appearance:none}
 html,body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;overflow-x:hidden;-webkit-text-size-adjust:100%}
-
-/* HEADER */
-header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(safe-area-inset-top));padding-bottom:0;padding-left:12px;padding-right:12px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(–border);display:flex;align-items:center;gap:10px}
-#app{padding-top:calc(var(–hdr) + max(48px,env(safe-area-inset-top)));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
-.menu-btn{background:none;border:none;color:var(–sub);font-size:20px;padding:6px;cursor:pointer;line-height:1;flex-shrink:0}
-.menu-btn:active{color:var(–amber)}
-.hdr-title{font-family:var(–mono);font-size:12px;font-weight:700;letter-spacing:.1em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(safe-area-inset-top));padding-bottom:0;padding-left:12px;padding-right:12px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+#app{padding-top:calc(var(--hdr) + max(48px,env(safe-area-inset-top)));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
+.menu-btn{background:none;border:none;color:var(--sub);font-size:20px;padding:6px;cursor:pointer;line-height:1;flex-shrink:0}
+.menu-btn:active{color:var(--amber)}
+.hdr-title{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hdr-r{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.hdr-n{font-family:var(–mono);font-size:11px;color:var(–sub)}
-.dot{width:7px;height:7px;border-radius:50%;background:var(–sub2);flex-shrink:0;transition:background .3s}
-.dot.live{background:var(–green);box-shadow:0 0 7px var(–green)}
-.gear{background:none;border:none;color:var(–sub);font-size:17px;padding:4px;cursor:pointer;line-height:1}
-.gear:active{color:var(–amber)}
-
-/* DRAWER */
-#drawer{position:fixed;top:0;left:0;bottom:0;z-index:400;width:240px;background:rgba(20,20,20,0.98);border-right:1px solid var(–border2);transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--sub2);flex-shrink:0;transition:background .3s}
+.dot.live{background:var(--green);box-shadow:0 0 7px var(--green)}
+.gear{background:none;border:none;color:var(--sub);font-size:17px;padding:4px;cursor:pointer;line-height:1}
+.gear:active{color:var(--amber)}
+#drawer{position:fixed;top:0;left:0;bottom:0;z-index:400;width:240px;background:rgba(20,20,20,0.98);border-right:1px solid var(--border2);transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);overflow-y:auto}
 #drawer.open{transform:translateX(0)}
 #drawer-overlay{display:none;position:fixed;inset:0;z-index:350;background:rgba(0,0,0,0.92)}
 #drawer-overlay.show{display:block}
-.drawer-hdr{padding:16px;border-bottom:1px solid var(–border);font-family:var(–mono);font-size:11px;color:var(–sub);letter-spacing:.12em;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(–card)}
-.drawer-close{background:none;border:none;color:var(–sub);font-size:18px;cursor:pointer}
-.new-machine-btn{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;border-bottom:1px solid var(–border);color:var(–amber);font-family:var(–mono);font-size:12px;padding:12px 16px;cursor:pointer;text-align:left}
+.drawer-hdr{padding:16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--sub);letter-spacing:.12em;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card)}
+.drawer-close{background:none;border:none;color:var(--sub);font-size:18px;cursor:pointer}
+.new-machine-btn{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--amber);font-family:var(--mono);font-size:12px;padding:12px 16px;cursor:pointer;text-align:left}
 .new-machine-btn:active{background:rgba(245,158,11,.08)}
-.machine-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(–border);cursor:pointer;transition:background .15s}
-.machine-item.active{background:rgba(245,158,11,.1);border-left:2px solid var(–amber)}
-.machine-item-name{font-family:var(–mono);font-size:13px;font-weight:600}
-.machine-item-n{font-family:var(–mono);font-size:10px;color:var(–sub)}
-
-/* BODY LAYOUT */
-
-/* LEFT HISTORY PANEL */
-.hist-panel{width:var(–side);flex-shrink:0;position:fixed;top:calc(var(–hdr) + max(48px,env(safe-area-inset-top)));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(–border);background:var(–bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
+.machine-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.machine-item.active{background:rgba(245,158,11,.1);border-left:2px solid var(--amber)}
+.machine-item-name{font-family:var(--mono);font-size:13px;font-weight:600}
+.machine-item-n{font-family:var(--mono);font-size:10px;color:var(--sub)}
+.hist-panel{width:var(--side);flex-shrink:0;position:fixed;top:calc(var(--hdr) + max(48px,env(safe-area-inset-top)));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
 .hist-panel::-webkit-scrollbar{display:none}
-.hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(–mono);font-size:9px;color:var(–sub2);letter-spacing:.08em}
-/* data item */
-.hp-item{border-bottom:1px solid var(–border);padding:5px 3px;text-align:center;flex-shrink:0}
-.hp-num{font-family:var(–mono);font-size:8px;color:var(–sub2);margin-bottom:2px}
-.hp-cumul{font-family:var(–mono);font-size:11px;font-weight:700;color:var(–text);line-height:1.1}
-.hp-rot-sm{font-family:var(–mono);font-size:9px;color:var(–sub);margin-top:1px}
-.hp-dev{font-family:var(–mono);font-size:9px;font-weight:600;margin-top:1px}
-/* hit divider */
+.hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(--sans);font-size:9px;color:var(--sub2);letter-spacing:.08em}
+.hp-item{border-bottom:1px solid var(--border);padding:5px 3px;text-align:center;flex-shrink:0}
+.hp-num{font-family:var(--mono);font-size:8px;color:var(--sub2);margin-bottom:2px}
+.hp-cumul{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);line-height:1.1}
+.hp-rot-sm{font-family:var(--mono);font-size:9px;color:var(--sub);margin-top:1px}
+.hp-dev{font-family:var(--mono);font-size:9px;font-weight:600;margin-top:1px}
 .hp-hit{border-bottom:1px solid rgba(248,113,113,.3);padding:5px 3px;text-align:center;flex-shrink:0;background:rgba(248,113,113,.05)}
 .hp-hit-icon{font-size:13px;line-height:1}
-.hp-hit-label{font-family:var(–mono);font-size:7px;color:var(–red);margin-top:1px;letter-spacing:0}
-/* baseline item */
-.hp-base{border-bottom:1px solid var(–border2);padding:5px 3px;text-align:center;flex-shrink:0;background:rgba(245,158,11,.05)}
-.hp-base-lbl{font-family:var(–mono);font-size:8px;color:var(–amber-dim);margin-bottom:2px}
-.hp-base-val{font-family:var(–mono);font-size:10px;font-weight:600;color:var(–amber)}
-
-/* MAIN CONTENT */
-.main-content{flex:1;overflow-x:hidden;min-width:0;padding-bottom:80px;margin-left:var(–side);touch-action:pan-y;overscroll-behavior:contain}
-
-/* SECTION TAG */
-.stag{font-family:var(–mono);font-size:10px;letter-spacing:.13em;color:var(–sub);padding:14px 12px 0;display:flex;align-items:center;gap:8px}
-.stag .sn{color:var(–amber-dim);min-width:16px}
-.stag::after{content:’’;flex:1;height:1px;background:var(–border);margin-left:6px}
-
-/* KPI GRID */
+.hp-hit-label{font-family:var(--mono);font-size:7px;color:var(--red);margin-top:1px;letter-spacing:0}
+.hp-base{border-bottom:1px solid var(--border2);padding:5px 3px;text-align:center;flex-shrink:0;background:rgba(245,158,11,.05)}
+.hp-base-lbl{font-family:var(--mono);font-size:8px;color:var(--amber-dim);margin-bottom:2px}
+.hp-base-val{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber)}
+.main-content{flex:1;overflow-x:hidden;min-width:0;padding-bottom:80px;margin-left:var(--side);touch-action:pan-y;overscroll-behavior:contain}
+.stag{font-family:var(--mono);font-size:10px;letter-spacing:.13em;color:var(--sub);padding:14px 12px 0;display:flex;align-items:center;gap:8px}
+.stag .sn{color:var(--amber-dim);min-width:16px}
+.stag::after{content:'';flex:1;height:1px;background:var(--border);margin-left:6px}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px 12px}
-.kpi{background:var(–card);border:1px solid var(–border);border-radius:10px;padding:11px;position:relative;overflow:hidden}
-.kpi.hi{border-color:var(–amber-dim)}
-.kpi.hi::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;background:var(–amber)}
-.kpi-lbl{font-size:10px;color:var(–sub);margin-bottom:5px}
-.kpi-val{font-family:var(–mono);font-size:32px;font-weight:700;line-height:1}
-.kpi-val-sm{font-family:var(–mono);font-size:21px;font-weight:700;line-height:1}
-.kpi.hi .kpi-val{color:var(–amber)}
-.kpi-sub{font-family:var(–mono);font-size:10px;color:var(–sub);margin-top:4px}
-.kpi-extra{margin-top:8px;padding-top:8px;border-top:1px solid var(–border);display:flex;gap:12px}
-.ke .ke-l{font-size:9px;color:var(–sub2);margin-bottom:2px}
-.ke .ke-v{font-family:var(–mono);font-size:12px;font-weight:600}
-
-/* INPUT SECTION */
-#input-sec{padding:0 12px 12px;border-bottom:1px solid var(–border)}
-.input-lbl{font-family:var(–mono);font-size:10px;letter-spacing:.1em;color:var(–sub);margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.input-lbl::before{content:‘01’;color:var(–amber-dim)}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px;position:relative;overflow:hidden}
+.kpi.hi{border-color:var(--amber-dim)}
+.kpi.hi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--amber)}
+.kpi-lbl{font-size:10px;color:var(--sub);margin-bottom:5px}
+.kpi-val{font-family:var(--mono);font-size:32px;font-weight:700;line-height:1}
+.kpi-val-sm{font-family:var(--mono);font-size:21px;font-weight:700;line-height:1}
+.kpi.hi .kpi-val{color:var(--amber)}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:4px}
+.kpi-extra{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:12px}
+.ke .ke-l{font-size:9px;color:var(--sub2);margin-bottom:2px}
+.ke .ke-v{font-family:var(--mono);font-size:12px;font-weight:600}
+#input-sec{padding:0 12px 12px;border-bottom:1px solid var(--border)}
+.input-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--sub);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.input-lbl::before{content:'01';color:var(--amber-dim)}
 .input-row{display:flex;gap:6px;margin-bottom:7px}
-.rot-in{flex:1;min-width:0;background:var(–card2);border:1px solid var(–border2);border-radius:8px;color:var(–text);font-family:var(–mono);font-size:18px;font-weight:600;padding:11px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(–text);opacity:1}
-.rot-in:focus{border-color:var(–amber)}
-.rot-in:-webkit-autofill,.rot-in:-webkit-autofill:hover,.rot-in:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(–card2) inset;-webkit-text-fill-color:var(–text);caret-color:var(–text)}
-.rot-in::placeholder{color:var(–sub2);font-size:12px}
-.add-btn{flex-shrink:0;background:var(–amber);border:none;-webkit-appearance:none;appearance:none;border-radius:8px;color:#000;font-family:var(–mono);font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;white-space:nowrap;-webkit-appearance:none;transition:opacity .15s}
+.rot-in{flex:1;min-width:0;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:18px;font-weight:600;padding:11px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(--text);opacity:1}
+.rot-in:focus{border-color:var(--amber)}
+.rot-in:-webkit-autofill,.rot-in:-webkit-autofill:hover,.rot-in:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--card2) inset;-webkit-text-fill-color:var(--text);caret-color:var(--text)}
+.rot-in::placeholder{color:var(--sub2);font-size:12px}
+.add-btn{flex-shrink:0;background:var(--amber);border:none;-webkit-appearance:none;appearance:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;white-space:nowrap;transition:opacity .15s}
 .add-btn:active{opacity:.7}
-.hit-btn{width:100%;background:transparent;-webkit-appearance:none;appearance:none;border:1px solid var(–red);border-radius:6px;color:var(–red);font-family:var(–mono);font-size:12px;font-weight:700;padding:8px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;transition:background .15s}
+.hit-btn{width:100%;background:transparent;-webkit-appearance:none;appearance:none;border:1px solid var(--red);border-radius:6px;color:var(--red);font-family:var(--mono);font-size:12px;font-weight:700;padding:8px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;transition:background .15s}
 .hit-btn:active{background:rgba(248,113,113,.12)}
 .hit-btn:disabled{opacity:.35;cursor:not-allowed}
-
-/* CI SLIDER */
-#ci-sec{padding:10px 12px;border-bottom:1px solid var(–border)}
+#ci-sec{padding:10px 12px;border-bottom:1px solid var(--border)}
 .slider-row{display:flex;align-items:center;gap:10px}
-.slider-lbl{font-family:var(–mono);font-size:11px;color:var(–sub);white-space:nowrap}
-.ci-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(–border2);outline:none;cursor:pointer}
-.ci-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(–amber);cursor:pointer;box-shadow:0 0 8px rgba(245,158,11,.5)}
-.ci-pct{font-family:var(–mono);font-size:14px;font-weight:700;color:var(–amber);min-width:36px;text-align:right}
-
-/* GRAPH */
-#graph-sec{padding:10px 12px;border-bottom:1px solid var(–border)}
+.slider-lbl{font-family:var(--mono);font-size:11px;color:var(--sub);white-space:nowrap}
+.ci-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer}
+.ci-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 8px rgba(245,158,11,.5)}
+.ci-pct{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--amber);min-width:36px;text-align:right}
+#graph-sec{padding:10px 12px;border-bottom:1px solid var(--border)}
 .ctabs{display:flex;gap:4px;margin-bottom:8px}
-.ctab{flex:1;background:var(–card);border:1px solid var(–border);border-radius:8px;color:var(–sub2);font-family:var(–mono);font-size:13px;font-weight:500;padding:10px 4px;cursor:pointer;text-align:center;transition:all .15s;opacity:.55}
-.ctab.on{background:var(–amber);border-color:var(–amber);color:#000;font-weight:700;opacity:1;box-shadow:0 0 12px rgba(245,158,11,.35)}
+.ctab{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--sub2);font-family:var(--mono);font-size:13px;font-weight:500;padding:10px 4px;cursor:pointer;text-align:center;transition:all .15s;opacity:.55}
+.ctab.on{background:var(--amber);border-color:var(--amber);color:#000;font-weight:700;opacity:1;box-shadow:0 0 12px rgba(245,158,11,.35)}
 .cwrap{display:none}.cwrap.on{display:block}
 .cwrap canvas{border-radius:8px}
-
-/* CARD */
-.card{margin:4px 12px;background:var(–card);border:1px solid var(–border);border-radius:10px;overflow:hidden}
-
-/* SUCCESS */
+.card{margin:4px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .succ-wrap{padding:13px}
-.succ-pct{font-family:var(–mono);font-size:21px;font-weight:700;line-height:1;margin-bottom:4px}
-.succ-lbl{font-size:11px;color:var(–sub);margin-bottom:10px}
-.bar-track{height:5px;background:var(–border2);border-radius:3px;overflow:hidden}
+.succ-pct{font-family:var(--mono);font-size:21px;font-weight:700;line-height:1;margin-bottom:4px}
+.succ-lbl{font-size:11px;color:var(--sub);margin-bottom:10px}
+.bar-track{height:5px;background:var(--border2);border-radius:3px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
-.succ-verdict{margin-top:9px;padding:7px 9px;background:var(–card2);border-radius:6px;font-size:12px;color:var(–sub)}
-.succ-verdict strong{color:var(–text)}
-
-/* LIKELIHOOD */
+.succ-verdict{margin-top:9px;padding:7px 9px;background:var(--card2);border-radius:6px;font-size:12px;color:var(--sub)}
+.succ-verdict strong{color:var(--text)}
 .lk-table{width:100%;border-collapse:collapse}
-.lk-table td{padding:9px 12px;border-bottom:1px solid var(–border)}
+.lk-table td{padding:9px 12px;border-bottom:1px solid var(--border)}
 .lk-table tr:last-child td{border-bottom:none}
-.lk-range{font-family:var(–mono);font-size:11px;color:var(–sub)}
-.lk-bc{width:40%}.lk-track{height:4px;background:var(–border2);border-radius:2px;overflow:hidden}
+.lk-range{font-family:var(--mono);font-size:11px;color:var(--sub)}
+.lk-bc{width:40%}.lk-track{height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
 .lk-fill{height:100%;border-radius:2px;transition:width .6s}
-.lk-pct{font-family:var(–mono);font-size:12px;font-weight:600;text-align:right;width:50px}
-
-/* COLLAPSIBLE */
-.collapse-btn{width:100%;background:none;border:none;border-top:1px solid var(–border);color:var(–sub);font-family:var(–mono);font-size:11px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;letter-spacing:.08em;transition:color .2s}
-.collapse-btn:active{color:var(–amber)}
+.lk-pct{font-family:var(--mono);font-size:12px;font-weight:600;text-align:right;width:50px}
+.collapse-btn{width:100%;background:none;border:none;border-top:1px solid var(--border);color:var(--sub);font-family:var(--mono);font-size:11px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;letter-spacing:.08em;transition:color .2s}
+.collapse-btn:active{color:var(--amber)}
 .collapse-arrow{transition:transform .25s}
 .collapse-arrow.open{transform:rotate(180deg)}
 .collapsible{overflow:hidden;max-height:0;transition:max-height .35s ease}
 .collapsible.open{max-height:2000px}
-
-/* BAYES */
-.bayes-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(–border)}
-.bayes-cell{background:var(–card);padding:11px 12px}
-.bayes-lbl{font-size:10px;color:var(–sub);margin-bottom:4px}
-.bayes-val{font-family:var(–mono);font-size:15px;font-weight:600}
-.bayes-desc{font-size:10px;color:var(–sub2);margin-top:3px}
-
-/* CI DISPLAY */
-.ci-row{padding:11px 12px;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bayes-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.bayes-cell{background:var(--card);padding:11px 12px}
+.bayes-lbl{font-size:10px;color:var(--sub);margin-bottom:4px}
+.bayes-val{font-family:var(--mono);font-size:15px;font-weight:600}
+.bayes-desc{font-size:10px;color:var(--sub2);margin-top:3px}
+.ci-row{padding:11px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
 .ci-row:last-child{border-bottom:none}
-.ci-type{font-size:11px;color:var(–sub)}
-.ci-type strong{display:block;font-size:11px;color:var(–text);font-weight:500;margin-bottom:2px}
-.ci-range{font-family:var(–mono);font-size:13px;font-weight:600;color:var(–cyan);text-align:right;white-space:nowrap}
-
-/* VARIANCE */
+.ci-type{font-size:11px;color:var(--sub)}
+.ci-type strong{display:block;font-size:11px;color:var(--text);font-weight:500;margin-bottom:2px}
+.ci-range{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--cyan);text-align:right;white-space:nowrap}
 .var-wrap{padding:13px}
 .var-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;gap:8px}
 .var-metrics{display:flex;gap:14px;flex-wrap:wrap}
-.vm .v-l{font-size:9px;color:var(–sub);margin-bottom:2px}
-.vm .v-v{font-family:var(–mono);font-size:13px;font-weight:600}
+.vm .v-l{font-size:9px;color:var(--sub);margin-bottom:2px}
+.vm .v-v{font-family:var(--mono);font-size:13px;font-weight:600}
 .vbadge{font-size:10px;font-weight:700;padding:4px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
-.var-desc{font-size:12px;color:var(–sub);line-height:1.7}
-
-/* SETTINGS MODAL */
+.var-desc{font-size:12px;color:var(--sub);line-height:1.7}
 #settings-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);align-items:flex-end;justify-content:center}
 #settings-modal.open{display:flex}
-.sheet{background:var(–card);border:1px solid var(–border2);border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
-.sheet-title{font-family:var(–mono);font-size:12px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
-.close-btn{background:none;border:none;color:var(–sub);font-size:20px;cursor:pointer}
+.sheet{background:var(--card);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.sheet-title{font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.close-btn{background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer}
 .set-row{margin-bottom:13px}
-.set-lbl{font-size:12px;color:var(–sub);margin-bottom:5px}
-.set-in{width:100%;background:var(–card2);border:1px solid var(–border2);border-radius:8px;color:var(–text);font-family:var(–mono);font-size:15px;padding:9px 11px;outline:none}
-.set-in:focus{border-color:var(–amber)}
-.reset-btn{width:100%;background:transparent;border:1px solid var(–red);border-radius:8px;color:var(–red);font-family:var(–mono);font-size:12px;padding:11px;cursor:pointer;margin-top:8px}
+.set-lbl{font-size:12px;color:var(--sub);margin-bottom:5px}
+.set-in{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:15px;padding:9px 11px;outline:none}
+.set-in:focus{border-color:var(--amber)}
+.reset-btn{width:100%;background:transparent;border:1px solid var(--red);border-radius:8px;color:var(--red);font-family:var(--mono);font-size:12px;padding:11px;cursor:pointer;margin-top:8px}
 .reset-btn:active{background:rgba(248,113,113,.1)}
-
-/* EMPTY STATE */
 #empty-state{padding:40px 20px;text-align:center}
-.empty-t{font-family:var(–mono);font-size:11px;color:var(–sub);margin-bottom:8px}
-.empty-s{font-size:12px;color:var(–sub2);line-height:1.9}
-
+.empty-t{font-family:var(--mono);font-size:11px;color:var(--sub);margin-bottom:8px}
+.empty-s{font-size:12px;color:var(--sub2);line-height:1.9}
 .hidden{display:none!important}
 </style>
-
 </head>
 <body>
-
-<!-- DRAWER -->
 
 <div id="drawer">
   <div class="drawer-hdr">
@@ -228,122 +183,97 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
   </header>
 
   <div style="display:flex">
-
-```
-<!-- LEFT HISTORY PANEL -->
-<div class="hist-panel" id="histPanel" ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()">
-  <div class="hp-empty" id="hpEmpty">履 歴</div>
-</div>
-
-<!-- MAIN -->
-<div class="main-content">
-
-  <!-- KPI -->
-  <div class="kpi-grid">
-    <div class="kpi hi">
-      <div class="kpi-lbl">推定回転数 / 1k</div>
-      <div class="kpi-val" id="kpiMu">-.-</div>
-      <div class="kpi-sub">Beta事後分布</div>
-      <div class="kpi-extra">
-        <div class="ke"><div class="ke-l">平均回転数</div><div class="ke-v" id="kpiMean">-.-</div></div>
-        <div class="ke"><div class="ke-l">投資額</div><div class="ke-v" id="kpiInvest">-.k</div></div>
+    <div class="hist-panel" id="histPanel" ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()">
+      <div class="hp-empty" id="hpEmpty">履 歴</div>
+    </div>
+    <div class="main-content">
+      <div class="kpi-grid">
+        <div class="kpi hi">
+          <div class="kpi-lbl">推定回転数 / 1k</div>
+          <div class="kpi-val" id="kpiMu">-.-</div>
+          <div class="kpi-sub">Beta事後分布</div>
+          <div class="kpi-extra">
+            <div class="ke"><div class="ke-l">平均回転数</div><div class="ke-v" id="kpiMean">-.-</div></div>
+            <div class="ke"><div class="ke-l">投資額</div><div class="ke-v" id="kpiInvest">-.k</div></div>
+          </div>
+        </div>
+        <div class="kpi hi">
+          <div class="kpi-lbl">ボーダー超え確率</div>
+          <div class="kpi-val" id="kpiSuc">-.-%</div>
+          <div class="kpi-sub" id="kpiSucLbl">ボーダー — 回転</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">推定期待値（トータル）</div>
+          <div class="kpi-val-sm" id="kpiEVTotal">-.-</div>
+          <div class="kpi-sub" id="kpiEVSub">1k: -.- 円</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">当たり回数</div>
+          <div class="kpi-val-sm" id="kpiHits">0</div>
+          <div class="kpi-sub" id="kpiNLbl">N=0 サンプル</div>
+        </div>
+      </div>
+      <section id="input-sec">
+        <div class="input-lbl" id="inputLbl">INIT — 初期累計回転数を入力</div>
+        <div class="input-row">
+          <input type="number" class="rot-in" id="rotIn" placeholder="前任者の回転数 (例: 0)" inputmode="numeric" min="0">
+          <button class="add-btn" onclick="addEntry()">ADD</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:stretch">
+          <button class="hit-btn" id="hitBtn" onclick="addHit()" disabled style="flex:3;font-size:13px;padding:9px 10px">🎯 当たり</button>
+          <button class="hit-btn" id="undoHitBtn" onclick="undoHit()" style="flex:0 0 auto;padding:9px 12px;display:none" title="直前の当たりを取り消す">↩</button>
+          <button class="hit-btn" onclick="showBulkInput()" style="flex:1;padding:9px 6px;font-size:10px;border-color:var(--border2);color:var(--text);background:var(--card2);line-height:1.3;opacity:1">連続<br>入力</button>
+        </div>
+      </section>
+      <div id="ci-sec">
+        <div class="slider-row">
+          <span class="slider-lbl">信頼区間</span>
+          <input type="range" class="ci-slider" id="ciSlider" min="50" max="99" value="95" oninput="onCI()">
+          <span class="ci-pct" id="ciPct">95%</span>
+        </div>
+      </div>
+      <div id="graph-sec">
+        <div class="ctabs">
+          <button class="ctab on" onclick="switchTab(0)">分布</button>
+          <button class="ctab" onclick="switchTab(1)">履歴</button>
+          <button class="ctab" onclick="switchTab(2)">尤度帯</button>
+        </div>
+        <div class="cwrap on" id="cw0"><canvas id="distChart" height="180"></canvas></div>
+        <div class="cwrap"    id="cw1"><canvas id="histChart" height="180"></canvas></div>
+        <div class="cwrap"    id="cw2"><canvas id="likeChart" height="180"></canvas></div>
+      </div>
+      <div id="empty-state">
+        <div class="empty-t">// AWAITING DATA INPUT</div>
+        <div class="empty-s">まず初期累計回転数を入力<br>（前任者の回転数 or 0）<br><br>次からは1000円ごとに<br>液晶の累計回転数を入力してください</div>
+      </div>
+      <div id="stats-sec" class="hidden">
+        <div class="stag"><span class="sn">02</span>成功率推定</div>
+        <div class="card">
+          <div class="succ-wrap">
+            <div class="succ-pct" id="succPct">-.-%</div>
+            <div class="succ-lbl" id="succLbl">ボーダー超えの確率</div>
+            <div class="bar-track"><div class="bar-fill" id="succBar" style="width:0%"></div></div>
+            <div class="succ-verdict" id="succVerdict"></div>
+          </div>
+        </div>
+        <div class="stag"><span class="sn">03</span>尤度計算（回転数帯別）</div>
+        <div class="card"><table class="lk-table" id="lkTable"></table></div>
+        <button class="collapse-btn" onclick="toggleCollapse()">
+          <span>// 統計詳細（ベイズ更新・信頼区間・分散）</span>
+          <span class="collapse-arrow" id="colArrow">▼</span>
+        </button>
+        <div class="collapsible" id="colSection">
+          <div class="stag"><span class="sn">04</span>ベイズ更新（Beta-Binomial）</div>
+          <div class="card"><div class="bayes-grid" id="bayesGrid"></div></div>
+          <div class="stag"><span class="sn">05</span>信頼区間 / 信用区間</div>
+          <div class="card" id="ciCard"></div>
+          <div class="stag"><span class="sn">06</span>分散チェック</div>
+          <div class="card" id="varCard"></div>
+        </div>
       </div>
     </div>
-    <div class="kpi hi">
-      <div class="kpi-lbl">ボーダー超え確率</div>
-      <div class="kpi-val" id="kpiSuc">-.-%</div>
-      <div class="kpi-sub" id="kpiSucLbl">ボーダー — 回転</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-lbl">推定期待値（トータル）</div>
-      <div class="kpi-val-sm" id="kpiEVTotal">-.-</div>
-      <div class="kpi-sub" id="kpiEVSub">1k: -.- 円</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-lbl">当たり回数</div>
-      <div class="kpi-val-sm" id="kpiHits">0</div>
-      <div class="kpi-sub" id="kpiNLbl">N=0 サンプル</div>
-    </div>
-  </div>
-
-  <!-- INPUT -->
-  <section id="input-sec">
-    <div class="input-lbl" id="inputLbl">INIT — 初期累計回転数を入力</div>
-    <div class="input-row">
-      <input type="number" class="rot-in" id="rotIn" placeholder="前任者の回転数 (例: 0)" inputmode="numeric" min="0">
-      <button class="add-btn" onclick="addEntry()">ADD</button>
-    </div>
-    <div style="display:flex;gap:6px;align-items:stretch">
-      <button class="hit-btn" id="hitBtn" onclick="addHit()" disabled style="flex:3;font-size:13px;padding:9px 10px">🎯 当たり</button>
-      <button class="hit-btn" id="undoHitBtn" onclick="undoHit()" style="flex:0 0 auto;padding:9px 12px;display:none" title="直前の当たりを取り消す">↩</button>
-      <button class="hit-btn" onclick="showBulkInput()" style="flex:1;padding:9px 6px;font-size:10px;border-color:var(--border2);color:var(--text);background:var(--card2);line-height:1.3;opacity:1">連続<br>入力</button>
-    </div>
-  </section>
-
-  <!-- CI SLIDER -->
-  <div id="ci-sec">
-    <div class="slider-row">
-      <span class="slider-lbl">信頼区間</span>
-      <input type="range" class="ci-slider" id="ciSlider" min="50" max="99" value="95" oninput="onCI()">
-      <span class="ci-pct" id="ciPct">95%</span>
-    </div>
-  </div>
-
-  <!-- GRAPH -->
-  <div id="graph-sec">
-    <div class="ctabs">
-      <button class="ctab on" onclick="switchTab(0)">分布</button>
-      <button class="ctab" onclick="switchTab(1)">履歴</button>
-      <button class="ctab" onclick="switchTab(2)">尤度帯</button>
-    </div>
-    <div class="cwrap on" id="cw0"><canvas id="distChart" height="180"></canvas></div>
-    <div class="cwrap"    id="cw1"><canvas id="histChart" height="180"></canvas></div>
-    <div class="cwrap"    id="cw2"><canvas id="likeChart" height="180"></canvas></div>
-  </div>
-
-  <!-- EMPTY STATE -->
-  <div id="empty-state">
-    <div class="empty-t">// AWAITING DATA INPUT</div>
-    <div class="empty-s">まず初期累計回転数を入力<br>（前任者の回転数 or 0）<br><br>次からは1000円ごとに<br>液晶の累計回転数を入力してください</div>
-  </div>
-
-  <!-- STATS -->
-  <div id="stats-sec" class="hidden">
-
-    <div class="stag"><span class="sn">02</span>成功率推定</div>
-    <div class="card">
-      <div class="succ-wrap">
-        <div class="succ-pct" id="succPct">-.-%</div>
-        <div class="succ-lbl" id="succLbl">ボーダー超えの確率</div>
-        <div class="bar-track"><div class="bar-fill" id="succBar" style="width:0%"></div></div>
-        <div class="succ-verdict" id="succVerdict"></div>
-      </div>
-    </div>
-
-    <div class="stag"><span class="sn">03</span>尤度計算（回転数帯別）</div>
-    <div class="card"><table class="lk-table" id="lkTable"></table></div>
-
-    <button class="collapse-btn" onclick="toggleCollapse()">
-      <span>// 統計詳細（ベイズ更新・信頼区間・分散）</span>
-      <span class="collapse-arrow" id="colArrow">▼</span>
-    </button>
-    <div class="collapsible" id="colSection">
-      <div class="stag"><span class="sn">04</span>ベイズ更新（Beta-Binomial）</div>
-      <div class="card"><div class="bayes-grid" id="bayesGrid"></div></div>
-      <div class="stag"><span class="sn">05</span>信頼区間 / 信用区間</div>
-      <div class="card" id="ciCard"></div>
-      <div class="stag"><span class="sn">06</span>分散チェック</div>
-      <div class="card" id="varCard"></div>
-    </div>
-
   </div>
 </div>
-```
-
-  </div>
-</div>
-
-<!-- EXPORT MODAL -->
 
 <div id="export-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center">
   <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px">
@@ -357,34 +287,28 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
   </div>
 </div>
 
-<!-- BULK INPUT MODAL -->
-
 <div id="bulk-modal" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center;padding:0">
   <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px">
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:6px">まとめて入力</div>
+    <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:6px">まとめて入力</div>
     <div style="font-size:11px;color:#909090;margin-bottom:12px">累計回転数をカンマ区切りで入力<br>例: 126, 146, 164, 187</div>
-    <textarea id="bulk-inp" rows="4" style="width:100%;background:#111;border:1px solid #444;border-radius:8px;color:#e8e8e8;font-family:'IBM Plex Mono',monospace;font-size:15px;padding:10px 12px;outline:none;resize:none;margin-bottom:12px"></textarea>
+    <textarea id="bulk-inp" rows="4" style="width:100%;background:#111;border:1px solid #444;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:15px;padding:10px 12px;outline:none;resize:none;margin-bottom:12px"></textarea>
     <div style="display:flex;gap:8px">
-      <button onclick="closeBulk()" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
-      <button onclick="addBulk()" style="flex:1;background:#f59e0b;border:none;border-radius:8px;color:#000;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;padding:12px;cursor:pointer">追加</button>
+      <button onclick="closeBulk()" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
+      <button onclick="addBulk()" style="flex:1;background:#f59e0b;border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;cursor:pointer">追加</button>
     </div>
   </div>
 </div>
-
-<!-- CUSTOM MODAL (replaces prompt/confirm/alert for iOS PWA) -->
 
 <div id="cmodal" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:24px">
   <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:16px;padding:20px;width:100%;max-width:320px">
     <div id="cmodal-msg" style="font-size:13px;color:#909090;line-height:1.7;margin-bottom:14px"></div>
-    <input type="number" id="cmodal-inp" inputmode="numeric" style="display:none;width:100%;background:#111;border:1px solid #444;border-radius:8px;color:#e8e8e8;font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;padding:10px 12px;outline:none;margin-bottom:14px;-webkit-appearance:none">
+    <input type="number" id="cmodal-inp" inputmode="numeric" style="display:none;width:100%;background:#111;border:1px solid #444;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:20px;font-weight:600;padding:10px 12px;outline:none;margin-bottom:14px;-webkit-appearance:none">
     <div style="display:flex;gap:8px">
-      <button id="cmodal-cancel" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
-      <button id="cmodal-ok" style="flex:1;background:#f59e0b;border:none;border-radius:8px;color:#000;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;padding:12px;cursor:pointer">OK</button>
+      <button id="cmodal-cancel" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
+      <button id="cmodal-ok" style="flex:1;background:#f59e0b;border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;cursor:pointer">OK</button>
     </div>
   </div>
 </div>
-
-<!-- SETTINGS -->
 
 <div id="settings-modal">
   <div class="sheet">
@@ -413,853 +337,234 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-// MATH: Beta-Binomial (low-p Bernoulli, N_balls=250+賞球×rot)
-// ══════════════════════════════════════════════════════
+function lnGamma(z){if(z<0.5)return Math.log(Math.PI/Math.sin(Math.PI*z))-lnGamma(1-z);z-=1;const C=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];let x=C[0];for(let i=1;i<9;i++)x+=C[i]/(z+i);const t=z+7.5;return 0.5*Math.log(2*Math.PI)+(z+0.5)*Math.log(t)-t+Math.log(x);}
+function betaCDF(x,a,b){if(x<=0)return 0;if(x>=1)return 1;if(x>(a+1)/(a+b+2))return 1-betaCDF(1-x,b,a);const lB=lnGamma(a)+lnGamma(b)-lnGamma(a+b);const front=Math.exp(a*Math.log(x)+b*Math.log(1-x)-lB)/a;const MAXIT=300,EPS=1e-10,FP=1e-30;const qab=a+b,qap=a+1,qam=a-1;let c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=MAXIT;m++){let m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<EPS)break;}return front*h;}
+function normInv(p){const a=[2.50662823884,-18.61500062529,41.39119773534,-25.44106049637];const b=[-8.4735109309,23.08336743743,-21.06224101826,3.13082909833];const c=[.3374754822726147,.9761690190917186,.1607979714918209,.0276438810333863,.0038405729373609,.0003951896511349,.0000321767881768,.0000002888167364,.0000003960315187];const q=p-.5;let r,z;if(Math.abs(q)<=.42){r=q*q;z=q*(((a[3]*r+a[2])*r+a[1])*r+a[0])/((((b[3]*r+b[2])*r+b[1])*r+b[0])*r+1);}else{r=p<.5?p:1-p;r=Math.sqrt(-Math.log(r));z=c[0]+r*(c[1]+r*(c[2]+r*(c[3]+r*(c[4]+r*(c[5]+r*(c[6]+r*(c[7]+r*c[8])))))));if(q<0)z=-z;}return z;}
+function rotToP(rot,sh){return rot/(250+sh*rot);}
+function pToRot(p,sh){return 250*p/Math.max(1e-9,1-sh*p);}
+function defMachine(id){return{id,sessions:[{base:null,data:[],hit:false}]};}
+function defState(){return{machines:[defMachine('台0001')],current:0,cfg:{border:17,priorMu:19,priorSigma:2.5,shogyu:1},ciLevel:95,colOpen:false,activeTab:0};}
+function migrate(st){if(!st)return defState();if(!st.machines)return defState();st.machines.forEach(m=>{if(m.entries!==undefined&&m.sessions===undefined){if(!m.entries||m.entries.length===0){m.sessions=[{base:null,data:[],hit:false}];}else{m.sessions=[{base:m.entries[0],data:m.entries.slice(1),hit:false}];}delete m.entries;delete m.hits;}if(!m.sessions)m.sessions=[{base:null,data:[],hit:false}];});if(st.cfg&&!st.cfg.shogyu)st.cfg.shogyu=1;if(!st.activeTab)st.activeTab=0;return st;}
+let ST;try{ST=migrate(JSON.parse(localStorage.getItem('kt_v5')||'null'));}catch{ST=defState();}
+function save(){localStorage.setItem('kt_v5',JSON.stringify(ST));}
+function mach(){return ST.machines[ST.current];}
+function curSess(){const s=mach().sessions;return s[s.length-1];}
+function rots(){const all=[];mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];all.push(v-prev);});});return all;}
+function hitCount(){return mach().sessions.filter(s=>s.hit).length;}
+function allEvents(){const events=[];let dataIdx=0;mach().sessions.forEach((sess,si)=>{if(sess.base!==null){events.push({type:'base',val:sess.base,si});}sess.data.forEach((v,di)=>{const prev=di===0?sess.base:sess.data[di-1];dataIdx++;events.push({type:'data',cumul:v,rot:v-prev,idx:dataIdx,si,di});});if(sess.hit){events.push({type:'hit',si});}});return events;}
 
-function lnGamma(z) {
-  if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
-  z -= 1;
-  const C = [0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,
-             -176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
-  let x = C[0];
-  for (let i = 1; i < 9; i++) x += C[i] / (z + i);
-  const t = z + 7.5;
-  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+function calcStats(){
+  const r=rots(),n=r.length;if(!n)return null;
+  const{border,priorMu,priorSigma,shogyu}=ST.cfg;const ci=ST.ciLevel;
+  const nEff=250+shogyu*priorMu,p0=priorMu/nEff,sp=priorSigma/nEff;
+  const kappa=Math.max(2,p0*(1-p0)/(sp*sp)-1);
+  const a0=kappa*p0,b0=kappa*(1-p0);
+  let S=0,Nballs=0;
+  mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;S+=rot;Nballs+=250+shogyu*rot;});});
+  const aPost=a0+S,bPost=b0+(Nballs-S),pPost=aPost/(aPost+bPost),muPost=pToRot(pPost,shogyu);
+  const varP=aPost*bPost/((aPost+bPost)**2*(aPost+bPost+1));
+  const sdRot=Math.sqrt(varP)*250/Math.max(1e-9,(1-shogyu*pPost)**2);
+  const pSD=Math.sqrt(varP),lo=(1-ci/100)/2,hi=1-lo;
+  const ciLo=pToRot(Math.max(1e-9,pPost+normInv(lo)*pSD),shogyu);
+  const ciHi=pToRot(Math.min(1-1e-9,pPost+normInv(hi)*pSD),shogyu);
+  const borderP=rotToP(border,shogyu),pSuc=1-betaCDF(borderP,aPost,bPost);
+  const ev=(muPost/border-1)*1000;
+  const lk={b15:betaCDF(rotToP(15,shogyu),aPost,bPost),r1517:betaCDF(rotToP(17,shogyu),aPost,bPost)-betaCDF(rotToP(15,shogyu),aPost,bPost),r1719:betaCDF(rotToP(19,shogyu),aPost,bPost)-betaCDF(rotToP(17,shogyu),aPost,bPost),r1921:betaCDF(rotToP(21,shogyu),aPost,bPost)-betaCDF(rotToP(19,shogyu),aPost,bPost),r2123:betaCDF(rotToP(23,shogyu),aPost,bPost)-betaCDF(rotToP(21,shogyu),aPost,bPost),r2325:betaCDF(rotToP(25,shogyu),aPost,bPost)-betaCDF(rotToP(23,shogyu),aPost,bPost),a25:1-betaCDF(rotToP(25,shogyu),aPost,bPost)};
+  const mean=r.reduce((a,b)=>a+b,0)/n;let sVar=null,sSD=null,cv=null,vj=null;
+  if(n>=2){sVar=r.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);sSD=Math.sqrt(sVar);cv=sSD/mean;if(cv<.08)vj={label:'非常に安定',color:'#4ade80',bg:'rgba(74,222,128,.1)'};else if(cv<.15)vj={label:'安定',color:'#86efac',bg:'rgba(134,239,172,.1)'};else if(cv<.25)vj={label:'やや不安定',color:'#facc15',bg:'rgba(250,204,21,.1)'};else vj={label:'不安定',color:'#f87171',bg:'rgba(248,113,113,.1)'};}
+  return{n,mean,sVar,sSD,cv,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,ci,border,a0,b0,priorMu,shogyu};
 }
 
-// Regularized incomplete beta (Lentz CF)
-function betaCDF(x, a, b) {
-  if (x <= 0) return 0;
-  if (x >= 1) return 1;
-  if (x > (a + 1) / (a + b + 2)) return 1 - betaCDF(1 - x, b, a);
-  const lB = lnGamma(a) + lnGamma(b) - lnGamma(a + b);
-  const front = Math.exp(a * Math.log(x) + b * Math.log(1 - x) - lB) / a;
-  const MAXIT = 300, EPS = 1e-10, FP = 1e-30;
-  const qab = a+b, qap = a+1, qam = a-1;
-  let c = 1, d = 1 - qab*x/qap;
-  if (Math.abs(d) < FP) d = FP;
-  d = 1/d; let h = d;
-  for (let m = 1; m <= MAXIT; m++) {
-    let m2 = 2*m;
-    let aa = m*(b-m)*x/((qam+m2)*(a+m2));
-    d=1+aa*d; if(Math.abs(d)<FP)d=FP; c=1+aa/c; if(Math.abs(c)<FP)c=FP; d=1/d; h*=d*c;
-    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
-    d=1+aa*d; if(Math.abs(d)<FP)d=FP; c=1+aa/c; if(Math.abs(c)<FP)c=FP;
-    d=1/d; const del=d*c; h*=del;
-    if (Math.abs(del-1) < EPS) break;
-  }
-  return front * h;
+let charts={};
+function f(v,d=1){return v===null||v===undefined?'-.-':Number(v).toFixed(d);}
+function fp(v){return v===null?'-.-%':(v*100).toFixed(1)+'%';}
+
+function render(){
+  const s=calcStats(),m=mach(),n=s?s.n:0,cur=curSess(),hasData=n>0;
+  document.getElementById('hdrTitle').textContent=m.id;
+  document.getElementById('dot').classList.toggle('live',hasData);
+  document.getElementById('empty-state').classList.toggle('hidden',hasData);
+  document.getElementById('stats-sec').classList.toggle('hidden',!hasData);
+  const isInit=cur.base===null;
+  document.getElementById('inputLbl').textContent=isInit?'INIT — 初期累計回転数を入力':'DATA INPUT — 現在の累計回転数';
+  const rotIn=document.getElementById('rotIn');
+  if(isInit){rotIn.placeholder='前任者の回転数 (例: 0 or 123)';}
+  else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;rotIn.placeholder=`> ${last}`;}
+  document.getElementById('hitBtn').disabled=(cur.base===null||cur.data.length===0);
+  const sess=mach().sessions;
+  const canUndo=sess.length>=2&&sess[sess.length-2].hit&&sess[sess.length-1].base===null&&sess[sess.length-1].data.length===0;
+  document.getElementById('undoHitBtn').style.display=canUndo?'':'none';
+  renderDrawerList();renderHistPanel(s);renderKPI(s,m,hasData);
+  if(!s)return;
+  renderSuccess(s);renderLK(s);renderBayes(s);renderCI(s);renderVar(s);renderActiveChart(s);
 }
 
-function normInv(p) {
-  const a=[2.50662823884,-18.61500062529,41.39119773534,-25.44106049637];
-  const b=[-8.4735109309,23.08336743743,-21.06224101826,3.13082909833];
-  const c=[.3374754822726147,.9761690190917186,.1607979714918209,.0276438810333863,.0038405729373609,.0003951896511349,.0000321767881768,.0000002888167364,.0000003960315187];
-  const q=p-.5; let r,z;
-  if(Math.abs(q)<=.42){r=q*q;z=q*(((a[3]*r+a[2])*r+a[1])*r+a[0])/((((b[3]*r+b[2])*r+b[1])*r+b[0])*r+1);}
-  else{r=p<.5?p:1-p;r=Math.sqrt(-Math.log(r));z=c[0]+r*(c[1]+r*(c[2]+r*(c[3]+r*(c[4]+r*(c[5]+r*(c[6]+r*(c[7]+r*c[8])))))));if(q<0)z=-z;}
-  return z;
+function renderDrawerList(){
+  document.getElementById('machineList').innerHTML=[...ST.machines].reverse().map((m,ri)=>{
+    const i=ST.machines.length-1-ri,n=rots_for(m),isActive=i===ST.current;
+    const mu=muPost_for(m),muStr=mu!==null?`推定 ${mu.toFixed(1)}回`:'データなし';
+    return `<div class="machine-item ${isActive?'active':''}" onclick="switchMachine(${i})" oncontextmenu="event.preventDefault();renameMachine(${i})" ontouchstart="startLongPress(${i})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()" style="position:relative"><div><div class="machine-item-name">${m.id}</div><div class="machine-item-n">N=${n} / ${muStr}</div></div><div style="display:flex;align-items:center;gap:8px">${isActive?'<span style="color:var(--amber);font-size:12px">●</span>':''}${ST.machines.length>1?`<button onclick="event.stopPropagation();deleteMachine(${i})" style="background:none;border:1px solid #444;border-radius:6px;color:#f87171;font-size:11px;padding:3px 7px;cursor:pointer">削除</button>`:''}</div></div>`;
+  }).join('');
 }
 
-function betaInv(p, a, b) {
-  if (p <= 0) return 0;
-  if (p >= 1) return 1;
-  const mu = a/(a+b), v = a*b/((a+b)**2*(a+b+1));
-  let x = Math.max(1e-7, Math.min(1-1e-7, mu + normInv(p)*Math.sqrt(v)));
-  for (let i = 0; i < 30; i++) {
-    const fx = betaCDF(x,a,b) - p;
-    if (Math.abs(fx) < 1e-13) break;
-    const lx = a*Math.log(x) + b*Math.log(1-x) - (lnGamma(a)+lnGamma(b)-lnGamma(a+b));
-    const fpx = Math.exp(lx);
-    if (fpx < 1e-300) break;
-    x = Math.max(1e-7, Math.min(1-1e-7, x - fx/fpx));
-  }
-  return x;
+function rots_for(m){let c=0;m.sessions.forEach(sess=>{if(sess.base!==null)c+=sess.data.length;});return c;}
+function muPost_for(m){const{priorMu,priorSigma,shogyu}=ST.cfg;const nEff=250+shogyu*priorMu,p0=priorMu/nEff,sp=priorSigma/nEff;const kappa=Math.max(2,p0*(1-p0)/(sp*sp)-1);const a0=kappa*p0,b0=kappa*(1-p0);let S=0,Nb=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;S+=rot;Nb+=250+shogyu*rot;});});if(S===0)return null;const aP=a0+S,bP=b0+(Nb-S),pP=aP/(aP+bP);return pToRot(pP,shogyu);}
+
+function renderKPI(s,m,hasData){
+  if(!hasData){['kpiMu','kpiMean','kpiInvest','kpiEVTotal'].forEach(id=>document.getElementById(id).textContent='-.-');document.getElementById('kpiInvest').textContent='-.k';document.getElementById('kpiEVSub').textContent='1k: -.- 円';document.getElementById('kpiSuc').textContent='-.-%';document.getElementById('kpiSuc').style.color='';document.getElementById('kpiSucLbl').textContent=`ボーダー ${ST.cfg.border} 回転`;document.getElementById('kpiHits').textContent=hitCount();document.getElementById('kpiNLbl').textContent='N=0 サンプル';return;}
+  const muEl=document.getElementById('kpiMu');muEl.textContent=f(s.muPost);muEl.style.color=s.muPost>=s.border*1.05?'#4ade80':s.muPost>=s.border?'#f59e0b':'#f87171';
+  document.getElementById('kpiMean').textContent=f(s.mean)+'回';document.getElementById('kpiInvest').textContent=s.n+'k';
+  const sc=s.pSuc>=.6?'#4ade80':s.pSuc>=.4?'#facc15':'#f87171';const se=document.getElementById('kpiSuc');se.textContent=fp(s.pSuc);se.style.color=sc;
+  document.getElementById('kpiSucLbl').textContent=`ボーダー ${s.border} 回転`;
+  const evTotal=s.ev*s.n,eet=document.getElementById('kpiEVTotal');eet.textContent=(evTotal>=0?'+':'')+f(evTotal,0)+'円';eet.style.color=evTotal>=0?'#4ade80':'#f87171';
+  document.getElementById('kpiEVSub').textContent=`1k: ${(s.ev>=0?'+':'')+f(s.ev,0)}円`;
+  document.getElementById('kpiHits').textContent=hitCount();document.getElementById('kpiNLbl').textContent=`N=${s.n} サンプル`;
 }
 
-function rotToP(rot, sh) { return rot / (250 + sh * rot); }
-function pToRot(p, sh)   { return 250 * p / Math.max(1e-9, 1 - sh * p); }
-
-// ══════════════════════════════════════════════════════
-// STATE (session model)
-// Sessions: [{base: int|null, data: int[], hit: bool}]
-// base = baseline cumulative, data = cumulative values per 1k, hit = 当たりフラグ
-// ══════════════════════════════════════════════════════
-function defMachine(id) {
-  return { id, sessions: [{ base: null, data: [], hit: false }] };
-}
-function defState() {
-  return {
-    machines: [defMachine('台0001')],
-    current: 0,
-    cfg: { border: 17, priorMu: 19, priorSigma: 2.5, shogyu: 1 },
-    ciLevel: 95, colOpen: false, activeTab: 0
-  };
+function renderSuccess(s){
+  const c=s.pSuc>=.6?'#4ade80':s.pSuc>=.4?'#facc15':'#f87171';const el=document.getElementById('succPct');el.textContent=fp(s.pSuc);el.style.color=c;
+  document.getElementById('succLbl').textContent=`ボーダー（${s.border}回転）を超える確率（1-BetaCDF）`;
+  document.getElementById('succBar').style.cssText=`width:${Math.min(100,s.pSuc*100)}%;background:${c}`;
+  let msg='';if(s.pSuc>=.75)msg='<strong>高確率でボーダー越え。</strong>継続推奨。';else if(s.pSuc>=.55)msg='<strong>やや有利寄り。</strong>データを積んで精度向上を。';else if(s.pSuc>=.40)msg='<strong>判定保留。</strong>データ不足か境界ライン付近。';else if(s.pSuc>=.25)msg='<strong>やや不利寄り。</strong>移動を検討してください。';else msg='<strong>ボーダー割れの可能性大。</strong>移動を推奨します。';
+  document.getElementById('succVerdict').innerHTML=msg;
 }
 
-// Migrate old format (entries/hits) to sessions
-function migrate(st) {
-  if (!st) return defState();
-  if (!st.machines) return defState();
-  st.machines.forEach(m => {
-    if (m.entries !== undefined && m.sessions === undefined) {
-      if (!m.entries || m.entries.length === 0) {
-        m.sessions = [{ base: null, data: [], hit: false }];
-      } else {
-        m.sessions = [{ base: m.entries[0], data: m.entries.slice(1), hit: false }];
-      }
-      delete m.entries; delete m.hits;
-    }
-    if (!m.sessions) m.sessions = [{ base: null, data: [], hit: false }];
-  });
-  if (st.cfg && !st.cfg.shogyu) st.cfg.shogyu = 1;
-  if (!st.activeTab) st.activeTab = 0;
-  return st;
+function renderLK(s){
+  const rows=[{label:'< 15回転',val:s.lk.b15,color:'#ef4444'},{label:'15〜17回転',val:s.lk.r1517,color:'#f97316'},{label:'17〜19回転',val:s.lk.r1719,color:'#facc15'},{label:'19〜21回転',val:s.lk.r1921,color:'#a3e635'},{label:'21〜23回転',val:s.lk.r2123,color:'#4ade80'},{label:'23〜25回転',val:s.lk.r2325,color:'#34d399'},{label:'> 25回転',val:s.lk.a25,color:'#22d3ee'}];
+  document.getElementById('lkTable').innerHTML=rows.map(r=>`<tr><td class="lk-range">${r.label}</td><td class="lk-bc"><div class="lk-track"><div class="lk-fill" style="width:${r.val*100}%;background:${r.color}"></div></div></td><td class="lk-pct" style="color:${r.color}">${fp(r.val)}</td></tr>`).join('');
 }
 
-let ST;
-try { ST = migrate(JSON.parse(localStorage.getItem('kt_v5') || 'null')); }
-catch { ST = defState(); }
-
-function save() { localStorage.setItem('kt_v5', JSON.stringify(ST)); }
-function mach()    { return ST.machines[ST.current]; }
-function curSess() { const s = mach().sessions; return s[s.length - 1]; }
-
-// Per-1k rotations across all sessions (data only, no baseline)
-function rots() {
-  const all = [];
-  mach().sessions.forEach(sess => {
-    if (sess.base === null) return;
-    sess.data.forEach((v, i) => {
-      const prev = i === 0 ? sess.base : sess.data[i-1];
-      all.push(v - prev);
-    });
-  });
-  return all;
+function renderBayes(s){
+  const pct=v=>(v*100).toFixed(4)+'%';
+  document.getElementById('bayesGrid').innerHTML=[{l:'事前 α₀',v:f(s.a0,1),d:`p₀=${pct(s.a0/(s.a0+s.b0))}`},{l:'事後 α*',v:f(s.aPost,1),d:`β*=${f(s.bPost,1)}`},{l:'事前 μ₀',v:f(s.priorMu)+'回',d:'ユーザー設定'},{l:'事後 μ*',v:f(s.muPost)+'回',d:`SD≈${f(s.sdRot,2)}回`}].map(c=>`<div class="bayes-cell"><div class="bayes-lbl">${c.l}</div><div class="bayes-val">${c.v}</div><div class="bayes-desc">${c.d}</div></div>`).join('');
 }
 
-// Total 当たり count
-function hitCount() {
-  return mach().sessions.filter(s => s.hit).length;
+function renderCI(s){
+  document.getElementById('ciCard').innerHTML=`<div class="ci-row"><div class="ci-type"><strong>Beta ${s.ci}% 信用区間</strong>exact Beta quantile（正規近似なし）</div><div class="ci-range">${f(s.ciLo)} 〜 ${f(s.ciHi)}</div></div><div class="ci-row"><div class="ci-type"><strong>区間幅</strong>± ${f((s.ciHi-s.ciLo)/2,2)} 回転</div><div class="ci-range" style="color:var(--sub)">${s.ci}% 信頼</div></div>`;
 }
 
-// Flat list of events for left panel
-function allEvents() {
-  const events = [];
-  let dataIdx = 0;
-  mach().sessions.forEach((sess, si) => {
-    // Baseline
-    if (sess.base !== null) {
-      events.push({ type: 'base', val: sess.base, si });
-    }
-    // Data points
-    sess.data.forEach((v, di) => {
-      const prev = di === 0 ? sess.base : sess.data[di-1];
-      dataIdx++;
-      events.push({ type: 'data', cumul: v, rot: v - prev, idx: dataIdx, si, di });
-    });
-    // Hit
-    if (sess.hit) {
-      events.push({ type: 'hit', si });
-    }
-  });
-  return events;
+function renderVar(s){
+  if(s.n<2){document.getElementById('varCard').innerHTML='<div style="padding:12px;color:var(--sub);font-size:12px">N≥2で分散チェックが有効になります</div>';return;}
+  const desc={'非常に安定':'回転数のばらつきが極めて小さく、台の挙動が安定しています。','安定':'標準的な範囲内のばらつきです。平均値は十分に信頼できます。','やや不安定':'ばらつきがやや大きいです。数回計測して確認を推奨します。','不安定':'回転数の変動が大きく、台の状態が不安定です。'}[s.vj.label];
+  document.getElementById('varCard').innerHTML=`<div class="var-wrap"><div class="var-top"><div class="var-metrics"><div class="vm"><div class="v-l">分散 s²</div><div class="v-v">${f(s.sVar,2)}</div></div><div class="vm"><div class="v-l">標準偏差</div><div class="v-v">±${f(s.sSD,2)}</div></div><div class="vm"><div class="v-l">変動係数</div><div class="v-v">${(s.cv*100).toFixed(1)}%</div></div></div><div class="vbadge" style="color:${s.vj.color};background:${s.vj.bg}">${s.vj.label}</div></div><div class="var-desc">${desc}</div></div>`;
 }
 
-// ══════════════════════════════════════════════════════
-// STATS
-// ══════════════════════════════════════════════════════
-function calcStats() {
-  const r = rots(), n = r.length;
-  if (!n) return null;
-  const { border, priorMu, priorSigma, shogyu } = ST.cfg;
-  const ci = ST.ciLevel;
-
-  // Prior Beta(α₀, β₀)
-  const nEff = 250 + shogyu * priorMu;
-  const p0   = priorMu / nEff;
-  const sp   = priorSigma / nEff;
-  const kappa = Math.max(2, p0 * (1 - p0) / (sp * sp) - 1);
-  const a0 = kappa * p0, b0 = kappa * (1 - p0);
-
-  // Sufficient statistics
-  let S = 0, Nballs = 0;
-  mach().sessions.forEach(sess => {
-    if (sess.base === null) return;
-    sess.data.forEach((v, i) => {
-      const prev = i === 0 ? sess.base : sess.data[i-1];
-      const rot = v - prev;
-      S += rot;
-      Nballs += 250 + shogyu * rot;
-    });
-  });
-
-  const aPost = a0 + S, bPost = b0 + (Nballs - S);
-  const pPost  = aPost / (aPost + bPost);
-  const muPost = pToRot(pPost, shogyu);
-  // SD via delta method
-  const varP  = aPost * bPost / ((aPost + bPost) ** 2 * (aPost + bPost + 1));
-  const sdRot = Math.sqrt(varP) * 250 / Math.max(1e-9, (1 - shogyu * pPost) ** 2);
-
-  // CI via normal approximation to Beta (accurate for large aPost+bPost)
-  const pSD = Math.sqrt(varP);
-  const lo = (1 - ci/100) / 2, hi = 1 - lo;
-  const ciLo = pToRot(Math.max(1e-9, pPost + normInv(lo) * pSD), shogyu);
-  const ciHi = pToRot(Math.min(1-1e-9, pPost + normInv(hi) * pSD), shogyu);
-
-  // P(rotation > border) = 1 - BetaCDF(borderP)
-  const borderP = rotToP(border, shogyu);
-  const pSuc    = 1 - betaCDF(borderP, aPost, bPost);
-
-  // EV
-  const ev = (muPost / border - 1) * 1000;
-
-  // Likelihood by range (7 bands, 2-step)
-  const lk = {
-    b15:   betaCDF(rotToP(15, shogyu), aPost, bPost),
-    r1517: betaCDF(rotToP(17, shogyu), aPost, bPost) - betaCDF(rotToP(15, shogyu), aPost, bPost),
-    r1719: betaCDF(rotToP(19, shogyu), aPost, bPost) - betaCDF(rotToP(17, shogyu), aPost, bPost),
-    r1921: betaCDF(rotToP(21, shogyu), aPost, bPost) - betaCDF(rotToP(19, shogyu), aPost, bPost),
-    r2123: betaCDF(rotToP(23, shogyu), aPost, bPost) - betaCDF(rotToP(21, shogyu), aPost, bPost),
-    r2325: betaCDF(rotToP(25, shogyu), aPost, bPost) - betaCDF(rotToP(23, shogyu), aPost, bPost),
-    a25:   1 - betaCDF(rotToP(25, shogyu), aPost, bPost),
-  };
-
-  // Sample variance
-  const mean = r.reduce((a,b)=>a+b,0)/n;
-  let sVar=null, sSD=null, cv=null, vj=null;
-  if (n >= 2) {
-    sVar = r.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);
-    sSD  = Math.sqrt(sVar);
-    cv   = sSD / mean;
-    if      (cv<.08) vj={label:'非常に安定',color:'#4ade80',bg:'rgba(74,222,128,.1)'};
-    else if (cv<.15) vj={label:'安定',      color:'#86efac',bg:'rgba(134,239,172,.1)'};
-    else if (cv<.25) vj={label:'やや不安定',color:'#facc15',bg:'rgba(250,204,21,.1)'};
-    else             vj={label:'不安定',    color:'#f87171',bg:'rgba(248,113,113,.1)'};
-  }
-
-  return { n, mean, sVar, sSD, cv, vj, aPost, bPost, pPost, muPost, sdRot, ciLo, ciHi, pSuc, ev, lk, ci, border, a0, b0, priorMu, shogyu };
-}
-
-// ══════════════════════════════════════════════════════
-// RENDER
-// ══════════════════════════════════════════════════════
-let charts = {};
-function f(v, d=1)  { return v===null||v===undefined?'-.-':Number(v).toFixed(d); }
-function fp(v)       { return v===null?'-.-%':(v*100).toFixed(1)+'%'; }
-
-function render() {
-  const s = calcStats(), m = mach(), n = s ? s.n : 0;
-  const cur = curSess();
-  const hasData = n > 0;
-
-  document.getElementById('hdrTitle').textContent = m.id;
-  document.getElementById('dot').classList.toggle('live', hasData);
-  document.getElementById('empty-state').classList.toggle('hidden', hasData);
-  document.getElementById('stats-sec').classList.toggle('hidden', !hasData);
-
-  // Dynamic input label & placeholder
-  const isInit = cur.base === null;
-  const lbl = document.getElementById('inputLbl');
-  lbl.textContent = isInit ? 'INIT — 初期累計回転数を入力' : 'DATA INPUT — 現在の累計回転数';
-
-  const rotIn = document.getElementById('rotIn');
-  if (isInit) {
-    rotIn.placeholder = '前任者の回転数 (例: 0 or 123)';
-  } else {
-    const last = cur.data.length > 0 ? cur.data[cur.data.length-1] : cur.base;
-    rotIn.placeholder = `> ${last}`;
-  }
-
-  // Hit button: enable only when current session has at least 1 data point
-  document.getElementById('hitBtn').disabled = (cur.base === null || cur.data.length === 0);
-  // Undo hit: show only when last session is empty and second-to-last has hit=true
-  const sess = mach().sessions;
-  const canUndo = sess.length >= 2 && sess[sess.length-2].hit && sess[sess.length-1].base === null && sess[sess.length-1].data.length === 0;
-  document.getElementById('undoHitBtn').style.display = canUndo ? '' : 'none';
-
-  renderDrawerList();
-  renderHistPanel(s);
-  renderKPI(s, m, hasData);
-  if (!s) return;
-  renderSuccess(s);
-  renderLK(s);
-  renderBayes(s);
-  renderCI(s);
-  renderVar(s);
-  renderActiveChart(s);
-}
-
-function renderDrawerList() {
-  // Newest machine at TOP → reverse before rendering
-  document.getElementById('machineList').innerHTML =
-    [...ST.machines].reverse().map((m, ri) => {
-      const i = ST.machines.length - 1 - ri;
-      const n = rots_for(m);
-      const isActive = i === ST.current;
-      const mu = muPost_for(m);
-      const muStr = mu !== null ? `推定 ${mu.toFixed(1)}回` : 'データなし';
-      return `<div class="machine-item ${isActive?'active':''}" onclick="switchMachine(${i})" oncontextmenu="event.preventDefault();renameMachine(${i})" ontouchstart="startLongPress(${i})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()" style="position:relative">
-        <div>
-          <div class="machine-item-name">${m.id}</div>
-          <div class="machine-item-n">N=${n} / ${muStr}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${isActive?'<span style="color:var(--amber);font-size:12px">●</span>':''}
-          ${ST.machines.length > 1 ? `<button onclick="event.stopPropagation();deleteMachine(${i})" style="background:none;border:1px solid #444;border-radius:6px;color:#f87171;font-size:11px;padding:3px 7px;cursor:pointer">削除</button>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-}
-
-function rots_for(m) {
-  let c = 0;
-  m.sessions.forEach(sess => { if(sess.base!==null) c += sess.data.length; });
-  return c;
-}
-
-function muPost_for(m) {
-  // Quick estimate of muPost for a given machine
-  const { border, priorMu, priorSigma, shogyu } = ST.cfg;
-  const nEff = 250 + shogyu * priorMu;
-  const p0 = priorMu / nEff, sp = priorSigma / nEff;
-  const kappa = Math.max(2, p0*(1-p0)/(sp*sp)-1);
-  const a0 = kappa*p0, b0 = kappa*(1-p0);
-  let S=0, Nb=0;
-  m.sessions.forEach(sess => {
-    if (sess.base===null) return;
-    sess.data.forEach((v,i) => {
-      const prev = i===0 ? sess.base : sess.data[i-1];
-      const rot = v-prev; S+=rot; Nb+=250+shogyu*rot;
-    });
-  });
-  if (S===0) return null;
-  const aP=a0+S, bP=b0+(Nb-S), pP=aP/(aP+bP);
-  return pToRot(pP, shogyu);
-}
-
-function renderKPI(s, m, hasData) {
-  if (!hasData) {
-    ['kpiMu','kpiMean','kpiInvest','kpiEVTotal'].forEach(id => document.getElementById(id).textContent = '-.-');
-    document.getElementById('kpiInvest').textContent = '-.k';
-    document.getElementById('kpiEVSub').textContent = '1k: -.- 円';
-    document.getElementById('kpiSuc').textContent = '-.-%';
-    document.getElementById('kpiSuc').style.color = '';
-    document.getElementById('kpiSucLbl').textContent = `ボーダー ${ST.cfg.border} 回転`;
-    document.getElementById('kpiHits').textContent = hitCount();
-    document.getElementById('kpiNLbl').textContent = 'N=0 サンプル';
-    return;
-  }
-  const muEl = document.getElementById('kpiMu');
-  muEl.textContent = f(s.muPost);
-  muEl.style.color = s.muPost >= s.border * 1.05 ? '#4ade80' : s.muPost >= s.border ? '#f59e0b' : '#f87171';
-  document.getElementById('kpiMean').textContent  = f(s.mean) + '回';
-  document.getElementById('kpiInvest').textContent = s.n + 'k';
-  const sc = s.pSuc>=.6?'#4ade80':s.pSuc>=.4?'#facc15':'#f87171';
-  const se = document.getElementById('kpiSuc');
-  se.textContent = fp(s.pSuc); se.style.color = sc;
-  document.getElementById('kpiSucLbl').textContent = `ボーダー ${s.border} 回転`;
-  const evTotal = s.ev * s.n;
-  const eet = document.getElementById('kpiEVTotal');
-  eet.textContent = (evTotal>=0?'+':'')+f(evTotal,0)+'円';
-  eet.style.color = evTotal>=0?'#4ade80':'#f87171';
-  document.getElementById('kpiEVSub').textContent = `1k: ${(s.ev>=0?'+':'')+f(s.ev,0)}円`;
-  document.getElementById('kpiHits').textContent  = hitCount();
-  document.getElementById('kpiNLbl').textContent  = `N=${s.n} サンプル`;
-}
-
-function renderSuccess(s) {
-  const c = s.pSuc>=.6?'#4ade80':s.pSuc>=.4?'#facc15':'#f87171';
-  const el = document.getElementById('succPct');
-  el.textContent = fp(s.pSuc); el.style.color = c;
-  document.getElementById('succLbl').textContent = `ボーダー（${s.border}回転）を超える確率（1-BetaCDF）`;
-  document.getElementById('succBar').style.cssText = `width:${Math.min(100,s.pSuc*100)}%;background:${c}`;
-  let msg = '';
-  if      (s.pSuc>=.75) msg='<strong>高確率でボーダー越え。</strong>継続推奨。';
-  else if (s.pSuc>=.55) msg='<strong>やや有利寄り。</strong>データを積んで精度向上を。';
-  else if (s.pSuc>=.40) msg='<strong>判定保留。</strong>データ不足か境界ライン付近。';
-  else if (s.pSuc>=.25) msg='<strong>やや不利寄り。</strong>移動を検討してください。';
-  else                   msg='<strong>ボーダー割れの可能性大。</strong>移動を推奨します。';
-  document.getElementById('succVerdict').innerHTML = msg;
-}
-
-function renderLK(s) {
-  const rows = [
-    {label:'< 15回転',   val:s.lk.b15,   color:'#ef4444'},
-    {label:'15〜17回転', val:s.lk.r1517, color:'#f97316'},
-    {label:'17〜19回転', val:s.lk.r1719, color:'#facc15'},
-    {label:'19〜21回転', val:s.lk.r1921, color:'#a3e635'},
-    {label:'21〜23回転', val:s.lk.r2123, color:'#4ade80'},
-    {label:'23〜25回転', val:s.lk.r2325, color:'#34d399'},
-    {label:'> 25回転',   val:s.lk.a25,   color:'#22d3ee'},
-  ];
-  document.getElementById('lkTable').innerHTML = rows.map(r=>`<tr>
-    <td class="lk-range">${r.label}</td>
-    <td class="lk-bc"><div class="lk-track"><div class="lk-fill" style="width:${r.val*100}%;background:${r.color}"></div></div></td>
-    <td class="lk-pct" style="color:${r.color}">${fp(r.val)}</td>
-  </tr>`).join('');
-}
-
-function renderBayes(s) {
-  const pct = v => (v*100).toFixed(4)+'%';
-  document.getElementById('bayesGrid').innerHTML = [
-    {l:'事前 α₀', v:f(s.a0,1), d:`p₀=${pct(s.a0/(s.a0+s.b0))}`},
-    {l:'事後 α*',  v:f(s.aPost,1), d:`β*=${f(s.bPost,1)}`},
-    {l:'事前 μ₀', v:f(s.priorMu)+'回', d:'ユーザー設定'},
-    {l:'事後 μ*',  v:f(s.muPost)+'回', d:`SD≈${f(s.sdRot,2)}回`},
-  ].map(c=>`<div class="bayes-cell"><div class="bayes-lbl">${c.l}</div><div class="bayes-val">${c.v}</div><div class="bayes-desc">${c.d}</div></div>`).join('');
-}
-
-function renderCI(s) {
-  document.getElementById('ciCard').innerHTML = `
-    <div class="ci-row">
-      <div class="ci-type"><strong>Beta ${s.ci}% 信用区間</strong>exact Beta quantile（正規近似なし）</div>
-      <div class="ci-range">${f(s.ciLo)} 〜 ${f(s.ciHi)}</div>
-    </div>
-    <div class="ci-row">
-      <div class="ci-type"><strong>区間幅</strong>± ${f((s.ciHi-s.ciLo)/2,2)} 回転</div>
-      <div class="ci-range" style="color:var(--sub)">${s.ci}% 信頼</div>
-    </div>`;
-}
-
-function renderVar(s) {
-  if (s.n < 2) {
-    document.getElementById('varCard').innerHTML = '<div style="padding:12px;color:var(--sub);font-size:12px">N≥2で分散チェックが有効になります</div>';
-    return;
-  }
-  const desc = {
-    '非常に安定':'回転数のばらつきが極めて小さく、台の挙動が安定しています。',
-    '安定':'標準的な範囲内のばらつきです。平均値は十分に信頼できます。',
-    'やや不安定':'ばらつきがやや大きいです。数回計測して確認を推奨します。',
-    '不安定':'回転数の変動が大きく、台の状態が不安定です。',
-  }[s.vj.label];
-  document.getElementById('varCard').innerHTML = `<div class="var-wrap">
-    <div class="var-top">
-      <div class="var-metrics">
-        <div class="vm"><div class="v-l">分散 s²</div><div class="v-v">${f(s.sVar,2)}</div></div>
-        <div class="vm"><div class="v-l">標準偏差</div><div class="v-v">±${f(s.sSD,2)}</div></div>
-        <div class="vm"><div class="v-l">変動係数</div><div class="v-v">${(s.cv*100).toFixed(1)}%</div></div>
-      </div>
-      <div class="vbadge" style="color:${s.vj.color};background:${s.vj.bg}">${s.vj.label}</div>
-    </div>
-    <div class="var-desc">${desc}</div>
-  </div>`;
-}
-
-// Left panel: oldest at bottom (flex-direction:column-reverse → append oldest first)
-function renderHistPanel(s) {
-  const panel = document.getElementById('histPanel');
-  const events = allEvents();
-  panel.querySelectorAll('.hp-item,.hp-hit,.hp-base').forEach(el => el.remove());
-  const hasAnyBase = mach().sessions.some(s => s.base !== null);
-  const isEmpty = !hasAnyBase;
-  document.getElementById('hpEmpty').classList.toggle('hidden', !isEmpty);
-  if (isEmpty) return;
-
-  // Newest first → append in reverse order so newest is at top
-  [...events].reverse().forEach(ev => {
-    const div = document.createElement('div');
-    if (ev.type === 'base') {
-      div.className = 'hp-base';
-      div.innerHTML = `<div class="hp-base-lbl">開始</div><div class="hp-base-val" onclick="editBase(${ev.si})" style="cursor:pointer;text-decoration:underline dotted">${ev.val}</div>`;
-    } else if (ev.type === 'hit') {
-      div.className = 'hp-hit';
-      div.innerHTML = `<div class="hp-hit-icon">🎯</div><div class="hp-hit-label">当たり</div>`;
-    } else {
-      // data point
-      const dev = s ? ev.rot - s.muPost : null;
-      const devStr = dev===null ? '' : (dev>=0 ? '+'+f(dev,1) : f(dev,1));
-      const devColor = dev===null?'var(--sub)':dev>=0?'#4ade80':'#f87171';
-      div.className = 'hp-item';
-      div.style.cssText = 'position:relative;cursor:pointer';
-      div.innerHTML = `<div class="hp-num">#${ev.idx}</div><div class="hp-cumul" onclick="editData(${ev.si},${ev.di})" style="cursor:pointer;text-decoration:underline dotted">${ev.cumul}</div><div class="hp-rot-sm">${ev.rot}回</div><div class="hp-dev" style="color:${devColor}">${devStr}</div><button onclick="event.stopPropagation();deleteDataPoint(${ev.si},${ev.di})" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:#f87171;border:none;border-radius:4px;color:#000;font-size:9px;font-weight:700;padding:3px 6px;cursor:pointer" class="del-dp-btn">削除</button>`;
-      div.addEventListener('click', function() {
-        const btn = this.querySelector('.del-dp-btn');
-        const isShown = btn.style.display !== 'none';
-        document.querySelectorAll('.del-dp-btn').forEach(b => b.style.display='none');
-        btn.style.display = isShown ? 'none' : 'block';
-      });
-    }
+function renderHistPanel(s){
+  const panel=document.getElementById('histPanel');const events=allEvents();
+  panel.querySelectorAll('.hp-item,.hp-hit,.hp-base').forEach(el=>el.remove());
+  const hasAnyBase=mach().sessions.some(s=>s.base!==null),isEmpty=!hasAnyBase;
+  document.getElementById('hpEmpty').classList.toggle('hidden',!isEmpty);
+  if(isEmpty)return;
+  [...events].reverse().forEach(ev=>{
+    const div=document.createElement('div');
+    if(ev.type==='base'){div.className='hp-base';div.innerHTML=`<div class="hp-base-lbl">開始</div><div class="hp-base-val" onclick="editBase(${ev.si})" style="cursor:pointer;text-decoration:underline dotted">${ev.val}</div>`;}
+    else if(ev.type==='hit'){div.className='hp-hit';div.innerHTML=`<div class="hp-hit-icon">🎯</div><div class="hp-hit-label">当たり</div>`;}
+    else{const dev=s?ev.rot-s.muPost:null;const devStr=dev===null?'':(dev>=0?'+'+f(dev,1):f(dev,1));const devColor=dev===null?'var(--sub)':dev>=0?'#4ade80':'#f87171';div.className='hp-item';div.style.cssText='position:relative;cursor:pointer';div.innerHTML=`<div class="hp-num">#${ev.idx}</div><div class="hp-cumul" onclick="editData(${ev.si},${ev.di})" style="cursor:pointer;text-decoration:underline dotted">${ev.cumul}</div><div class="hp-rot-sm">${ev.rot}回</div><div class="hp-dev" style="color:${devColor}">${devStr}</div><button onclick="event.stopPropagation();deleteDataPoint(${ev.si},${ev.di})" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:#f87171;border:none;border-radius:4px;color:#000;font-size:9px;font-weight:700;padding:3px 6px;cursor:pointer" class="del-dp-btn">削除</button>`;div.addEventListener('click',function(){const btn=this.querySelector('.del-dp-btn');const isShown=btn.style.display!=='none';document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');btn.style.display=isShown?'none':'block';});}
     panel.appendChild(div);
   });
-    // Scroll to top so newest entry is visible
-  panel.scrollTop = 0;
+  panel.scrollTop=0;
 }
 
-// ══════════════════════════════════════════════════════
-// CHARTS
-// ══════════════════════════════════════════════════════
-const CO = { responsive:true, animation:{duration:250}, plugins:{legend:{display:false}} };
-const GRID = {color:'#1e1e1e'}, TICK = {color:'#707070',font:{family:'IBM Plex Mono',size:10}};
+const CO={responsive:true,animation:{duration:250},plugins:{legend:{display:false}}};
+const GRID={color:'#1e1e1e'},TICK={color:'#707070',font:{family:'IBM Plex Mono',size:10}};
+function killCharts(){Object.values(charts).forEach(c=>{try{c&&c.destroy()}catch{}});charts={};}
+function renderActiveChart(s){if(ST.activeTab===0)renderDistBarChart(s);else if(ST.activeTab===1)renderHistChartFn(s);else renderLikeChart(s);}
 
-function killCharts() { Object.values(charts).forEach(c=>{try{c&&c.destroy()}catch{}}); charts={}; }
-
-function renderActiveChart(s) {
-  if      (ST.activeTab===0) renderDistBarChart(s);
-  else if (ST.activeTab===1) renderHistChartFn(s);
-  else                       renderLikeChart(s);
+function renderDistBarChart(s){
+  const ctx=document.getElementById('distChart').getContext('2d');if(charts.dist){charts.dist.destroy();charts.dist=null;}
+  const mu=s.muPost,spread=Math.max(3,s.sdRot*3.5);const startC=Math.round((mu-spread)*2)/2,endC=Math.round((mu+spread)*2)/2;
+  const labels=[],allData=[],ciData=[];const ciLo=s.ciLo,ciHi=s.ciHi;
+  for(let c=startC;c<=endC+0.01;c+=0.5){const rLo=Math.max(0.01,c-0.25),rHi=c+0.25;const prob=Math.max(0,betaCDF(rotToP(rHi,s.shogyu),s.aPost,s.bPost)-betaCDF(rotToP(rLo,s.shogyu),s.aPost,s.bPost));const inCI=!isNaN(ciLo)&&!isNaN(ciHi)&&c>=ciLo&&c<=ciHi;labels.push(c.toFixed(1));allData.push(inCI?0:prob);ciData.push(inCI?prob:0);}
+  charts.dist=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'out',data:allData,backgroundColor:'rgba(245,158,11,.12)',borderColor:'rgba(245,158,11,.3)',borderWidth:1,borderRadius:2,stack:'a'},{label:'in',data:ciData,backgroundColor:'rgba(245,158,11,.85)',borderColor:'rgba(245,158,11,.95)',borderWidth:1,borderRadius:2,stack:'a'}]},options:{...CO,scales:{x:{ticks:TICK,grid:GRID,stacked:true},y:{ticks:{display:false},grid:GRID,stacked:true}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.raw*100).toFixed(1)+'%'}}}}});
 }
 
-function renderDistBarChart(s) {
-  const ctx = document.getElementById('distChart').getContext('2d');
-  if (charts.dist) { charts.dist.destroy(); charts.dist = null; }
-  const mu = s.muPost, spread = Math.max(3, s.sdRot * 3.5);
-  const startC = Math.round((mu - spread) * 2) / 2;
-  const endC   = Math.round((mu + spread) * 2) / 2;
-  const labels=[], allData=[], ciData=[];
-  const ciLo = s.ciLo, ciHi = s.ciHi;
-  for (let c = startC; c <= endC + 0.01; c += 0.5) {
-    const rLo = Math.max(0.01, c - 0.25), rHi = c + 0.25;
-    const prob = Math.max(0, betaCDF(rotToP(rHi, s.shogyu), s.aPost, s.bPost) - betaCDF(rotToP(rLo, s.shogyu), s.aPost, s.bPost));
-    const inCI = !isNaN(ciLo) && !isNaN(ciHi) && c >= ciLo && c <= ciHi;
-    labels.push(c.toFixed(1));
-    allData.push(inCI ? 0 : prob);
-    ciData.push(inCI ? prob : 0);
-  }
-  charts.dist = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [
-      { label:'out', data: allData, backgroundColor: 'rgba(245,158,11,.12)', borderColor: 'rgba(245,158,11,.3)', borderWidth: 1, borderRadius: 2, stack: 'a' },
-      { label:'in',  data: ciData,  backgroundColor: 'rgba(245,158,11,.85)', borderColor: 'rgba(245,158,11,.95)', borderWidth: 1, borderRadius: 2, stack: 'a' },
-    ]},
-    options: { ...CO,
-      scales: {
-        x: { ticks: TICK, grid: GRID, stacked: true },
-        y: { ticks: {display:false}, grid: GRID, stacked: true }
-      },
-      plugins: { legend:{display:false}, tooltip:{callbacks:{label: ctx => (ctx.raw*100).toFixed(1)+'%'}} }
-    }
-  });
+function renderHistChartFn(s){
+  const r=rots(),ctx=document.getElementById('histChart').getContext('2d');if(charts.hist)charts.hist.destroy();
+  const labels=r.map((_,i)=>`#${i+1}`);const runAvg=r.map((_,i)=>r.slice(0,i+1).reduce((a,b)=>a+b,0)/(i+1));
+  charts.hist=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'回転数/1k',data:r,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',pointBackgroundColor:'#f59e0b',pointRadius:4,tension:.2,fill:true},{label:'累積平均',data:runAvg,borderColor:'#22d3ee',borderDash:[5,3],pointRadius:0,tension:.3,borderWidth:1.5},{label:'ボーダー',data:r.map(()=>s.border),borderColor:'#f87171',borderDash:[3,3],pointRadius:0,borderWidth:1}]},options:{...CO,scales:{x:{ticks:TICK,grid:GRID},y:{ticks:TICK,grid:GRID}},plugins:{legend:{display:true,labels:{color:'#808080',font:{family:'IBM Plex Mono',size:10},boxWidth:12,padding:10}}}}});
 }
 
-function renderHistChartFn(s) {
-  const r = rots(), ctx = document.getElementById('histChart').getContext('2d');
-  if (charts.hist) charts.hist.destroy();
-  const labels = r.map((_,i)=>`#${i+1}`);
-  const runAvg = r.map((_,i)=>r.slice(0,i+1).reduce((a,b)=>a+b,0)/(i+1));
-  charts.hist = new Chart(ctx, {type:'line', data:{labels, datasets:[
-    {label:'回転数/1k', data:r, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,.08)', pointBackgroundColor:'#f59e0b', pointRadius:4, tension:.2, fill:true},
-    {label:'累積平均',  data:runAvg, borderColor:'#22d3ee', borderDash:[5,3], pointRadius:0, tension:.3, borderWidth:1.5},
-    {label:'ボーダー',  data:r.map(()=>s.border), borderColor:'#f87171', borderDash:[3,3], pointRadius:0, borderWidth:1},
-  ]}, options:{...CO, scales:{x:{ticks:TICK,grid:GRID}, y:{ticks:TICK,grid:GRID}},
-    plugins:{legend:{display:true, labels:{color:'#808080',font:{family:'IBM Plex Mono',size:10},boxWidth:12,padding:10}}}}});
+function renderLikeChart(s){
+  const ctx=document.getElementById('likeChart').getContext('2d');if(charts.like)charts.like.destroy();
+  const vals=[s.lk.b15,s.lk.r1517,s.lk.r1719,s.lk.r1921,s.lk.r2123,s.lk.r2325,s.lk.a25];
+  const colors=['rgba(239,68,68,.75)','rgba(249,115,22,.75)','rgba(250,204,21,.75)','rgba(163,230,53,.75)','rgba(74,222,128,.75)','rgba(52,211,153,.75)','rgba(34,211,238,.75)'];
+  const borders=['#ef4444','#f97316','#facc15','#a3e635','#4ade80','#34d399','#22d3ee'];
+  charts.like=new Chart(ctx,{type:'bar',data:{labels:['<15','15-17','17-19','19-21','21-23','23-25','>25'],datasets:[{data:vals.map(v=>v*100),backgroundColor:colors,borderColor:borders,borderWidth:1,borderRadius:4}]},options:{...CO,scales:{x:{ticks:{color:'#808080',font:{family:'IBM Plex Mono',size:10}},grid:{display:false}},y:{ticks:{...TICK,callback:v=>v.toFixed(0)+'%'},grid:GRID,max:100}}}});
 }
 
-function renderLikeChart(s) {
-  const ctx = document.getElementById('likeChart').getContext('2d');
-  if (charts.like) charts.like.destroy();
-  const vals = [s.lk.b15,s.lk.r1517,s.lk.r1719,s.lk.r1921,s.lk.r2123,s.lk.r2325,s.lk.a25];
-  const colors = ['rgba(239,68,68,.75)','rgba(249,115,22,.75)','rgba(250,204,21,.75)','rgba(163,230,53,.75)','rgba(74,222,128,.75)','rgba(52,211,153,.75)','rgba(34,211,238,.75)'];
-  const borders = ['#ef4444','#f97316','#facc15','#a3e635','#4ade80','#34d399','#22d3ee'];
-  charts.like = new Chart(ctx, {type:'bar', data:{
-    labels:['<15','15-17','17-19','19-21','21-23','23-25','>25'],
-    datasets:[{data:vals.map(v=>v*100), backgroundColor:colors, borderColor:borders, borderWidth:1, borderRadius:4}]
-  }, options:{...CO, scales:{
-    x:{ticks:{color:'#808080',font:{family:'IBM Plex Mono',size:10}}, grid:{display:false}},
-    y:{ticks:{...TICK,callback:v=>v.toFixed(0)+'%'}, grid:GRID, max:100}
-  }}});
+function switchTab(i){ST.activeTab=i;save();document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));document.querySelectorAll('.cwrap').forEach((w,j)=>w.classList.toggle('on',j===i));const s=calcStats();if(s)renderActiveChart(s);}
+
+function addEntry(){
+  const inp=document.getElementById('rotIn');const v=parseInt(inp.value);
+  if(isNaN(v)||v<0){inp.style.borderColor='#f87171';setTimeout(()=>inp.style.borderColor='',800);return;}
+  const cur=curSess();
+  if(cur.base===null){cur.base=v;}
+  else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;if(v<=last){showAlert(`前回の値（${last}）より大きい値を入力してください`);return;}cur.data.push(v);}
+  save();inp.value='';inp.focus();killCharts();render();
 }
 
-function switchTab(i) {
-  ST.activeTab = i; save();
-  document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));
-  document.querySelectorAll('.cwrap').forEach((w,j)=>w.classList.toggle('on',j===i));
-  const s = calcStats(); if(s) renderActiveChart(s);
-}
+function addHit(){const cur=curSess();if(cur.base===null||cur.data.length===0){showAlert('回転数データを少なくとも1件入力してください');return;}cur.hit=true;mach().sessions.push({base:null,data:[],hit:false});save();render();}
 
-// ══════════════════════════════════════════════════════
-// ACTIONS
-// ══════════════════════════════════════════════════════
-function addEntry() {
-  const inp = document.getElementById('rotIn');
-  const v   = parseInt(inp.value);
-  if (isNaN(v) || v < 0) {
-    inp.style.borderColor = '#f87171';
-    setTimeout(() => inp.style.borderColor = '', 800);
-    return;
-  }
-  const cur = curSess();
-  if (cur.base === null) {
-    // First entry = baseline
-    cur.base = v;
-  } else {
-    // Subsequent = data point (must be > last)
-    const last = cur.data.length > 0 ? cur.data[cur.data.length-1] : cur.base;
-    if (v <= last) {
-      showAlert(`前回の値（${last}）より大きい値を入力してください`);
-      return;
-    }
-    cur.data.push(v);
-  }
-  save(); inp.value = ''; inp.focus();
-  killCharts(); render();
+function _cmodal(msg,withInput,defVal,cb){
+  const el=document.getElementById('cmodal'),inp=document.getElementById('cmodal-inp');
+  document.getElementById('cmodal-msg').innerHTML=msg;inp.style.display=withInput?'block':'none';
+  if(withInput){inp.value=defVal!==undefined?defVal:'';inp.type='number';}
+  el.style.display='flex';
+  const ok=()=>{el.style.display='none';cb(withInput?inp.value:true);};
+  const cancel=()=>{el.style.display='none';document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');cb(null);};
+  document.getElementById('cmodal-ok').onclick=ok;document.getElementById('cmodal-cancel').onclick=cancel;
+  if(withInput){setTimeout(()=>inp.focus(),100);inp.onkeydown=e=>{if(e.key==='Enter')ok();};}
 }
+function showAlert(msg){_cmodal(msg,false,undefined,()=>{});document.getElementById('cmodal-cancel').style.display='none';setTimeout(()=>document.getElementById('cmodal-cancel').style.display='',50);}
+function showConfirm(msg,cb){_cmodal(msg,false,undefined,v=>cb(v===true));}
+function showPrompt(msg,def,cb){_cmodal(msg,true,def,cb);}
 
-function addHit() {
-  const cur = curSess();
-  // Should be enabled only when conditions met, but double-check
-  if (cur.base === null || cur.data.length === 0) {
-    showAlert('回転数データを少なくとも1件入力してください');
-    return;
-  }
-  cur.hit = true;
-  // Start new session (next input will be new baseline)
-  mach().sessions.push({ base: null, data: [], hit: false });
-  save(); render();
-}
+function undoHit(){const sess=mach().sessions;if(sess.length<2)return;const prev=sess[sess.length-2],cur=sess[sess.length-1];if(!prev.hit||cur.base!==null||cur.data.length>0)return;showConfirm('直前の当たりを取り消しますか？',ok=>{if(!ok)return;prev.hit=false;sess.pop();save();killCharts();render();});}
+function editBase(si){const sess=mach().sessions[si],next=sess.data.length>0?sess.data[0]:null;const msg=`開始回転数を入力${next!==null?'<br><small>(次の値 '+next+' より小さくしてください)</small>':''}`;showPrompt(msg,sess.base,raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値にしてください`);return;}sess.base=v;save();killCharts();render();});}
+function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:sess.data[di-1],next=di<sess.data.length-1?sess.data[di+1]:null;const msg=`累計回転数を入力<br><small>${prev}より大きく${next!==null?next+'より小さい値を入力':''}</small>`;showPrompt(msg,sess.data[di],raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)){showAlert('数値を入力してください');return;}if(v<=prev){showAlert(`前の値（${prev}）より大きい値を入力してください`);return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}sess.data[di]=v;save();killCharts();render();});}
+function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;const sess=mach().sessions[si];sess.data.splice(di,1);save();killCharts();render();});}
 
-// ══ CUSTOM MODAL (iOS PWA safe) ══
-function _cmodal(msg, withInput, defVal, cb) {
-  const el  = document.getElementById('cmodal');
-  const inp = document.getElementById('cmodal-inp');
-  document.getElementById('cmodal-msg').innerHTML = msg;
-  inp.style.display = withInput ? 'block' : 'none';
-  if (withInput) { inp.value = defVal !== undefined ? defVal : ''; inp.type='number'; }
-  el.style.display = 'flex';
-  const ok = () => { el.style.display='none'; cb(withInput ? inp.value : true); };
-  const cancel = () => { 
-    el.style.display='none';
-    document.querySelectorAll('.del-dp-btn').forEach(b => b.style.display='none');
-    cb(null);
-  };
-  document.getElementById('cmodal-ok').onclick     = ok;
-  document.getElementById('cmodal-cancel').onclick = cancel;
-  if (withInput) { setTimeout(()=>inp.focus(),100); inp.onkeydown = e=>{ if(e.key==='Enter') ok(); }; }
-}
-function showAlert(msg)           { _cmodal(msg, false, undefined, ()=>{}); document.getElementById('cmodal-cancel').style.display='none'; setTimeout(()=>document.getElementById('cmodal-cancel').style.display='',50); }
-function showConfirm(msg, cb)     { _cmodal(msg, false, undefined, v=>cb(v===true)); }
-function showPrompt(msg, def, cb) { _cmodal(msg, true, def, cb); }
+function openExport(){const m=mach();let lines=[];m.sessions.forEach(sess=>{if(sess.base===null)return;lines.push(String(sess.base));sess.data.forEach(v=>lines.push(String(v)));if(sess.hit)lines.push('🎯');});document.getElementById('exportText').value=lines.join('\n');document.getElementById('export-modal').style.display='flex';}
+function closeExport(){document.getElementById('export-modal').style.display='none';}
+function copyExport(){const txt=document.getElementById('exportText');txt.select();try{navigator.clipboard.writeText(txt.value).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='✓ コピー完了';setTimeout(()=>btn.textContent='コピー',2000);});}catch{document.execCommand('copy');const btn=document.getElementById('copyBtn');btn.textContent='✓ コピー完了';setTimeout(()=>btn.textContent='コピー',2000);}}
+function showBulkInput(){document.getElementById('bulk-inp').value='';document.getElementById('bulk-modal').style.display='flex';setTimeout(()=>document.getElementById('bulk-inp').focus(),100);}
+function closeBulk(){document.getElementById('bulk-modal').style.display='none';}
+function addBulk(){const raw=document.getElementById('bulk-inp').value;const vals=raw.split(/[,、。・\.\s\u3000\uff0c\uff0e]+/).map(s=>parseInt(s.trim())).filter(v=>!isNaN(v)&&v>0);if(!vals.length){closeBulk();return;}const cur=curSess();let errors=[];vals.forEach(v=>{if(cur.base===null){cur.base=v;}else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;if(v<=last){errors.push(`${v}（前の値${last}以下のためスキップ）`);return;}cur.data.push(v);}});save();killCharts();closeBulk();render();if(errors.length)showAlert('スキップされた値:\n'+errors.join('\n'));}
 
-function undoHit() {
-  const sess = mach().sessions;
-  if (sess.length < 2) return;
-  const prev = sess[sess.length - 2];
-  const cur  = sess[sess.length - 1];
-  if (!prev.hit || cur.base !== null || cur.data.length > 0) return;
-  showConfirm('直前の当たりを取り消しますか？', ok => {
-    if (!ok) return;
-    prev.hit = false;
-    sess.pop();
-    save(); killCharts(); render();
-  });
-}
+let _longPressTimer=null;
+function startLongPress(i){_longPressTimer=setTimeout(()=>renameMachine(i),600);}
+function cancelLongPress(){clearTimeout(_longPressTimer);}
+function renameMachine(i){showPrompt(`台の名前を入力`,ST.machines[i].id,raw=>{if(raw===null||raw.trim()==='')return;ST.machines[i].id=raw.trim();save();render();});}
+function deleteMachine(i){showConfirm(`「${ST.machines[i].id}」を削除しますか？`,ok=>{if(!ok)return;ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
+function addMachine(){const num=ST.machines.length+1;ST.machines.push(defMachine(`台${String(num).padStart(4,'0')}`));ST.current=ST.machines.length-1;save();killCharts();closeDrawer();render();}
+function switchMachine(i){ST.current=i;save();killCharts();closeDrawer();render();}
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('show');}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('show');}
 
-function editBase(si) {
-  const sess = mach().sessions[si];
-  const next = sess.data.length > 0 ? sess.data[0] : null;
-  const msg  = `開始回転数を入力${next!==null?'<br><small>(次の値 '+next+' より小さくしてください)</small>':''}`;
-  showPrompt(msg, sess.base, raw => {
-    if (raw === null || raw === '') return;
-    const v = parseInt(raw);
-    if (isNaN(v) || v < 0) { showAlert('正の整数を入力してください'); return; }
-    if (next !== null && v >= next) { showAlert(`次の値（${next}）より小さい値にしてください`); return; }
-    sess.base = v;
-    save(); killCharts(); render();
-  });
-}
+function onCI(){const v=parseInt(document.getElementById('ciSlider').value);ST.ciLevel=v;document.getElementById('ciPct').textContent=v+'%';save();const s=calcStats();if(s){renderCI(s);renderSuccess(s);renderKPI(s,mach(),true);renderDistBarChart(s);}}
+function toggleCollapse(){ST.colOpen=!ST.colOpen;save();document.getElementById('colSection').classList.toggle('open',ST.colOpen);document.getElementById('colArrow').classList.toggle('open',ST.colOpen);}
+function openSettings(){const{border,priorMu,priorSigma,shogyu}=ST.cfg;document.getElementById('setBorder').value=border;document.getElementById('setPriorMu').value=priorMu;document.getElementById('setPriorSigma').value=priorSigma;document.getElementById('setShogyu').value=shogyu;document.getElementById('settings-modal').classList.add('open');}
+function closeSettings(){const b=parseFloat(document.getElementById('setBorder').value),mu=parseFloat(document.getElementById('setPriorMu').value),sg=parseFloat(document.getElementById('setPriorSigma').value),sh=parseInt(document.getElementById('setShogyu').value);if(!isNaN(b)&&b>0)ST.cfg.border=b;if(!isNaN(mu)&&mu>0)ST.cfg.priorMu=mu;if(!isNaN(sg)&&sg>0)ST.cfg.priorSigma=sg;if(!isNaN(sh)&&sh>=0)ST.cfg.shogyu=sh;save();document.getElementById('settings-modal').classList.remove('open');killCharts();render();}
+function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
 
-function editData(si, di) {
-  const sess = mach().sessions[si];
-  const prev = di === 0 ? sess.base : sess.data[di - 1];
-  const next = di < sess.data.length - 1 ? sess.data[di + 1] : null;
-  const msg  = `累計回転数を入力<br><small>${prev}より大きく${next!==null?next+'より小さい値を入力':''}</small>`;
-  showPrompt(msg, sess.data[di], raw => {
-    if (raw === null || raw === '') return;
-    const v = parseInt(raw);
-    if (isNaN(v)) { showAlert('数値を入力してください'); return; }
-    if (v <= prev) { showAlert(`前の値（${prev}）より大きい値を入力してください`); return; }
-    if (next !== null && v >= next) { showAlert(`次の値（${next}）より小さい値を入力してください`); return; }
-    sess.data[di] = v;
-    save(); killCharts(); render();
-  });
-}
+document.getElementById('rotIn').addEventListener('keydown',e=>{if(e.key==='Enter')addEntry();});
+document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
+document.getElementById('ciSlider').value=ST.ciLevel;
+document.getElementById('ciPct').textContent=ST.ciLevel+'%';
+document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===ST.activeTab));
+document.querySelectorAll('.cwrap').forEach((w,j)=>w.classList.toggle('on',j===ST.activeTab));
+if(ST.colOpen){document.getElementById('colSection').classList.add('open');document.getElementById('colArrow').classList.add('open');}
 
-function deleteDataPoint(si, di) {
-  document.querySelectorAll('.del-dp-btn').forEach(b => b.style.display='none');
-  showConfirm('このデータを削除しますか？', ok => {
-    document.querySelectorAll('.del-dp-btn').forEach(b => b.style.display='none');
-    if (!ok) return;
-    const sess = mach().sessions[si];
-    sess.data.splice(di, 1);
-    save(); killCharts(); render();
-  });
-}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-function openExport() {
-  const m = mach();
-  let lines = [];
-  m.sessions.forEach(sess => {
-    if (sess.base === null) return;
-    lines.push(String(sess.base));
-    sess.data.forEach(v => lines.push(String(v)));
-    if (sess.hit) lines.push('🎯');
-  });
-  document.getElementById('exportText').value = lines.join('\n');
-  document.getElementById('export-modal').style.display = 'flex';
-}
-function closeExport() { document.getElementById('export-modal').style.display = 'none'; }
-function copyExport() {
-  const txt = document.getElementById('exportText');
-  txt.select();
-  try {
-    navigator.clipboard.writeText(txt.value).then(() => {
-      const btn = document.getElementById('copyBtn');
-      btn.textContent = '✓ コピー完了';
-      setTimeout(() => btn.textContent = 'コピー', 2000);
-    });
-  } catch {
-    document.execCommand('copy');
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = '✓ コピー完了';
-    setTimeout(() => btn.textContent = 'コピー', 2000);
-  }
-}
-
-function showBulkInput() {
-  document.getElementById('bulk-inp').value = '';
-  document.getElementById('bulk-modal').style.display = 'flex';
-  setTimeout(() => document.getElementById('bulk-inp').focus(), 100);
-}
-function closeBulk() { document.getElementById('bulk-modal').style.display = 'none'; }
-function addBulk() {
-  const raw = document.getElementById('bulk-inp').value;
-  const vals = raw.split(/[,、。・\.\s\u3000\uff0c\uff0e]+/).map(s => parseInt(s.trim())).filter(v => !isNaN(v) && v > 0);
-  if (!vals.length) { closeBulk(); return; }
-  const cur = curSess();
-  let errors = [];
-  vals.forEach(v => {
-    if (cur.base === null) {
-      cur.base = v;
-    } else {
-      const last = cur.data.length > 0 ? cur.data[cur.data.length-1] : cur.base;
-      if (v <= last) { errors.push(`${v}（前の値${last}以下のためスキップ）`); return; }
-      cur.data.push(v);
-    }
-  });
-  save(); killCharts(); closeBulk(); render();
-  if (errors.length) showAlert('スキップされた値:\n' + errors.join('\n'));
-}
-
-let _longPressTimer = null;
-function startLongPress(i) { _longPressTimer = setTimeout(() => renameMachine(i), 600); }
-function cancelLongPress() { clearTimeout(_longPressTimer); }
-
-function renameMachine(i) {
-  showPrompt(`台の名前を入力`, ST.machines[i].id, raw => {
-    if (raw === null || raw.trim() === '') return;
-    ST.machines[i].id = raw.trim();
-    save(); render();
-  });
-}
-
-function deleteMachine(i) {
-  showConfirm(`「${ST.machines[i].id}」を削除しますか？`, ok => {
-    if (!ok) return;
-    ST.machines.splice(i, 1);
-    if (ST.current >= ST.machines.length) ST.current = ST.machines.length - 1;
-    save(); killCharts(); render();
-  });
-}
-
-function addMachine() {
-  const num = ST.machines.length + 1;
-  ST.machines.push(defMachine(`台${String(num).padStart(4,'0')}`));
-  ST.current = ST.machines.length - 1;
-  save(); killCharts(); closeDrawer(); render();
-}
-
-function switchMachine(i) {
-  ST.current = i; save(); killCharts(); closeDrawer(); render();
-}
-
-function openDrawer()  { document.getElementById('drawer').classList.add('open'); document.getElementById('drawer-overlay').classList.add('show'); }
-function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('drawer-overlay').classList.remove('show'); }
-
-function onCI() {
-  const v = parseInt(document.getElementById('ciSlider').value);
-  ST.ciLevel = v;
-  document.getElementById('ciPct').textContent = v + '%';
-  save();
-  const s = calcStats();
-  if (s) { renderCI(s); renderSuccess(s); renderKPI(s, mach(), true); renderDistBarChart(s); }
-}
-
-function toggleCollapse() {
-  ST.colOpen = !ST.colOpen; save();
-  document.getElementById('colSection').classList.toggle('open', ST.colOpen);
-  document.getElementById('colArrow').classList.toggle('open', ST.colOpen);
-}
-
-function openSettings() {
-  const { border, priorMu, priorSigma, shogyu } = ST.cfg;
-  document.getElementById('setBorder').value     = border;
-  document.getElementById('setPriorMu').value    = priorMu;
-  document.getElementById('setPriorSigma').value = priorSigma;
-  document.getElementById('setShogyu').value     = shogyu;
-  document.getElementById('settings-modal').classList.add('open');
-}
-function closeSettings() {
-  const b  = parseFloat(document.getElementById('setBorder').value);
-  const mu = parseFloat(document.getElementById('setPriorMu').value);
-  const sg = parseFloat(document.getElementById('setPriorSigma').value);
-  const sh = parseInt(document.getElementById('setShogyu').value);
-  if (!isNaN(b)  && b  > 0) ST.cfg.border     = b;
-  if (!isNaN(mu) && mu > 0) ST.cfg.priorMu    = mu;
-  if (!isNaN(sg) && sg > 0) ST.cfg.priorSigma = sg;
-  if (!isNaN(sh) && sh >= 0) ST.cfg.shogyu    = sh;
-  save();
-  document.getElementById('settings-modal').classList.remove('open');
-  killCharts(); render();
-}
-function confirmReset() {
-  showConfirm(`${mach().id}のデータを全て削除しますか？`, ok => {
-    if (!ok) return;
-    mach().sessions = [{ base: null, data: [], hit: false }];
-    save(); closeSettings(); killCharts(); render();
-  });
-}
-
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
-document.getElementById('rotIn').addEventListener('keydown', e => { if(e.key==='Enter') addEntry(); });
-document.getElementById('settings-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSettings(); });
-
-document.getElementById('ciSlider').value        = ST.ciLevel;
-document.getElementById('ciPct').textContent      = ST.ciLevel + '%';
-document.querySelectorAll('.ctab').forEach((t,j) => t.classList.toggle('on', j===ST.activeTab));
-document.querySelectorAll('.cwrap').forEach((w,j) => w.classList.toggle('on', j===ST.activeTab));
-if (ST.colOpen) {
-  document.getElementById('colSection').classList.add('open');
-  document.getElementById('colArrow').classList.add('open');
-}
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-
-// Hide delete buttons when tapping outside history panel
-document.addEventListener('click', e => {
-  if (!e.target.closest('.hp-item') && !e.target.closest('#cmodal')) {
-    document.querySelectorAll('.del-dp-btn').forEach(b => b.style.display='none');
-  }
-});
+document.addEventListener('click',e=>{if(!e.target.closest('.hp-item')&&!e.target.closest('#cmodal')){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');}});
 
 render();
 
-// ── HEADER HEIGHT FIX ──────────────────────────────────
-// CSSのenv()がPWAモードで効かないケースをJSで確実に補正する
-function fixHeaderOffset() {
-  const hdr = document.querySelector('header');
-  const app = document.getElementById('app');
-  const histPanel = document.getElementById('histPanel');
-  if (!hdr || !app) return;
-  const h = hdr.getBoundingClientRect().height;
-  app.style.paddingTop = h + 'px';
-  if (histPanel) histPanel.style.top = h + 'px';
-}
-window.addEventListener('load', fixHeaderOffset);
-window.addEventListener('resize', fixHeaderOffset);
-document.addEventListener('DOMContentLoaded', fixHeaderOffset);
+function fixHeaderOffset(){const hdr=document.querySelector('header'),app=document.getElementById('app'),histPanel=document.getElementById('histPanel');if(!hdr||!app)return;const h=hdr.getBoundingClientRect().height;app.style.paddingTop=h+'px';if(histPanel)histPanel.style.top=h+'px';}
+window.addEventListener('load',fixHeaderOffset);
+window.addEventListener('resize',fixHeaderOffset);
+document.addEventListener('DOMContentLoaded',fixHeaderOffset);
 </script>
 
 </body>
