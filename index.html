@@ -45,8 +45,10 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .drawer-close{background:none;border:none;color:var(--sub);font-size:18px;cursor:pointer}
 .new-machine-btn{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--amber);font-family:var(--mono);font-size:12px;padding:12px 16px;cursor:pointer;text-align:left}
 .new-machine-btn:active{background:rgba(245,158,11,.08)}
-.machine-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
-.machine-item.active{background:rgba(245,158,11,.1);border-left:2px solid var(--amber)}
+.mi-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.mi-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;transition:transform .2s,background .15s;will-change:transform;background:transparent;user-select:none;-webkit-user-select:none}
+.mi-inner.active{background:rgba(245,158,11,.1);border-left:2px solid var(--amber)}
+.mi-del-reveal{position:absolute;right:0;top:0;bottom:0;width:72px;background:#f87171;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;color:#000;flex-shrink:0}
 .machine-item-name{font-family:var(--mono);font-size:13px;font-weight:600}
 .machine-item-n{font-family:var(--mono);font-size:10px;color:var(--sub)}
 .hist-panel{width:var(--side);flex-shrink:0;position:fixed;top:calc(var(--hdr) + max(48px,env(safe-area-inset-top)));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
@@ -303,14 +305,20 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
 </div>
 
 <div id="export-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center">
-  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px">
+  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
     <div style="font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
-      <span>// データエクスポート</span>
+      <span>// データ管理</span>
       <button onclick="closeExport()" style="background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer">✕</button>
     </div>
-    <div style="font-size:11px;color:var(--sub2);margin-bottom:12px">長押しで全選択 → コピー、またはコピーボタンを使用</div>
-    <textarea id="exportText" readonly rows="10" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:14px;padding:12px;resize:none;outline:none;line-height:1.9"></textarea>
-    <button onclick="copyExport()" style="width:100%;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;margin-top:10px;cursor:pointer" id="copyBtn">コピー</button>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:8px;letter-spacing:.08em">EXPORT — 全台データ</div>
+    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">コピーして別端末のインポートに貼り付け</div>
+    <textarea id="exportText" readonly rows="6" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.7"></textarea>
+    <button onclick="copyExport()" id="copyBtn" style="width:100%;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;margin-top:8px;cursor:pointer">コピー</button>
+    <div style="height:1px;background:#2a2a2a;margin:16px 0"></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:8px;letter-spacing:.08em">IMPORT — データ復元</div>
+    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">エクスポートしたテキストを貼り付け → 現在のデータは上書きされます</div>
+    <textarea id="importText" rows="6" placeholder="ここにエクスポートデータを貼り付け..." style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.7"></textarea>
+    <button onclick="importData()" style="width:100%;background:transparent;border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;margin-top:8px;cursor:pointer">インポート（上書き）</button>
   </div>
 </div>
 
@@ -429,12 +437,17 @@ function render(){
 function renderDrawerList(){
   document.getElementById('machineList').innerHTML=[...ST.machines].reverse().map((m,ri)=>{
     const i=ST.machines.length-1-ri,n=rots_for(m),isActive=i===ST.current;
-    const mu=muPost_for(m),muStr=mu!==null?`推定 ${mu.toFixed(1)}回`:'データなし';
-    return `<div class="machine-item ${isActive?'active':''}" onclick="switchMachine(${i})" oncontextmenu="event.preventDefault();renameMachine(${i})" ontouchstart="startLongPress(${i})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()" style="position:relative"><div><div class="machine-item-name">${m.id}</div><div class="machine-item-n">N=${n} / ${muStr}</div></div><div style="display:flex;align-items:center;gap:8px">${isActive?'<span style="color:var(--amber);font-size:12px">●</span>':''}${ST.machines.length>1?`<button onclick="event.stopPropagation();deleteMachine(${i})" style="background:none;border:1px solid #444;border-radius:6px;color:#f87171;font-size:11px;padding:3px 7px;cursor:pointer">削除</button>`:''}</div></div>`;
+    const mu=muPost_for(m),mean=mean_for(m);
+    let infoStr='データなし';
+    if(mu!==null&&mean!==null)infoStr=`推定 ${mu.toFixed(1)} / 実測 ${mean.toFixed(1)}回`;
+    else if(mu!==null)infoStr=`推定 ${mu.toFixed(1)}回`;
+    const delBtn=ST.machines.length>1?`<div class="mi-del-reveal" onclick="event.stopPropagation();deleteMachine(${i})">削除</div>`:'';
+    return `<div class="mi-wrap" id="mi-wrap-${i}">${delBtn}<div class="mi-inner ${isActive?'active':''}" id="mi-inner-${i}" onclick="miTap(event,${i})" oncontextmenu="event.preventDefault();renameMachine(${i})" ontouchstart="miTouchStart(event,${i})" ontouchend="miTouchEnd(event,${i})" ontouchmove="miTouchMove(event,${i})"><div><div class="machine-item-name">${m.id}</div><div class="machine-item-n">N=${n} / ${infoStr}</div></div>${isActive?'<span style="color:var(--amber);font-size:12px;flex-shrink:0;margin-left:8px">●</span>':''}</div></div>`;
   }).join('');
 }
 
 function rots_for(m){let c=0;m.sessions.forEach(sess=>{if(sess.base!==null)c+=sess.data.length;});return c;}
+function mean_for(m){const r=[];m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];r.push(v-prev);});});return r.length?r.reduce((a,b)=>a+b,0)/r.length:null;}
 function muPost_for(m){const{priorMu,priorSigma,shogyu}=ST.cfg;const nEff=250+shogyu*priorMu,p0=priorMu/nEff,sp=priorSigma/nEff;const kappa=Math.max(2,p0*(1-p0)/(sp*sp)-1);const a0=kappa*p0,b0=kappa*(1-p0);let S=0,Nb=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;S+=rot;Nb+=250+shogyu*rot;});});if(S===0)return null;const aP=a0+S,bP=b0+(Nb-S),pP=aP/(aP+bP);return pToRot(pP,shogyu);}
 
 function renderKPI(s,m,hasData){
@@ -551,9 +564,31 @@ function editBase(si){const sess=mach().sessions[si],next=sess.data.length>0?ses
 function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:sess.data[di-1],next=di<sess.data.length-1?sess.data[di+1]:null;const msg=`累計回転数を入力<br><small>${prev}より大きく${next!==null?next+'より小さい値を入力':''}</small>`;showPrompt(msg,sess.data[di],raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)){showAlert('数値を入力してください');return;}if(v<=prev){showAlert(`前の値（${prev}）より大きい値を入力してください`);return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}sess.data[di]=v;save();killCharts();render();});}
 function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;const sess=mach().sessions[si];sess.data.splice(di,1);save();killCharts();render();});}
 
-function openExport(){const m=mach();let lines=[];m.sessions.forEach(sess=>{if(sess.base===null)return;lines.push(String(sess.base));sess.data.forEach(v=>lines.push(String(v)));if(sess.hit)lines.push('🎯');});document.getElementById('exportText').value=lines.join('\n');document.getElementById('export-modal').style.display='flex';}
+function openExport(){
+  document.getElementById('exportText').value=JSON.stringify(ST.machines,null,2);
+  document.getElementById('importText').value='';
+  document.getElementById('export-modal').style.display='flex';
+}
 function closeExport(){document.getElementById('export-modal').style.display='none';}
-function copyExport(){const txt=document.getElementById('exportText');txt.select();try{navigator.clipboard.writeText(txt.value).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='✓ コピー完了';setTimeout(()=>btn.textContent='コピー',2000);});}catch{document.execCommand('copy');const btn=document.getElementById('copyBtn');btn.textContent='✓ コピー完了';setTimeout(()=>btn.textContent='コピー',2000);}}
+function copyExport(){
+  const txt=document.getElementById('exportText');
+  txt.select();
+  try{navigator.clipboard.writeText(txt.value).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='✓ コピー完了';setTimeout(()=>btn.textContent='コピー',2000);});}
+  catch{document.execCommand('copy');const btn=document.getElementById('copyBtn');btn.textContent='✓ コピー完了';setTimeout(()=>btn.textContent='コピー',2000);}
+}
+function importData(){
+  const raw=document.getElementById('importText').value.trim();
+  if(!raw){showAlert('インポートするデータを貼り付けてください');return;}
+  let machines;
+  try{machines=JSON.parse(raw);if(!Array.isArray(machines))throw new Error();}
+  catch{showAlert('データの形式が正しくありません');return;}
+  showConfirm('全台データを上書きしますか？\n現在のデータは失われます。',ok=>{
+    if(!ok)return;
+    ST.machines=machines;
+    if(ST.current>=ST.machines.length)ST.current=0;
+    save();killCharts();closeExport();render();
+  });
+}
 function showBulkInput(){document.getElementById('bulk-inp').value='';document.getElementById('bulk-modal').style.display='flex';setTimeout(()=>document.getElementById('bulk-inp').focus(),100);}
 function closeBulk(){document.getElementById('bulk-modal').style.display='none';}
 function addBulk(){const raw=document.getElementById('bulk-inp').value;const vals=raw.split(/[,、。・\.\s\u3000\uff0c\uff0e]+/).map(s=>parseInt(s.trim())).filter(v=>!isNaN(v)&&v>0);if(!vals.length){closeBulk();return;}const cur=curSess();let errors=[];vals.forEach(v=>{if(cur.base===null){cur.base=v;}else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;if(v<=last){errors.push(`${v}（前の値${last}以下のためスキップ）`);return;}cur.data.push(v);}});save();killCharts();closeBulk();render();if(errors.length)showAlert('スキップされた値:\n'+errors.join('\n'));}
@@ -561,6 +596,47 @@ function addBulk(){const raw=document.getElementById('bulk-inp').value;const val
 let _longPressTimer=null;
 function startLongPress(i){_longPressTimer=setTimeout(()=>renameMachine(i),600);}
 function cancelLongPress(){clearTimeout(_longPressTimer);}
+
+// swipe delete
+let _miSwipe={id:null,startX:0,curX:0,opened:{}};
+function miTap(e,i){
+  if(_miSwipe.opened[i]){
+    const el=document.getElementById(`mi-inner-${i}`);
+    if(el){el.style.transition='transform .2s';el.style.transform='translateX(0)';}
+    _miSwipe.opened[i]=false;
+  } else {
+    switchMachine(i);
+  }
+}
+function miTouchStart(e,i){
+  startLongPress(i);
+  _miSwipe.id=i;_miSwipe.startX=e.touches[0].clientX;_miSwipe.curX=e.touches[0].clientX;
+}
+function miTouchMove(e,i){
+  cancelLongPress();
+  if(_miSwipe.id!==i)return;
+  _miSwipe.curX=e.touches[0].clientX;
+  const dx=_miSwipe.startX-_miSwipe.curX;
+  const el=document.getElementById(`mi-inner-${i}`);
+  if(!el)return;
+  if(Math.abs(dx)>6){
+    const tx=Math.min(72,Math.max(0,dx));
+    el.style.transition='none';
+    el.style.transform=`translateX(-${tx}px)`;
+  }
+}
+function miTouchEnd(e,i){
+  cancelLongPress();
+  if(_miSwipe.id!==i)return;
+  const dx=_miSwipe.startX-_miSwipe.curX;
+  const el=document.getElementById(`mi-inner-${i}`);
+  if(el){
+    el.style.transition='transform .2s';
+    if(dx>40){el.style.transform='translateX(-72px)';_miSwipe.opened[i]=true;}
+    else{el.style.transform='translateX(0)';_miSwipe.opened[i]=false;}
+  }
+  _miSwipe.id=null;
+}
 function renameMachine(i){showPrompt(`台の名前を入力`,ST.machines[i].id,raw=>{if(raw===null||raw.trim()==='')return;ST.machines[i].id=raw.trim();save();render();},true);}
 function deleteMachine(i){showConfirm(`「${ST.machines[i].id}」を削除しますか？`,ok=>{if(!ok)return;ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
 function addMachine(){const num=ST.machines.length+1;ST.machines.push(defMachine(`台${String(num).padStart(4,'0')}`));ST.current=ST.machines.length-1;save();killCharts();closeDrawer();render();}
@@ -574,12 +650,29 @@ function openSettings(){const{border,priorMu,priorSigma,shogyu}=ST.cfg;document.
 function closeSettings(){const b=parseFloat(document.getElementById('setBorder').value),mu=parseFloat(document.getElementById('setPriorMu').value),sg=parseFloat(document.getElementById('setPriorSigma').value),sh=parseInt(document.getElementById('setShogyu').value);if(!isNaN(b)&&b>0)ST.cfg.border=b;if(!isNaN(mu)&&mu>0)ST.cfg.priorMu=mu;if(!isNaN(sg)&&sg>0)ST.cfg.priorSigma=sg;if(!isNaN(sh)&&sh>=0)ST.cfg.shogyu=sh;save();document.getElementById('settings-modal').classList.remove('open');killCharts();render();}
 function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
 
+function _kbResize(){
+  const bar=document.getElementById('kb-bar');
+  if(!bar.classList.contains('show'))return;
+  if(window.visualViewport){
+    const vv=window.visualViewport;
+    const off=window.innerHeight-vv.offsetTop-vv.height;
+    bar.style.bottom=Math.max(0,off)+'px';
+  }
+}
 document.getElementById('rotIn').addEventListener('keydown',e=>{if(e.key==='Enter')addEntry();});
 document.getElementById('rotIn').addEventListener('focus',()=>{
   document.getElementById('kb-bar').classList.add('show');
+  window.visualViewport?.addEventListener('resize',_kbResize);
+  window.visualViewport?.addEventListener('scroll',_kbResize);
+  setTimeout(_kbResize,50);
 });
 document.getElementById('rotIn').addEventListener('blur',()=>{
-  setTimeout(()=>document.getElementById('kb-bar').classList.remove('show'),200);
+  setTimeout(()=>{
+    document.getElementById('kb-bar').classList.remove('show');
+    document.getElementById('kb-bar').style.bottom='';
+    window.visualViewport?.removeEventListener('resize',_kbResize);
+    window.visualViewport?.removeEventListener('scroll',_kbResize);
+  },200);
 });
 document.getElementById('rotIn').addEventListener('input',()=>{
   const v=document.getElementById('rotIn').value;
