@@ -157,7 +157,28 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .empty-t{font-family:var(--mono);font-size:11px;color:var(--sub);margin-bottom:8px}
 .empty-s{font-size:12px;color:var(--sub2);line-height:1.9}
 .hidden{display:none!important}
+
+/* ── FLOATING BAR ── */
+#kb-bar{
+position:fixed;bottom:-60px;left:0;right:0;
+height:52px;background:#1c1c1c;
+border-top:1px solid #3a3a3a;
+display:flex;align-items:center;
+padding:0 14px;
+transition:bottom .22s ease;
+z-index:999;
+}
+#kb-bar.show{bottom:0}
+#kb-preview{flex:1;font-family:var(–mono);font-size:20px;font-weight:700;color:var(–amber)}
+#kb-unit{font-size:11px;color:var(–sub);margin-left:4px}
+#kb-add-btn{
+background:var(–amber);border:none;border-radius:8px;
+color:#000;font-family:var(–mono);font-size:14px;font-weight:700;
+padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
+}
+#kb-add-btn:active{opacity:.7}
 </style>
+
 </head>
 <body>
 
@@ -170,6 +191,13 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
   <div id="machineList"></div>
 </div>
 <div id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- FLOATING BAR -->
+
+<div id="kb-bar">
+  <div id="kb-preview">—<span id="kb-unit">回転</span></div>
+  <button id="kb-add-btn" onmousedown="addEntry()">追加 →</button>
+</div>
 
 <div id="app">
   <header>
@@ -505,10 +533,10 @@ function addEntry(){
 
 function addHit(){const cur=curSess();if(cur.base===null||cur.data.length===0){showAlert('回転数データを少なくとも1件入力してください');return;}cur.hit=true;mach().sessions.push({base:null,data:[],hit:false});save();render();}
 
-function _cmodal(msg,withInput,defVal,cb){
+function _cmodal(msg,withInput,defVal,cb,isText){
   const el=document.getElementById('cmodal'),inp=document.getElementById('cmodal-inp');
   document.getElementById('cmodal-msg').innerHTML=msg;inp.style.display=withInput?'block':'none';
-  if(withInput){inp.value=defVal!==undefined?defVal:'';inp.type='number';}
+  if(withInput){inp.value=defVal!==undefined?defVal:'';inp.type=isText?'text':'number';inp.inputMode=isText?'text':'numeric';}
   el.style.display='flex';
   const ok=()=>{el.style.display='none';cb(withInput?inp.value:true);};
   const cancel=()=>{el.style.display='none';document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');cb(null);};
@@ -517,7 +545,7 @@ function _cmodal(msg,withInput,defVal,cb){
 }
 function showAlert(msg){_cmodal(msg,false,undefined,()=>{});document.getElementById('cmodal-cancel').style.display='none';setTimeout(()=>document.getElementById('cmodal-cancel').style.display='',50);}
 function showConfirm(msg,cb){_cmodal(msg,false,undefined,v=>cb(v===true));}
-function showPrompt(msg,def,cb){_cmodal(msg,true,def,cb);}
+function showPrompt(msg,def,cb,isText){_cmodal(msg,true,def,cb,isText);}
 
 function undoHit(){const sess=mach().sessions;if(sess.length<2)return;const prev=sess[sess.length-2],cur=sess[sess.length-1];if(!prev.hit||cur.base!==null||cur.data.length>0)return;showConfirm('直前の当たりを取り消しますか？',ok=>{if(!ok)return;prev.hit=false;sess.pop();save();killCharts();render();});}
 function editBase(si){const sess=mach().sessions[si],next=sess.data.length>0?sess.data[0]:null;const msg=`開始回転数を入力${next!==null?'<br><small>(次の値 '+next+' より小さくしてください)</small>':''}`;showPrompt(msg,sess.base,raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値にしてください`);return;}sess.base=v;save();killCharts();render();});}
@@ -534,7 +562,7 @@ function addBulk(){const raw=document.getElementById('bulk-inp').value;const val
 let _longPressTimer=null;
 function startLongPress(i){_longPressTimer=setTimeout(()=>renameMachine(i),600);}
 function cancelLongPress(){clearTimeout(_longPressTimer);}
-function renameMachine(i){showPrompt(`台の名前を入力`,ST.machines[i].id,raw=>{if(raw===null||raw.trim()==='')return;ST.machines[i].id=raw.trim();save();render();});}
+function renameMachine(i){showPrompt(`台の名前を入力`,ST.machines[i].id,raw=>{if(raw===null||raw.trim()==='')return;ST.machines[i].id=raw.trim();save();render();},true);}
 function deleteMachine(i){showConfirm(`「${ST.machines[i].id}」を削除しますか？`,ok=>{if(!ok)return;ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
 function addMachine(){const num=ST.machines.length+1;ST.machines.push(defMachine(`台${String(num).padStart(4,'0')}`));ST.current=ST.machines.length-1;save();killCharts();closeDrawer();render();}
 function switchMachine(i){ST.current=i;save();killCharts();closeDrawer();render();}
@@ -548,6 +576,16 @@ function closeSettings(){const b=parseFloat(document.getElementById('setBorder')
 function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
 
 document.getElementById('rotIn').addEventListener('keydown',e=>{if(e.key==='Enter')addEntry();});
+document.getElementById('rotIn').addEventListener('focus',()=>{
+  document.getElementById('kb-bar').classList.add('show');
+});
+document.getElementById('rotIn').addEventListener('blur',()=>{
+  setTimeout(()=>document.getElementById('kb-bar').classList.remove('show'),200);
+});
+document.getElementById('rotIn').addEventListener('input',()=>{
+  const v=document.getElementById('rotIn').value;
+  document.getElementById('kb-preview').innerHTML=v?`${v}<span id="kb-unit">回転</span>`:`—<span id="kb-unit">回転</span>`;
+});
 document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
 document.getElementById('ciSlider').value=ST.ciLevel;
 document.getElementById('ciPct').textContent=ST.ciLevel+'%';
