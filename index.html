@@ -157,7 +157,27 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .empty-t{font-family:var(--mono);font-size:11px;color:var(--sub);margin-bottom:8px}
 .empty-s{font-size:12px;color:var(--sub2);line-height:1.9}
 .hidden{display:none!important}
+
+/* ── FLOATING BAR ── */
+#kb-bar{
+position:fixed;bottom:-60px;left:0;right:0;
+height:52px;background:#1c1c1c;
+border-top:1px solid #3a3a3a;
+display:flex;align-items:center;
+padding:0 14px;
+transition:bottom .22s ease;
+z-index:999;
+}
+#kb-bar.show{bottom:0}
+#kb-preview{flex:1;font-family:var(–mono);font-size:20px;font-weight:700;color:var(–amber)}
+#kb-add-btn{
+background:var(–amber);border:none;border-radius:8px;
+color:#000;font-family:var(–mono);font-size:14px;font-weight:700;
+padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
+}
+#kb-add-btn:active{opacity:.7}
 </style>
+
 </head>
 <body>
 
@@ -170,6 +190,13 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
   <div id="machineList"></div>
 </div>
 <div id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- FLOATING BAR -->
+
+<div id="kb-bar">
+  <div id="kb-preview">—<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span></div>
+  <button id="kb-add-btn" onmousedown="addEntry()">追加 →</button>
+</div>
 
 <div id="app">
   <header>
@@ -556,7 +583,9 @@ document.getElementById('rotIn').addEventListener('blur',()=>{
 });
 document.getElementById('rotIn').addEventListener('input',()=>{
   const v=document.getElementById('rotIn').value;
-  document.getElementById('kb-preview').innerHTML=v?`${v}<span id="kb-unit">回転</span>`:`—<span id="kb-unit">回転</span>`;
+  document.getElementById('kb-preview').innerHTML=v
+    ?`${v}<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span>`
+    :`—<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span>`;
 });
 document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
 document.getElementById('ciSlider').value=ST.ciLevel;
