@@ -45,10 +45,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .drawer-close{background:none;border:none;color:var(--sub);font-size:18px;cursor:pointer}
 .new-machine-btn{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--amber);font-family:var(--mono);font-size:12px;padding:12px 16px;cursor:pointer;text-align:left}
 .new-machine-btn:active{background:rgba(245,158,11,.08)}
-.mi-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
-.mi-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;transition:transform .2s,background .15s;will-change:transform;background:transparent;user-select:none;-webkit-user-select:none}
-.mi-inner.active{background:rgba(245,158,11,.1);border-left:2px solid var(--amber)}
-.mi-del-reveal{position:absolute;right:0;top:0;bottom:0;width:72px;background:#f87171;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;color:#000;flex-shrink:0}
+.machine-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.machine-item.active{background:rgba(245,158,11,.1);border-left:2px solid var(--amber)}
 .machine-item-name{font-family:var(--mono);font-size:13px;font-weight:600}
 .machine-item-n{font-family:var(--mono);font-size:10px;color:var(--sub)}
 .hist-panel{width:var(--side);flex-shrink:0;position:fixed;top:calc(var(--hdr) + max(48px,env(safe-area-inset-top)));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
@@ -197,7 +195,7 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
 
 <div id="kb-bar">
   <div id="kb-preview">—<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span></div>
-  <button id="kb-add-btn" onmousedown="addEntry()">追加 →</button>
+  <button id="kb-add-btn" ontouchstart="event.preventDefault();addEntry()" onclick="addEntry()">追加 →</button>
 </div>
 
 <div id="app">
@@ -306,19 +304,24 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
 
 <div id="export-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center">
   <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
-    <div style="font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
       <span>// データ管理</span>
       <button onclick="closeExport()" style="background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer">✕</button>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:8px;letter-spacing:.08em">EXPORT — 全台データ</div>
-    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">コピーして別端末のインポートに貼り付け</div>
-    <textarea id="exportText" readonly rows="6" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.7"></textarea>
-    <button onclick="copyExport()" id="copyBtn" style="width:100%;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;margin-top:8px;cursor:pointer">コピー</button>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">SIMPLE — 現在の台の回転数リスト</div>
+    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">この台だけの回転数をコピー（メモ・バックアップ用）</div>
+    <textarea id="exportSimple" readonly rows="5" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:13px;padding:10px;resize:none;outline:none;line-height:1.9"></textarea>
+    <button onclick="copySimple()" id="copySimpleBtn" style="width:100%;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:11px;margin-top:8px;cursor:pointer">コピー（この台）</button>
     <div style="height:1px;background:#2a2a2a;margin:16px 0"></div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:8px;letter-spacing:.08em">IMPORT — データ復元</div>
-    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">エクスポートしたテキストを貼り付け → 現在のデータは上書きされます</div>
-    <textarea id="importText" rows="6" placeholder="ここにエクスポートデータを貼り付け..." style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.7"></textarea>
-    <button onclick="importData()" style="width:100%;background:transparent;border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;margin-top:8px;cursor:pointer">インポート（上書き）</button>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">EXPORT — 全台データ（引き継ぎ用）</div>
+    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">全台まとめてコピー → 別端末でインポート</div>
+    <textarea id="exportText" readonly rows="5" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.7"></textarea>
+    <button onclick="copyExport()" id="copyBtn" style="width:100%;background:transparent;border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-family:var(--mono);font-size:13px;font-weight:700;padding:11px;margin-top:8px;cursor:pointer">コピー（全台）</button>
+    <div style="height:1px;background:#2a2a2a;margin:16px 0"></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">IMPORT — データ復元</div>
+    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">全台エクスポートのテキストを貼り付け → 上書き復元</div>
+    <textarea id="importText" rows="5" placeholder="ここにエクスポートデータを貼り付け..." style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.7"></textarea>
+    <button onclick="importData()" style="width:100%;background:transparent;border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-family:var(--mono);font-size:13px;font-weight:700;padding:11px;margin-top:8px;cursor:pointer">インポート（上書き）</button>
   </div>
 </div>
 
@@ -441,8 +444,8 @@ function renderDrawerList(){
     let infoStr='データなし';
     if(mu!==null&&mean!==null)infoStr=`推定 ${mu.toFixed(1)} / 実測 ${mean.toFixed(1)}回`;
     else if(mu!==null)infoStr=`推定 ${mu.toFixed(1)}回`;
-    const delBtn=ST.machines.length>1?`<div class="mi-del-reveal" onclick="event.stopPropagation();deleteMachine(${i})">削除</div>`:'';
-    return `<div class="mi-wrap" id="mi-wrap-${i}">${delBtn}<div class="mi-inner ${isActive?'active':''}" id="mi-inner-${i}" onclick="miTap(event,${i})" oncontextmenu="event.preventDefault();renameMachine(${i})" ontouchstart="miTouchStart(event,${i})" ontouchend="miTouchEnd(event,${i})" ontouchmove="miTouchMove(event,${i})"><div><div class="machine-item-name">${m.id}</div><div class="machine-item-n">N=${n} / ${infoStr}</div></div>${isActive?'<span style="color:var(--amber);font-size:12px;flex-shrink:0;margin-left:8px">●</span>':''}</div></div>`;
+    const delBtn=ST.machines.length>1?`<button onclick="event.stopPropagation();deleteMachine(${i})" style="background:none;border:1px solid #555;border-radius:6px;color:#f87171;font-family:var(--mono);font-size:11px;padding:3px 8px;cursor:pointer;flex-shrink:0">削除</button>`:'';
+    return `<div class="machine-item ${isActive?'active':''}" onclick="switchMachine(${i})" ontouchstart="startLongPress(${i})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()"><div style="flex:1;min-width:0"><div class="machine-item-name">${m.id}</div><div class="machine-item-n">N=${n} / ${infoStr}</div></div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${isActive?'<span style="color:var(--amber);font-size:12px">●</span>':''}${delBtn}</div></div>`;
   }).join('');
 }
 
@@ -565,9 +568,19 @@ function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:se
 function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;const sess=mach().sessions[si];sess.data.splice(di,1);save();killCharts();render();});}
 
 function openExport(){
+  // simple: current machine rotation list
+  const m=mach();let lines=[];
+  m.sessions.forEach(sess=>{if(sess.base===null)return;lines.push(String(sess.base));sess.data.forEach(v=>lines.push(String(v)));if(sess.hit)lines.push('🎯');});
+  document.getElementById('exportSimple').value=lines.join('\n');
+  // full: all machines JSON
   document.getElementById('exportText').value=JSON.stringify(ST.machines,null,2);
   document.getElementById('importText').value='';
   document.getElementById('export-modal').style.display='flex';
+}
+function copySimple(){
+  const txt=document.getElementById('exportSimple');txt.select();
+  try{navigator.clipboard.writeText(txt.value).then(()=>{const b=document.getElementById('copySimpleBtn');b.textContent='✓ コピー完了';setTimeout(()=>b.textContent='コピー（この台）',2000);});}
+  catch{document.execCommand('copy');const b=document.getElementById('copySimpleBtn');b.textContent='✓ コピー完了';setTimeout(()=>b.textContent='コピー（この台）',2000);}
 }
 function closeExport(){document.getElementById('export-modal').style.display='none';}
 function copyExport(){
@@ -596,47 +609,6 @@ function addBulk(){const raw=document.getElementById('bulk-inp').value;const val
 let _longPressTimer=null;
 function startLongPress(i){_longPressTimer=setTimeout(()=>renameMachine(i),600);}
 function cancelLongPress(){clearTimeout(_longPressTimer);}
-
-// swipe delete
-let _miSwipe={id:null,startX:0,curX:0,opened:{}};
-function miTap(e,i){
-  if(_miSwipe.opened[i]){
-    const el=document.getElementById(`mi-inner-${i}`);
-    if(el){el.style.transition='transform .2s';el.style.transform='translateX(0)';}
-    _miSwipe.opened[i]=false;
-  } else {
-    switchMachine(i);
-  }
-}
-function miTouchStart(e,i){
-  startLongPress(i);
-  _miSwipe.id=i;_miSwipe.startX=e.touches[0].clientX;_miSwipe.curX=e.touches[0].clientX;
-}
-function miTouchMove(e,i){
-  cancelLongPress();
-  if(_miSwipe.id!==i)return;
-  _miSwipe.curX=e.touches[0].clientX;
-  const dx=_miSwipe.startX-_miSwipe.curX;
-  const el=document.getElementById(`mi-inner-${i}`);
-  if(!el)return;
-  if(Math.abs(dx)>6){
-    const tx=Math.min(72,Math.max(0,dx));
-    el.style.transition='none';
-    el.style.transform=`translateX(-${tx}px)`;
-  }
-}
-function miTouchEnd(e,i){
-  cancelLongPress();
-  if(_miSwipe.id!==i)return;
-  const dx=_miSwipe.startX-_miSwipe.curX;
-  const el=document.getElementById(`mi-inner-${i}`);
-  if(el){
-    el.style.transition='transform .2s';
-    if(dx>40){el.style.transform='translateX(-72px)';_miSwipe.opened[i]=true;}
-    else{el.style.transform='translateX(0)';_miSwipe.opened[i]=false;}
-  }
-  _miSwipe.id=null;
-}
 function renameMachine(i){showPrompt(`台の名前を入力`,ST.machines[i].id,raw=>{if(raw===null||raw.trim()==='')return;ST.machines[i].id=raw.trim();save();render();},true);}
 function deleteMachine(i){showConfirm(`「${ST.machines[i].id}」を削除しますか？`,ok=>{if(!ok)return;ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
 function addMachine(){const num=ST.machines.length+1;ST.machines.push(defMachine(`台${String(num).padStart(4,'0')}`));ST.current=ST.machines.length-1;save();killCharts();closeDrawer();render();}
