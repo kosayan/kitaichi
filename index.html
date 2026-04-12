@@ -195,9 +195,7 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
 
 <div id="kb-bar">
   <div id="kb-preview">—<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span></div>
-  <button id="kb-add-btn"
-    ontouchstart="event.preventDefault();_kbPressed=true;addEntry();setTimeout(()=>_kbPressed=false,300)"
-    onclick="_kbPressed=true;addEntry();setTimeout(()=>_kbPressed=false,300)">追加 →</button>
+  <button id="kb-add-btn" ontouchend="event.preventDefault();addEntry()" onclick="addEntry()">追加 →</button>
 </div>
 
 <div id="app">
@@ -305,7 +303,7 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
 </div>
 
 <div id="export-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center">
-  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
+  <div id="export-sheet" style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:80dvh;overflow-y:auto;-webkit-overflow-scrolling:touch">
     <div style="font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
       <span>// データ管理</span>
       <button onclick="closeExport()" style="background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer">✕</button>
@@ -578,10 +576,8 @@ function openExport(){
   document.getElementById('exportSimple').value=lines.join('\n');
   document.getElementById('exportText').value=JSON.stringify(ST.machines,null,2);
   document.getElementById('importText').value='';
-  const modal=document.getElementById('export-modal');
-  modal.style.display='flex';
-  // scroll inner sheet to top
-  setTimeout(()=>{const sheet=modal.querySelector('div');if(sheet)sheet.scrollTop=0;},50);
+  document.getElementById('export-modal').style.display='flex';
+  setTimeout(()=>{const sheet=document.getElementById('export-sheet');if(sheet)sheet.scrollTop=0;},50);
 }
 function copySimple(){
   const txt=document.getElementById('exportSimple');txt.select();
