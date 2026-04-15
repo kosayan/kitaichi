@@ -27,8 +27,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 input,button,textarea{-webkit-appearance:none;appearance:none}
 html,body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;overflow-x:hidden;-webkit-text-size-adjust:100%}
-header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:env(safe-area-inset-top);padding-bottom:0;padding-left:12px;padding-right:12px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-#app{padding-top:calc(var(--hdr) + env(safe-area-inset-top));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
+header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-area-inset-top),12px);padding-bottom:0;padding-left:12px;padding-right:12px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+#app{padding-top:calc(var(--hdr) + max(env(safe-area-inset-top),12px));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
 .menu-btn{background:none;border:none;color:var(--sub);font-size:20px;padding:6px;cursor:pointer;line-height:1;flex-shrink:0}
 .menu-btn:active{color:var(--amber)}
 .hdr-title{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -49,7 +49,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:env(safe-area
 .machine-item.active{background:rgba(245,158,11,.1);border-left:2px solid var(--amber)}
 .machine-item-name{font-family:var(--mono);font-size:13px;font-weight:600}
 .machine-item-n{font-family:var(--mono);font-size:10px;color:var(--sub)}
-.hist-panel{width:var(--side);flex-shrink:0;position:fixed;top:calc(var(--hdr) + env(safe-area-inset-top));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
+.hist-panel{width:var(--side);flex-shrink:0;position:fixed;top:calc(var(--hdr) + max(env(safe-area-inset-top),12px));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
 .hist-panel::-webkit-scrollbar{display:none}
 .hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(--sans);font-size:9px;color:var(--sub2);letter-spacing:.08em}
 .hp-item{border-bottom:1px solid var(--border);padding:5px 3px;text-align:center;flex-shrink:0}
@@ -252,10 +252,10 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
             <div class="comp-score-row">
               <div class="comp-score" id="compScore">-.-%</div>
               <div class="comp-score-sub">= 確率 × 信頼係数</div>
-              <button class="comp-toggle" onclick="toggleCompDetail()" id="compToggle">詳細 ▾</button>
+              <button class="comp-toggle" onclick="toggleCompDetail()" id="compToggle">詳細 ▴</button>
             </div>
             <div class="comp-comment" id="compComment"></div>
-            <div class="comp-detail" id="compDetail">
+            <div class="comp-detail open" id="compDetail">
               <div class="comp-factors">
                 <div class="comp-factor">
                   <div class="comp-factor-lbl">データ信頼度</div>
