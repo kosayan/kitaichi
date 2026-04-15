@@ -751,8 +751,7 @@ function _kbResize(){
   const bar=document.getElementById('kb-bar');
   if(!bar.classList.contains('show'))return;
   if(window.visualViewport){
-    const vv=window.visualViewport;
-    const off=window.innerHeight-vv.offsetTop-vv.height;
+    const off=window.innerHeight-window.visualViewport.height;
     bar.style.bottom=Math.max(0,off)+'px';
   }
 }
