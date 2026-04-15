@@ -27,8 +27,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 input,button,textarea{-webkit-appearance:none;appearance:none}
 html,body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;overflow-x:hidden;-webkit-text-size-adjust:100%}
-header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(safe-area-inset-top));padding-bottom:0;padding-left:12px;padding-right:12px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-#app{padding-top:calc(var(--hdr) + max(48px,env(safe-area-inset-top)));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
+header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:env(safe-area-inset-top);padding-bottom:0;padding-left:12px;padding-right:12px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+#app{padding-top:calc(var(--hdr) + env(safe-area-inset-top));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
 .menu-btn{background:none;border:none;color:var(--sub);font-size:20px;padding:6px;cursor:pointer;line-height:1;flex-shrink:0}
 .menu-btn:active{color:var(--amber)}
 .hdr-title{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -49,7 +49,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .machine-item.active{background:rgba(245,158,11,.1);border-left:2px solid var(--amber)}
 .machine-item-name{font-family:var(--mono);font-size:13px;font-weight:600}
 .machine-item-n{font-family:var(--mono);font-size:10px;color:var(--sub)}
-.hist-panel{width:var(--side);flex-shrink:0;position:fixed;top:calc(var(--hdr) + max(48px,env(safe-area-inset-top)));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
+.hist-panel{width:var(--side);flex-shrink:0;position:fixed;top:calc(var(--hdr) + env(safe-area-inset-top));left:0;bottom:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;justify-content:flex-start;scrollbar-width:none;z-index:100;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
 .hist-panel::-webkit-scrollbar{display:none}
 .hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(--sans);font-size:9px;color:var(--sub2);letter-spacing:.08em}
 .hp-item{border-bottom:1px solid var(--border);padding:5px 3px;text-align:center;flex-shrink:0}
@@ -67,19 +67,19 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .stag{font-family:var(--mono);font-size:10px;letter-spacing:.13em;color:var(--sub);padding:14px 12px 0;display:flex;align-items:center;gap:8px}
 .stag .sn{color:var(--amber-dim);min-width:16px}
 .stag::after{content:'';flex:1;height:1px;background:var(--border);margin-left:6px}
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px 12px}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px;position:relative;overflow:hidden}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px 12px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px;position:relative;overflow:hidden}
 .kpi.hi{border-color:var(--amber-dim)}
 .kpi.hi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--amber)}
 .kpi-lbl{font-size:10px;color:var(--sub);margin-bottom:5px}
-.kpi-val{font-family:var(--mono);font-size:32px;font-weight:700;line-height:1}
-.kpi-val-sm{font-family:var(--mono);font-size:21px;font-weight:700;line-height:1}
+.kpi-val{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1}
+.kpi-val-sm{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1}
 .kpi.hi .kpi-val{color:var(--amber)}
 .kpi-sub{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:4px}
 .kpi-extra{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:12px}
 .ke .ke-l{font-size:9px;color:var(--sub2);margin-bottom:2px}
 .ke .ke-v{font-family:var(--mono);font-size:12px;font-weight:600}
-#input-sec{padding:0 12px 12px;border-bottom:1px solid var(--border)}
+#input-sec{padding:0 12px 8px;border-bottom:1px solid var(--border)}
 .input-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--sub);margin-bottom:7px;display:flex;align-items:center;gap:6px}
 .input-lbl::before{content:'01';color:var(--amber-dim)}
 .input-row{display:flex;gap:6px;margin-bottom:7px}
@@ -103,9 +103,9 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .ctab{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--sub2);font-family:var(--mono);font-size:13px;font-weight:500;padding:10px 4px;cursor:pointer;text-align:center;transition:all .15s;opacity:.55}
 .ctab.on{background:var(--amber);border-color:var(--amber);color:#000;font-weight:700;opacity:1;box-shadow:0 0 12px rgba(245,158,11,.35)}
 .cwrap{display:none}.cwrap.on{display:block}
-.cwrap canvas{border-radius:8px}
+.cwrap canvas{border-radius:8px;background:var(--card)}
 .card{margin:4px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.succ-wrap{padding:13px}
+.succ-wrap{padding:8px 12px}
 .succ-pct{font-family:var(--mono);font-size:21px;font-weight:700;line-height:1;margin-bottom:4px}
 .succ-lbl{font-size:11px;color:var(--sub);margin-bottom:10px}
 .bar-track{height:5px;background:var(--border2);border-radius:3px;overflow:hidden}
@@ -159,21 +159,24 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(48px,env(
 .hidden{display:none!important}
 
 /* ── COMPOSITE SCORE ── */
-.comp-wrap{padding:13px;border-top:1px solid var(–border)}
-.comp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.comp-wrap{padding:9px 12px 8px}
+.comp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .comp-title{font-family:var(–mono);font-size:10px;color:var(–sub);letter-spacing:.1em}
 .comp-badge{font-family:var(–mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
-.comp-score-row{display:flex;align-items:flex-end;gap:8px;margin-bottom:10px}
-.comp-score{font-family:var(–mono);font-size:32px;font-weight:700;line-height:1}
-.comp-score-sub{font-family:var(–mono);font-size:10px;color:var(–sub);margin-bottom:4px}
-.comp-factors{display:flex;gap:6px;margin-bottom:10px}
-.comp-factor{flex:1;background:var(–card2);border-radius:8px;padding:7px 8px}
+.comp-score-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.comp-score{font-family:var(–mono);font-size:26px;font-weight:700;line-height:1}
+.comp-score-sub{font-family:var(–mono);font-size:10px;color:var(–sub)}
+.comp-toggle{background:none;border:none;color:var(–sub);font-family:var(–mono);font-size:10px;padding:0;cursor:pointer;letter-spacing:.05em;text-decoration:underline dotted}
+.comp-factors{display:flex;gap:6px;margin-bottom:6px;margin-top:6px}
+.comp-factor{flex:1;background:var(–card2);border-radius:8px;padding:6px 7px}
 .comp-factor-lbl{font-size:9px;color:var(–sub2);margin-bottom:3px;font-family:var(–mono);white-space:nowrap}
 .comp-factor-track{height:3px;background:var(–border2);border-radius:2px;overflow:hidden;margin-bottom:4px}
 .comp-factor-bar{height:100%;border-radius:2px}
 .comp-factor-val{font-family:var(–mono);font-size:12px;font-weight:700}
-.comp-comment{padding:7px 9px;background:var(–card2);border-radius:6px;font-size:12px;color:var(–sub)}
+.comp-comment{padding:5px 8px;background:var(–card2);border-radius:6px;font-size:11px;color:var(–sub)}
 .comp-comment strong{color:var(–text)}
+.comp-detail{overflow:hidden;max-height:0;transition:max-height .3s ease}
+.comp-detail.open{max-height:200px}
 
 /* ── FLOATING BAR ── */
 #kb-bar{
@@ -239,8 +242,8 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
     </div>
     <div class="main-content">
       <!-- 総合評価カード（データあり時のみ表示） -->
-      <div id="top-eval-card" class="hidden" style="padding:10px 12px 0">
-        <div class="card">
+      <div id="top-eval-card" class="hidden" style="padding-top:6px">
+        <div class="card" style="overflow:hidden">
           <div class="comp-wrap" id="compWrap">
             <div class="comp-header">
               <span class="comp-title">// 総合評価スコア</span>
@@ -249,31 +252,36 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
             <div class="comp-score-row">
               <div class="comp-score" id="compScore">-.-%</div>
               <div class="comp-score-sub">= 確率 × 信頼係数</div>
-            </div>
-            <div class="comp-factors">
-              <div class="comp-factor">
-                <div class="comp-factor-lbl">データ信頼度</div>
-                <div class="comp-factor-track"><div class="comp-factor-bar" id="cfBar1"></div></div>
-                <div class="comp-factor-val" id="cfVal1"></div>
-              </div>
-              <div class="comp-factor">
-                <div class="comp-factor-lbl">安定性信頼度</div>
-                <div class="comp-factor-track"><div class="comp-factor-bar" id="cfBar2"></div></div>
-                <div class="comp-factor-val" id="cfVal2"></div>
-              </div>
-              <div class="comp-factor">
-                <div class="comp-factor-lbl">信頼係数</div>
-                <div class="comp-factor-track"><div class="comp-factor-bar" id="cfBar3"></div></div>
-                <div class="comp-factor-val" id="cfVal3"></div>
-              </div>
+              <button class="comp-toggle" onclick="toggleCompDetail()" id="compToggle">詳細 ▾</button>
             </div>
             <div class="comp-comment" id="compComment"></div>
+            <div class="comp-detail" id="compDetail">
+              <div class="comp-factors">
+                <div class="comp-factor">
+                  <div class="comp-factor-lbl">データ信頼度</div>
+                  <div class="comp-factor-track"><div class="comp-factor-bar" id="cfBar1"></div></div>
+                  <div class="comp-factor-val" id="cfVal1"></div>
+                </div>
+                <div class="comp-factor">
+                  <div class="comp-factor-lbl">安定性信頼度</div>
+                  <div class="comp-factor-track"><div class="comp-factor-bar" id="cfBar2"></div></div>
+                  <div class="comp-factor-val" id="cfVal2"></div>
+                </div>
+                <div class="comp-factor">
+                  <div class="comp-factor-lbl">信頼係数</div>
+                  <div class="comp-factor-track"><div class="comp-factor-bar" id="cfBar3"></div></div>
+                  <div class="comp-factor-val" id="cfVal3"></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="succ-wrap" style="border-top:1px solid var(--border)">
-            <div class="succ-pct" id="succPct">-.-%</div>
-            <div class="succ-lbl" id="succLbl">ボーダー超えの確率</div>
+          <div class="succ-wrap" style="border-top:1px solid var(--border);padding:8px 12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div class="succ-pct" id="succPct" style="font-size:16px">-.-%</div>
+              <div class="succ-lbl" id="succLbl" style="font-size:10px;text-align:right;max-width:60%">ボーダー超えの確率</div>
+            </div>
             <div class="bar-track"><div class="bar-fill" id="succBar" style="width:0%"></div></div>
-            <div class="succ-verdict" id="succVerdict"></div>
+            <div class="succ-verdict" id="succVerdict" style="margin-top:7px"></div>
           </div>
         </div>
       </div>
@@ -323,8 +331,17 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
         <div class="cwrap"    id="cw2"><canvas id="likeChart" height="180"></canvas></div>
       </div>
       <div id="empty-state">
-        <div class="empty-t">// AWAITING DATA INPUT</div>
-        <div class="empty-s">まず初期累計回転数を入力<br>（前任者の回転数 or 0）<br><br>次からは1000円ごとに<br>液晶の累計回転数を入力してください</div>
+        <div style="padding:32px 20px 20px;text-align:center">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--amber-dim);letter-spacing:.15em;margin-bottom:12px">// AWAITING DATA INPUT</div>
+          <div style="font-size:13px;color:var(--sub);line-height:2">
+            まず<strong style="color:var(--text)">初期累計回転数</strong>を入力<br>
+            （前任者の回転数 or 0）
+          </div>
+          <div style="margin:20px auto 0;width:40px;height:1px;background:var(--border2)"></div>
+          <div style="font-size:11px;color:var(--sub2);line-height:2;margin-top:16px">
+            次からは<strong style="color:var(--sub)">1000円ごと</strong>に<br>液晶の累計回転数を入力してください
+          </div>
+        </div>
       </div>
       <div id="stats-sec" class="hidden">
         <div class="stag"><span class="sn">03</span>尤度計算（回転数帯別）</div>
@@ -474,7 +491,7 @@ function render(){
   document.getElementById('dot').classList.toggle('live',hasData);
   document.getElementById('empty-state').classList.toggle('hidden',hasData);
   document.getElementById('stats-sec').classList.toggle('hidden',!hasData);
-  document.getElementById('top-eval-card').classList.toggle('hidden',!hasData);
+  document.getElementById('top-eval-card').classList.remove('hidden');
   const isInit=cur.base===null;
   document.getElementById('inputLbl').textContent=isInit?'INIT — 初期累計回転数を入力':'DATA INPUT — 現在の累計回転数';
   const rotIn=document.getElementById('rotIn');
@@ -523,6 +540,19 @@ function renderKPI(s,m,hasData){
     ['kpiMu','kpiMean','kpiInvest','kpiEVTotal'].forEach(id=>document.getElementById(id).textContent='-.-');
     document.getElementById('kpiInvest').textContent='-.k';
     document.getElementById('kpiEVSub').textContent='1k: -.- 円';
+    // 総合評価カードのプレースホルダー
+    document.getElementById('compScore').textContent='-.-%';
+    document.getElementById('compScore').style.color='#525252';
+    const badge=document.getElementById('compBadge');
+    badge.textContent='データ待ち';badge.style.color='#525252';badge.style.background='rgba(82,82,82,.15)';
+    document.getElementById('compComment').innerHTML='<span style="color:var(--sub2)">回転数を入力すると総合評価が算出されます</span>';
+    ['cfBar1','cfBar2','cfBar3'].forEach(id=>document.getElementById(id).style.cssText='width:0%;background:#333');
+    ['cfVal1','cfVal2','cfVal3'].forEach(id=>{const el=document.getElementById(id);el.textContent='-.--';el.style.color='#525252';});
+    document.getElementById('succPct').textContent='-.-%';
+    document.getElementById('succPct').style.color='#525252';
+    document.getElementById('succLbl').textContent=`ボーダー（${ST.cfg.border}回転）を超える確率`;
+    document.getElementById('succBar').style.cssText='width:0%;background:#333';
+    document.getElementById('succVerdict').innerHTML='<span style="color:var(--sub2)">データ入力後に確率が表示されます</span>';
     return;
   }
   const muEl=document.getElementById('kpiMu');muEl.textContent=f(s.muPost);muEl.style.color=s.muPost>=s.border*1.05?'#4ade80':s.muPost>=s.border?'#f59e0b':'#f87171';
@@ -711,6 +741,7 @@ function closeDrawer(){document.getElementById('drawer').classList.remove('open'
 
 function onCI(){const v=parseInt(document.getElementById('ciSlider').value);ST.ciLevel=v;document.getElementById('ciPct').textContent=v+'%';save();const s=calcStats();if(s){renderCI(s);renderSuccess(s);renderKPI(s,mach(),true);renderDistBarChart(s);}}
 function toggleCollapse(){ST.colOpen=!ST.colOpen;save();document.getElementById('colSection').classList.toggle('open',ST.colOpen);document.getElementById('colArrow').classList.toggle('open',ST.colOpen);}
+function toggleCompDetail(){const d=document.getElementById('compDetail'),t=document.getElementById('compToggle');const open=d.classList.toggle('open');t.textContent=open?'詳細 ▴':'詳細 ▾';}
 function openSettings(){const{border,priorMu,priorSigma,shogyu}=ST.cfg;document.getElementById('setBorder').value=border;document.getElementById('setPriorMu').value=priorMu;document.getElementById('setPriorSigma').value=priorSigma;document.getElementById('setShogyu').value=shogyu;document.getElementById('settings-modal').classList.add('open');}
 function closeSettings(){const b=parseFloat(document.getElementById('setBorder').value),mu=parseFloat(document.getElementById('setPriorMu').value),sg=parseFloat(document.getElementById('setPriorSigma').value),sh=parseInt(document.getElementById('setShogyu').value);if(!isNaN(b)&&b>0)ST.cfg.border=b;if(!isNaN(mu)&&mu>0)ST.cfg.priorMu=mu;if(!isNaN(sg)&&sg>0)ST.cfg.priorSigma=sg;if(!isNaN(sh)&&sh>=0)ST.cfg.shogyu=sh;save();document.getElementById('settings-modal').classList.remove('open');killCharts();render();}
 function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
