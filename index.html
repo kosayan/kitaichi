@@ -177,25 +177,6 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
 .comp-comment strong{color:var(–text)}
 .comp-detail{overflow:hidden;max-height:0;transition:max-height .3s ease}
 .comp-detail.open{max-height:200px}
-
-/* ── FLOATING BAR ── */
-#kb-bar{
-position:fixed;bottom:-60px;left:0;right:0;
-height:52px;background:#1c1c1c;
-border-top:1px solid #3a3a3a;
-display:flex;align-items:center;
-padding:0 14px;
-transition:bottom .22s ease;
-z-index:999;
-}
-#kb-bar.show{bottom:0}
-#kb-preview{flex:1;font-family:var(–mono);font-size:20px;font-weight:700;color:var(–amber)}
-#kb-add-btn{
-background:var(–amber);border:none;border-radius:8px;
-color:#000;font-family:var(–mono);font-size:14px;font-weight:700;
-padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
-}
-#kb-add-btn:active{opacity:.7}
 </style>
 
 </head>
@@ -210,13 +191,6 @@ padding:9px 24px;cursor:pointer;letter-spacing:.05em;flex-shrink:0;
   <div id="machineList"></div>
 </div>
 <div id="drawer-overlay" onclick="closeDrawer()"></div>
-
-<!-- FLOATING BAR -->
-
-<div id="kb-bar">
-  <div id="kb-preview">—<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span></div>
-  <button id="kb-add-btn" onclick="addEntry()">追加 →</button>
-</div>
 
 <div id="app">
   <header>
@@ -746,36 +720,7 @@ function openSettings(){const{border,priorMu,priorSigma,shogyu}=ST.cfg;document.
 function closeSettings(){const b=parseFloat(document.getElementById('setBorder').value),mu=parseFloat(document.getElementById('setPriorMu').value),sg=parseFloat(document.getElementById('setPriorSigma').value),sh=parseInt(document.getElementById('setShogyu').value);if(!isNaN(b)&&b>0)ST.cfg.border=b;if(!isNaN(mu)&&mu>0)ST.cfg.priorMu=mu;if(!isNaN(sg)&&sg>0)ST.cfg.priorSigma=sg;if(!isNaN(sh)&&sh>=0)ST.cfg.shogyu=sh;save();document.getElementById('settings-modal').classList.remove('open');killCharts();render();}
 function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
 
-let _kbResize_fn=null;
-function _kbResize(){
-  const bar=document.getElementById('kb-bar');
-  if(!bar.classList.contains('show'))return;
-  if(window.visualViewport){
-    const off=window.innerHeight-window.visualViewport.height;
-    bar.style.bottom=Math.max(0,off)+'px';
-  }
-}
 document.getElementById('rotIn').addEventListener('keydown',e=>{if(e.key==='Enter')addEntry();});
-document.getElementById('rotIn').addEventListener('focus',()=>{
-  document.getElementById('kb-bar').classList.add('show');
-  window.visualViewport?.addEventListener('resize',_kbResize);
-  window.visualViewport?.addEventListener('scroll',_kbResize);
-  setTimeout(_kbResize,50);
-});
-document.getElementById('rotIn').addEventListener('blur',()=>{
-  setTimeout(()=>{
-    document.getElementById('kb-bar').classList.remove('show');
-    document.getElementById('kb-bar').style.bottom='';
-    window.visualViewport?.removeEventListener('resize',_kbResize);
-    window.visualViewport?.removeEventListener('scroll',_kbResize);
-  },200);
-});
-document.getElementById('rotIn').addEventListener('input',()=>{
-  const v=document.getElementById('rotIn').value;
-  document.getElementById('kb-preview').innerHTML=v
-    ?`${v}<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span>`
-    :`—<span style="font-size:11px;color:var(--sub);margin-left:4px">回転</span>`;
-});
 document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
 document.getElementById('ciSlider').value=ST.ciLevel;
 document.getElementById('ciPct').textContent=ST.ciLevel+'%';
