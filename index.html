@@ -26,7 +26,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 input,button,textarea{-webkit-appearance:none;appearance:none}
-html,body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;overflow-x:hidden;-webkit-text-size-adjust:100%}
+html,body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;overflow-x:hidden;-webkit-text-size-adjust:100%;overflow-y:auto;overscroll-behavior-y:none}
 header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-area-inset-top),12px);padding-bottom:0;padding-left:12px;padding-right:12px;background:rgba(10,10,10,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 #app{padding-top:calc(var(--hdr) + max(env(safe-area-inset-top),12px));display:flex;min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh}
 .menu-btn{background:none;border:none;color:var(--sub);font-size:20px;padding:6px;cursor:pointer;line-height:1;flex-shrink:0}
@@ -741,26 +741,6 @@ function fixHeaderOffset(){const hdr=document.querySelector('header'),app=docume
 window.addEventListener('load',fixHeaderOffset);
 window.addEventListener('resize',fixHeaderOffset);
 document.addEventListener('DOMContentLoaded',fixHeaderOffset);
-
-// Fix black gap when keyboard opens in Safari
-function fixViewport(){
-  const vv=window.visualViewport;
-  if(!vv)return;
-  const app=document.getElementById('app');
-  if(app){
-    app.style.minHeight=vv.height+'px';
-    app.style.height=vv.height+'px';
-  }
-  document.body.style.height=vv.height+'px';
-}
-function resetViewport(){
-  const app=document.getElementById('app');
-  if(app){app.style.minHeight='';app.style.height='';}
-  document.body.style.height='';
-}
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize',fixViewport);
-}
 </script>
 
 </body>
