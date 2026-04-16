@@ -277,10 +277,12 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
       </div>
       <section id="input-sec">
         <div class="input-lbl" id="inputLbl">INIT — 初期累計回転数を入力</div>
+        <form onsubmit="event.preventDefault();addEntry()" style="display:contents">
         <div class="input-row">
-          <input type="text" inputmode="decimal" enterkeyhint="done" class="rot-in" id="rotIn" placeholder="前任者の回転数 (例: 0)" autocomplete="off" autocorrect="off">
-          <button class="add-btn" onclick="addEntry()">ADD</button>
+          <input type="text" inputmode="text" enterkeyhint="go" class="rot-in" id="rotIn" placeholder="前任者の回転数 (例: 0)" autocomplete="off" autocorrect="off" autocapitalize="none">
+          <button type="submit" class="add-btn">ADD</button>
         </div>
+        </form>
         <div style="display:flex;gap:6px;align-items:stretch">
           <button class="hit-btn" id="hitBtn" onclick="addHit()" disabled style="flex:3;font-size:13px;padding:9px 10px">🎯 当たり</button>
           <button class="hit-btn" id="undoHitBtn" onclick="undoHit()" style="flex:0 0 auto;padding:9px 12px;display:none" title="直前の当たりを取り消す">↩</button>
@@ -720,8 +722,9 @@ function openSettings(){const{border,priorMu,priorSigma,shogyu}=ST.cfg;document.
 function closeSettings(){const b=parseFloat(document.getElementById('setBorder').value),mu=parseFloat(document.getElementById('setPriorMu').value),sg=parseFloat(document.getElementById('setPriorSigma').value),sh=parseInt(document.getElementById('setShogyu').value);if(!isNaN(b)&&b>0)ST.cfg.border=b;if(!isNaN(mu)&&mu>0)ST.cfg.priorMu=mu;if(!isNaN(sg)&&sg>0)ST.cfg.priorSigma=sg;if(!isNaN(sh)&&sh>=0)ST.cfg.shogyu=sh;save();document.getElementById('settings-modal').classList.remove('open');killCharts();render();}
 function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
 
-document.getElementById('rotIn').addEventListener('keydown',e=>{if(e.key==='Enter')addEntry();});
+// Enter key handled by form submit
 document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
+document.getElementById('rotIn').addEventListener('keyup',e=>{if(e.key==='Enter')addEntry();});
 document.getElementById('ciSlider').value=ST.ciLevel;
 document.getElementById('ciPct').textContent=ST.ciLevel+'%';
 document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===ST.activeTab));
