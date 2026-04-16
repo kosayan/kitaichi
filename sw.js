@@ -1,4 +1,4 @@
-const CACHE = ‘kaiten-v40’;
+const CACHE = ‘kaiten-v41’;
 const ASSETS = [’./index.html’, ‘./manifest.json’];
 
 self.addEventListener(‘install’, e => {
