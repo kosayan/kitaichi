@@ -746,12 +746,20 @@ document.addEventListener('DOMContentLoaded',fixHeaderOffset);
 function fixViewport(){
   const vv=window.visualViewport;
   if(!vv)return;
+  const app=document.getElementById('app');
+  if(app){
+    app.style.minHeight=vv.height+'px';
+    app.style.height=vv.height+'px';
+  }
   document.body.style.height=vv.height+'px';
-  window.scrollTo(0,0);
+}
+function resetViewport(){
+  const app=document.getElementById('app');
+  if(app){app.style.minHeight='';app.style.height='';}
+  document.body.style.height='';
 }
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize',fixViewport);
-  window.visualViewport.addEventListener('scroll',fixViewport);
 }
 </script>
 
