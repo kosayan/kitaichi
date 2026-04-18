@@ -54,6 +54,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
 .hist-panel::-webkit-scrollbar{display:none}
 .hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(--sans);font-size:9px;color:var(--sub2);letter-spacing:.08em}
 .hp-item{border-bottom:1px solid var(--border);padding:5px 3px;text-align:center;flex-shrink:0}
+.hp-item-half{padding:2px 3px}
+.hp-item-half .hp-cumul{font-size:9px}
+.hp-item-half .hp-rot-sm{font-size:9px}
+.hp-item-half .hp-num{font-size:7px;margin-bottom:1px}
+.hp-item-half .hp-dev{font-size:8px}
 .hp-num{font-family:var(--mono);font-size:8px;color:var(--sub2);margin-bottom:2px}
 .hp-row2{display:flex;justify-content:center;align-items:baseline;gap:4px;margin-bottom:2px}
 .hp-cumul{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);line-height:1}
@@ -294,13 +299,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
         </div>
       </div>
       <section id="input-sec">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <div class="input-lbl" id="inputLbl">INIT — 初期累計回転数を入力</div>
-          <div id="proToggle" style="display:none;font-family:var(--mono);font-size:10px;gap:2px;background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:2px;flex-shrink:0">
-            <button type="button" id="proHalfBtn" onclick="setProBalls(125)" style="background:transparent;border:none;color:var(--sub);padding:3px 8px;cursor:pointer;border-radius:4px;font-family:var(--mono);font-size:10px">0.5k</button>
-            <button type="button" id="proFullBtn" onclick="setProBalls(250)" style="background:var(--amber);border:none;color:#000;padding:3px 8px;cursor:pointer;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700">1k</button>
-          </div>
-        </div>
+        <div class="input-lbl" id="inputLbl">INIT — 初期累計回転数を入力</div>
         <form onsubmit="event.preventDefault();addEntry()" style="display:contents">
         <div class="input-row">
           <div style="flex:1;min-width:0;display:flex;align-items:stretch;background:var(--card2);border:1px solid var(--border2);border-radius:8px;overflow:hidden" id="rotInWrap">
@@ -315,6 +314,10 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
         <div style="display:flex;gap:6px;align-items:stretch">
           <button class="hit-btn" id="hitBtn" onclick="addHit()" disabled style="flex:1;font-size:13px;padding:9px 10px">🎯 当たり</button>
           <button class="hit-btn" id="undoHitBtn" onclick="undoHit()" style="flex:0 0 auto;padding:9px 12px;display:none" title="直前の当たりを取り消す">↩</button>
+          <div id="proToggle" style="display:none;align-items:center;gap:2px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:2px;flex-shrink:0">
+            <button type="button" id="proHalfBtn" onclick="setProBalls(125)" style="background:transparent;border:none;color:var(--sub);padding:6px 10px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px">0.5k</button>
+            <button type="button" id="proFullBtn" onclick="setProBalls(250)" style="background:var(--amber);border:none;color:#000;padding:6px 10px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700">1k</button>
+          </div>
         </div>
       </section>
       <div id="graph-sec">
@@ -513,10 +516,10 @@ function updateUndoBtn(){
   btn.style.opacity=enabled?'1':'.35';
   btn.style.cursor=enabled?'pointer':'default';
 }
-function rots(){const all=[];mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];all.push(v-prev);});});return all;}
+function rots(){const all=[];mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;const balls=(sess.dataBalls&&sess.dataBalls[i])||250;all.push(rot*(250/balls));});});return all;}
 function ballsFor(sess,di){return (sess.dataBalls&&sess.dataBalls[di])||250;}
 function hitCount(){return mach().sessions.filter(s=>s.hit).length;}
-function allEvents(){const events=[];let dataIdx=0;mach().sessions.forEach((sess,si)=>{if(sess.base!==null){events.push({type:'base',val:sess.base,si});}sess.data.forEach((v,di)=>{const prev=di===0?sess.base:sess.data[di-1];dataIdx++;events.push({type:'data',cumul:v,rot:v-prev,idx:dataIdx,si,di});});if(sess.hit){events.push({type:'hit',si});}});return events;}
+function allEvents(){const events=[];let dataIdx=0;mach().sessions.forEach((sess,si)=>{if(sess.base!==null){events.push({type:'base',val:sess.base,si});}sess.data.forEach((v,di)=>{const prev=di===0?sess.base:sess.data[di-1];const balls=(sess.dataBalls&&sess.dataBalls[di])||250;const rot=v-prev;const rotNorm=rot*(250/balls);dataIdx++;events.push({type:'data',cumul:v,rot,rotNorm,balls,idx:dataIdx,si,di});});if(sess.hit){events.push({type:'hit',si});}});return events;}
 
 function calcStats(){
   const r=rots(),n=r.length;if(!n)return null;
@@ -578,9 +581,7 @@ function render(){
   document.getElementById('top-eval-card').classList.remove('hidden');
   const isInit=cur.base===null;
   document.getElementById('inputLbl').textContent=isInit?'INIT — 初期累計回転数を入力':'DATA INPUT — 現在の累計回転数';
-  const rotIn=document.getElementById('rotIn');
-  if(isInit){rotIn.placeholder='前任者の回転数 (例: 0 or 123)';}
-  else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;rotIn.placeholder=`> ${last}`;}
+  updateInputPlaceholder();
   document.getElementById('hitBtn').disabled=(cur.base===null||cur.data.length===0);
   const sess=mach().sessions;
   const canUndo=sess.length>=2&&sess[sess.length-2].hit&&sess[sess.length-1].base===null&&sess[sess.length-1].data.length===0;
@@ -617,7 +618,7 @@ function renderDrawerList(){
 }
 
 function rots_for(m){let c=0;m.sessions.forEach(sess=>{if(sess.base!==null)c+=sess.data.length;});return c;}
-function mean_for(m){const r=[];m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];r.push(v-prev);});});return r.length?r.reduce((a,b)=>a+b,0)/r.length:null;}
+function mean_for(m){const r=[];m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const balls=(sess.dataBalls&&sess.dataBalls[i])||250;const rot=v-prev;r.push(rot*(250/balls));});});return r.length?r.reduce((a,b)=>a+b,0)/r.length:null;}
 function muPost_for(m){const{priorMu,priorSigma,shogyu}=ST.cfg;const nEff=250+shogyu*priorMu,p0=priorMu/nEff,sp=priorSigma/nEff;const kappa=Math.max(2,p0*(1-p0)/(sp*sp)-1);const a0=kappa*p0,b0=kappa*(1-p0);let S=0,Nb=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;const balls=(sess.dataBalls&&sess.dataBalls[i])||250;S+=rot;Nb+=balls+shogyu*rot;});});if(S===0)return null;const aP=a0+S,bP=b0+(Nb-S),pP=aP/(aP+bP);return pToRot(pP,shogyu);}
 
 function formatDate(ts){
@@ -676,11 +677,21 @@ function renderKPI(s,m,hasData){
     return;
   }
   const muEl=document.getElementById('kpiMu');muEl.textContent=f(s.muPost);muEl.style.color=s.muPost>=s.border*1.05?'#4ade80':s.muPost>=s.border?'#f59e0b':'#f87171';
-  document.getElementById('kpiMean').textContent=f(s.mean)+'回';document.getElementById('kpiInvest').textContent=s.n+'k';
-  const evTotal=s.ev*s.n,eet=document.getElementById('kpiEVTotal');eet.textContent=(evTotal>=0?'+':'')+f(evTotal,0)+'円';eet.style.color=evTotal>=0?'#4ade80':'#f87171';
+  // 実投資額：セッション内の実球数合計からk換算
+  let totalBalls=0;
+  mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{totalBalls+=(sess.dataBalls&&sess.dataBalls[i])||250;});});
+  const investK=totalBalls/250;
+  const investStr=investK%1===0?`${investK}k`:`${investK.toFixed(1)}k`;
+  document.getElementById('kpiMean').textContent=f(s.mean)+'回';
+  document.getElementById('kpiInvest').textContent=investStr;
+  // 期待値はinvestKベースで計算
+  const evTotal=s.ev*investK;
+  const eet=document.getElementById('kpiEVTotal');
+  eet.textContent=(evTotal>=0?'+':'')+f(evTotal,0)+'円';
+  eet.style.color=evTotal>=0?'#4ade80':'#f87171';
   document.getElementById('kpiEVSub').textContent=`推定1k: ${(s.ev>=0?'+':'')+f(s.ev,0)}円`;
   const realEv=(s.mean/s.border-1)*1000;
-  const realEvTotal=realEv*s.n;
+  const realEvTotal=realEv*investK;
   const realEl=document.getElementById('kpiEVReal');
   realEl.textContent=`実測1k: ${(realEv>=0?'+':'')+f(realEv,0)}円 (計${(realEvTotal>=0?'+':'')+f(realEvTotal,0)}円)`;
   realEl.style.color=realEv>=0?'#4ade80':'#f87171';
@@ -784,19 +795,16 @@ function renderHistPanel(s){
       }
     }
     else{
-      const dev=s?ev.rot-s.muPost:null;
+      const dev=s?ev.rotNorm-s.muPost:null;
       const devStr=dev===null?'':(dev>=0?'+'+f(dev,1):f(dev,1));
       const devColor=dev===null?'var(--sub)':dev>=0?'#4ade80':'#f87171';
-      // 回転数をボーダー比較で色分け
       const border=ST.cfg.border;
-      const rotColor=ev.rot>=border*1.1?'#4ade80':ev.rot>=border?'#a3e635':ev.rot>=border*0.9?'#facc15':'#f87171';
-      // 0.5k入力マーカー
-      const sess=mach().sessions[ev.si];
-      const balls=(sess.dataBalls&&sess.dataBalls[ev.di])||250;
-      const halfMark=balls===125?'<span style="font-family:var(--mono);font-size:7px;color:var(--amber);margin-left:2px">½</span>':'';
-      div.className='hp-item';
+      const rotColor=ev.rotNorm>=border*1.1?'#4ade80':ev.rotNorm>=border?'#a3e635':ev.rotNorm>=border*0.9?'#facc15':'#f87171';
+      const halfMark=ev.balls===125?'<span style="font-family:var(--mono);font-size:7px;color:var(--amber);margin-left:2px">½</span>':'';
+      const rotDisp=ev.balls===125?ev.rotNorm.toFixed(0):ev.rot.toString();
+      div.className='hp-item'+(ev.balls===125?' hp-item-half':'');
       div.style.cssText='position:relative;cursor:pointer';
-      div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${ev.rot}</span></div><div class="hp-dev" style="color:${devColor}">${devStr}</div><button onclick="event.stopPropagation();deleteDataPoint(${ev.si},${ev.di})" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:#f87171;border:none;border-radius:4px;color:#000;font-size:9px;font-weight:700;padding:3px 6px;cursor:pointer" class="del-dp-btn">削除</button>`;
+      div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${rotDisp}</span></div><div class="hp-dev" style="color:${devColor}">${devStr}</div><button onclick="event.stopPropagation();deleteDataPoint(${ev.si},${ev.di})" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:#f87171;border:none;border-radius:4px;color:#000;font-size:9px;font-weight:700;padding:3px 6px;cursor:pointer" class="del-dp-btn">削除</button>`;
       div.addEventListener('click',function(){const btn=this.querySelector('.del-dp-btn');const isShown=btn.style.display!=='none';document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');btn.style.display=isShown?'none':'block';});
     }
     panel.appendChild(div);
@@ -818,29 +826,34 @@ function renderDistBarChart(s){
 }
 
 function renderHistChartFn(s){
-  const r=rots(),ctx=document.getElementById('histChart').getContext('2d');if(charts.hist)charts.hist.destroy();
-  const labels=r.map((_,i)=>`#${i+1}`);const runAvg=r.map((_,i)=>r.slice(0,i+1).reduce((a,b)=>a+b,0)/(i+1));
-  charts.hist=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'回転数/1k',data:r,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',pointBackgroundColor:'#f59e0b',pointRadius:4,tension:.2,fill:true},{label:'累積平均',data:runAvg,borderColor:'#22d3ee',borderDash:[5,3],pointRadius:0,tension:.3,borderWidth:1.5},{label:'ボーダー',data:r.map(()=>s.border),borderColor:'#f87171',borderDash:[3,3],pointRadius:0,borderWidth:1}]},options:{...CO,scales:{x:{ticks:TICK,grid:GRID},y:{ticks:TICK,grid:GRID}},plugins:{legend:{display:true,labels:{color:'#808080',font:{family:'IBM Plex Mono',size:10},boxWidth:12,padding:10}}}}});
+  const ctx=document.getElementById('histChart').getContext('2d');if(charts.hist)charts.hist.destroy();
+  // 累積k数ベースでデータ点を生成
+  const events=allEvents().filter(e=>e.type==='data');
+  const points=[];
+  const runAvgPoints=[];
+  let cumK=0,sumRot=0,count=0;
+  events.forEach(ev=>{
+    const kInc=ev.balls/250;
+    cumK+=kInc;
+    sumRot+=ev.rotNorm;
+    count++;
+    points.push({x:cumK,y:ev.rotNorm});
+    runAvgPoints.push({x:cumK,y:sumRot/count});
+  });
+  const maxK=cumK||1;
+  const borderLine=[{x:0,y:s.border},{x:maxK,y:s.border}];
+  charts.hist=new Chart(ctx,{type:'line',data:{datasets:[{label:'回転数/1k',data:points,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',pointBackgroundColor:'#f59e0b',pointRadius:4,tension:.2,fill:true},{label:'累積平均',data:runAvgPoints,borderColor:'#22d3ee',borderDash:[5,3],pointRadius:0,tension:.3,borderWidth:1.5},{label:'ボーダー',data:borderLine,borderColor:'#f87171',borderDash:[3,3],pointRadius:0,borderWidth:1}]},options:{...CO,scales:{x:{type:'linear',ticks:{...TICK,callback:v=>v%1===0?`${v}k`:`${v.toFixed(1)}k`},grid:GRID,title:{display:false}},y:{ticks:TICK,grid:GRID}},plugins:{legend:{display:true,labels:{color:'#808080',font:{family:'IBM Plex Mono',size:10},boxWidth:12,padding:10}}}}});
 }
 
 function renderLikeChart(s){
   const ctx=document.getElementById('likeChart').getContext('2d');if(charts.like)charts.like.destroy();
   // likeWidth: 1=最粗, 10=最細
   const w=ST.likeWidth||5;
-  const r=rots();
-  // 細かい設定ではmuPost中心で範囲を設定
+  // 常にmuPost中心で範囲を設定（粗/細ともに）
   const muPost=s.muPost,sdRot=s.sdRot;
-  let minRot,maxRot;
-  if(w>=6){
-    // 細モード：推定値±3SDを範囲に
-    const spread=Math.max(3,sdRot*3);
-    minRot=Math.floor((muPost-spread)*2)/2;
-    maxRot=Math.ceil((muPost+spread)*2)/2;
-  } else {
-    // 粗モード：実データ範囲
-    minRot=Math.floor(Math.min(...r)-1);
-    maxRot=Math.ceil(Math.max(...r)+1);
-  }
+  const spread=Math.max(4,sdRot*3.5);
+  const minRot=Math.floor(muPost-spread);
+  const maxRot=Math.ceil(muPost+spread);
   const range=maxRot-minRot;
   const steps=[range/2, range/3, range/4, range/5, 2, 1.5, 1, 0.75, 0.5, 0.25];
   let step=steps[Math.max(0,Math.min(9,w-1))];
@@ -909,12 +922,24 @@ function setProBalls(b){
   _proNextBalls=b;
   const half=document.getElementById('proHalfBtn'),full=document.getElementById('proFullBtn');
   if(b===125){
-    half.style.cssText='background:var(--amber);border:none;color:#000;padding:3px 8px;cursor:pointer;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700';
-    full.style.cssText='background:transparent;border:none;color:var(--sub);padding:3px 8px;cursor:pointer;border-radius:4px;font-family:var(--mono);font-size:10px';
+    half.style.cssText='background:var(--amber);border:none;color:#000;padding:6px 10px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700';
+    full.style.cssText='background:transparent;border:none;color:var(--sub);padding:6px 10px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px';
   } else {
-    full.style.cssText='background:var(--amber);border:none;color:#000;padding:3px 8px;cursor:pointer;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700';
-    half.style.cssText='background:transparent;border:none;color:var(--sub);padding:3px 8px;cursor:pointer;border-radius:4px;font-family:var(--mono);font-size:10px';
+    full.style.cssText='background:var(--amber);border:none;color:#000;padding:6px 10px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700';
+    half.style.cssText='background:transparent;border:none;color:var(--sub);padding:6px 10px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px';
   }
+  // placeholderヒントを更新
+  updateInputPlaceholder();
+}
+function updateInputPlaceholder(){
+  const cur=curSess();
+  const isInit=cur.base===null;
+  const rotIn=document.getElementById('rotIn');
+  if(!rotIn)return;
+  if(isInit){rotIn.placeholder='前任者の回転数 (例: 0 or 123)';return;}
+  const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;
+  const hint=(ST.cfg.proMode&&_proNextBalls===125)?'（次は500円分）':'';
+  rotIn.placeholder=`> ${last}${hint}`;
 }
 
 function adjustInput(delta){
