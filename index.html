@@ -293,13 +293,6 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
           <button class="hit-btn" id="undoHitBtn" onclick="undoHit()" style="flex:0 0 auto;padding:9px 12px;display:none" title="直前の当たりを取り消す">↩</button>
         </div>
       </section>
-      <div id="ci-sec">
-        <div class="slider-row">
-          <span class="slider-lbl">信頼区間</span>
-          <input type="range" class="ci-slider" id="ciSlider" min="50" max="99" value="95" oninput="onCI()">
-          <span class="ci-pct" id="ciPct">95%</span>
-        </div>
-      </div>
       <div id="graph-sec">
         <div class="ctabs">
           <button class="ctab on" onclick="switchTab(0)">分布</button>
@@ -309,6 +302,13 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
         <div class="cwrap on" id="cw0"><canvas id="distChart" height="180"></canvas></div>
         <div class="cwrap"    id="cw1"><canvas id="histChart" height="180"></canvas></div>
         <div class="cwrap"    id="cw2"><canvas id="likeChart" height="180"></canvas></div>
+        <div id="ci-sec" style="padding:8px 0 0">
+          <div class="slider-row">
+            <span class="slider-lbl" id="ciLabel">信頼区間</span>
+            <input type="range" class="ci-slider" id="ciSlider" min="50" max="99" value="95" oninput="onCI()">
+            <span class="ci-pct" id="ciPct">95%</span>
+          </div>
+        </div>
       </div>
       <div id="empty-state">
         <div style="padding:32px 20px 20px;text-align:center">
@@ -422,7 +422,7 @@ function normInv(p){const a=[2.50662823884,-18.61500062529,41.39119773534,-25.44
 function rotToP(rot,sh){return rot/(250+sh*rot);}
 function pToRot(p,sh){return 250*p/Math.max(1e-9,1-sh*p);}
 function defMachine(id){return{id,sessions:[{base:null,data:[],hit:false}]};}
-function defState(){return{machines:[defMachine('台0001')],current:0,cfg:{border:17,priorMu:19,priorSigma:2.5,shogyu:1},ciLevel:95,colOpen:false,activeTab:0};}
+function defState(){return{machines:[defMachine('台0001')],current:0,cfg:{border:17,priorMu:19,priorSigma:2.5,shogyu:1},ciLevel:95,likeWidth:5,colOpen:false,activeTab:0};}
 function migrate(st){if(!st)return defState();if(!st.machines)return defState();st.machines.forEach(m=>{if(m.entries!==undefined&&m.sessions===undefined){if(!m.entries||m.entries.length===0){m.sessions=[{base:null,data:[],hit:false}];}else{m.sessions=[{base:m.entries[0],data:m.entries.slice(1),hit:false}];}delete m.entries;delete m.hits;}if(!m.sessions)m.sessions=[{base:null,data:[],hit:false}];});if(st.cfg&&!st.cfg.shogyu)st.cfg.shogyu=1;if(!st.activeTab)st.activeTab=0;return st;}
 let ST;try{ST=migrate(JSON.parse(localStorage.getItem('kt_v5')||'null'));}catch{ST=defState();}
 function save(){localStorage.setItem('kt_v5',JSON.stringify(ST));}
@@ -440,7 +440,11 @@ function calcStats(){
   const a0=kappa*p0,b0=kappa*(1-p0);
   let S=0,Nballs=0;
   mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;S+=rot;Nballs+=250+shogyu*rot;});});
-  const aPost=a0+S,bPost=b0+(Nballs-S),pPost=aPost/(aPost+bPost),muPost=pToRot(pPost,shogyu);
+  // 過分散補正 k(N) = max(1.3, 1 + 2.0/√N)
+  const kOver=Math.max(1.3,1+2.0/Math.sqrt(n));
+  const aPostRaw=a0+S,bPostRaw=b0+(Nballs-S);
+  const aPost=aPostRaw/kOver,bPost=bPostRaw/kOver;
+  const pPost=aPost/(aPost+bPost),muPost=pToRot(pPost,shogyu);
   const varP=aPost*bPost/((aPost+bPost)**2*(aPost+bPost+1));
   const sdRot=Math.sqrt(varP)*250/Math.max(1e-9,(1-shogyu*pPost)**2);
   const pSD=Math.sqrt(varP),lo=(1-ci/100)/2,hi=1-lo;
@@ -465,14 +469,14 @@ function calcStats(){
   lk.above=1-betaCDF(rotToP(bounds[bounds.length-1],shogyu),aPost,bPost);
   const mean=r.reduce((a,b)=>a+b,0)/n;let sVar=null,sSD=null,cv=null,vj=null;
   if(n>=2){sVar=r.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);sSD=Math.sqrt(sVar);cv=sSD/mean;if(cv<.08)vj={label:'非常に安定',color:'#4ade80',bg:'rgba(74,222,128,.1)'};else if(cv<.15)vj={label:'安定',color:'#86efac',bg:'rgba(134,239,172,.1)'};else if(cv<.25)vj={label:'やや不安定',color:'#facc15',bg:'rgba(250,204,21,.1)'};else vj={label:'不安定',color:'#f87171',bg:'rgba(248,113,113,.1)'};}
-  // 総合スコア計算
-  const dataTrust=n/(n+1.5);
+  // 総合スコア計算（dataTrustを過分散補正に合わせて緩める）
+  const dataTrust=n/(n+1.0);
   const theoreticalCV=0.21; // 250球・20回転の理論CV
   const meanCV=n>=2&&cv!==null?cv/Math.sqrt(n):theoreticalCV/Math.sqrt(Math.max(1,n));
   const stabTrust=1/(1+meanCV*1);
   const trustCoef=dataTrust*stabTrust;
   const composite=0.5+(pSuc-0.5)*trustCoef;
-  return{n,mean,sVar,sSD,cv,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,lkBounds,ci,border,a0,b0,priorMu,shogyu,dataTrust,stabTrust,trustCoef,composite};
+  return{n,mean,sVar,sSD,cv,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,lkBounds,ci,border,a0,b0,priorMu,shogyu,dataTrust,stabTrust,trustCoef,composite,kOver};
 }
 
 let charts={};
@@ -659,27 +663,71 @@ function renderHistChartFn(s){
 
 function renderLikeChart(s){
   const ctx=document.getElementById('likeChart').getContext('2d');if(charts.like)charts.like.destroy();
-  const bounds=s.lkBounds;
+  // likeWidth: 1=最粗, 10=最細
+  const w=ST.likeWidth||5;
+  const r=rots();
+  const minRot=Math.floor(Math.min(...r)-1);
+  const maxRot=Math.ceil(Math.max(...r)+1);
+  const range=maxRot-minRot;
+  // stepを10段階で滑らかに: w=1→range/2, w=10→0.25
+  const steps=[range/2, range/3, range/4, range/5, 2, 1.5, 1, 0.75, 0.5, 0.25];
+  let step=steps[Math.max(0,Math.min(9,w-1))];
+  step=Math.round(step*100)/100;
+  const bounds=[];
+  let v=minRot;
+  while(v<maxRot-0.001 && bounds.length<80){
+    bounds.push(Math.round(v*100)/100);
+    v=Math.round((v+step)*100)/100;
+  }
+  if(bounds[bounds.length-1]<maxRot)bounds.push(Math.round(maxRot*100)/100);
   const allColors=['rgba(239,68,68,.75)','rgba(249,115,22,.75)','rgba(250,204,21,.75)','rgba(163,230,53,.75)','rgba(74,222,128,.75)','rgba(52,211,153,.75)','rgba(34,211,238,.75)','rgba(6,182,212,.75)'];
   const allBorders=['#ef4444','#f97316','#facc15','#a3e635','#4ade80','#34d399','#22d3ee','#06b6d4'];
-  const labels=[`<${bounds[0]}`];
-  const vals=[s.lk.below*100];
+  const labels=[`<${Math.round(bounds[0])}`];
+  const vals=[betaCDF(rotToP(bounds[0],s.shogyu),s.aPost,s.bPost)*100];
   const bgColors=[allColors[0]];
   const brColors=[allBorders[0]];
   for(let i=0;i<bounds.length-1;i++){
-    labels.push(`${bounds[i]}-${bounds[i+1]}`);
-    vals.push(s.lk[`r${i}`]*100);
+    labels.push(`${Math.round(bounds[i])}-${Math.round(bounds[i+1])}`);
+    vals.push((betaCDF(rotToP(bounds[i+1],s.shogyu),s.aPost,s.bPost)-betaCDF(rotToP(bounds[i],s.shogyu),s.aPost,s.bPost))*100);
     bgColors.push(allColors[Math.min(i+1,allColors.length-1)]);
     brColors.push(allBorders[Math.min(i+1,allBorders.length-1)]);
   }
-  labels.push(`>${bounds[bounds.length-1]}`);
-  vals.push(s.lk.above*100);
+  labels.push(`>${Math.round(bounds[bounds.length-1])}`);
+  vals.push((1-betaCDF(rotToP(bounds[bounds.length-1],s.shogyu),s.aPost,s.bPost))*100);
   bgColors.push(allColors[Math.min(bounds.length,allColors.length-1)]);
   brColors.push(allBorders[Math.min(bounds.length,allBorders.length-1)]);
-  charts.like=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:bgColors,borderColor:brColors,borderWidth:1,borderRadius:4}]},options:{...CO,scales:{x:{ticks:{color:'#808080',font:{family:'IBM Plex Mono',size:9}},grid:{display:false}},y:{ticks:{...TICK,callback:v=>v.toFixed(0)+'%'},grid:GRID,max:100}}}});
+  // ラベルは最大7個程度に間引く
+  const labelSkip=Math.max(1,Math.ceil(labels.length/7));
+  charts.like=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:bgColors,borderColor:brColors,borderWidth:step<0.5?0:1,borderRadius:step<1?0:4}]},options:{...CO,scales:{x:{ticks:{color:'#808080',font:{family:'IBM Plex Mono',size:9},maxRotation:0,autoSkip:false,callback:(_,i)=>i%labelSkip===0?labels[i]:''},grid:{display:false}},y:{ticks:{...TICK,callback:v=>v.toFixed(0)+'%'},grid:GRID,max:100}}}});
 }
 
-function switchTab(i){ST.activeTab=i;save();document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));document.querySelectorAll('.cwrap').forEach((w,j)=>w.classList.toggle('on',j===i));const s=calcStats();if(s)renderActiveChart(s);}
+function updateSliderLabel(){
+  const tab=ST.activeTab;
+  const label=document.getElementById('ciLabel');
+  const pct=document.getElementById('ciPct');
+  const slider=document.getElementById('ciSlider');
+  if(tab===2){
+    // 尤度帯：粗←→細（min=1最粗, max=10最細）
+    slider.min=1;slider.max=10;
+    if(parseInt(slider.value)>10)slider.value=5;
+    const v=parseInt(slider.value);
+    label.textContent='幅：粗';
+    pct.textContent='細';
+    // ラベルの右に細かさを示す数字は不要、スライダー位置で表現
+  } else {
+    slider.min=50;slider.max=99;
+    if(parseInt(slider.value)<50)slider.value=ST.ciLevel;
+    label.textContent='信頼区間';
+    pct.textContent=slider.value+'%';
+  }
+}
+function switchTab(i){
+  ST.activeTab=i;save();
+  document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  document.querySelectorAll('.cwrap').forEach((w,j)=>w.classList.toggle('on',j===i));
+  updateSliderLabel();
+  const s=calcStats();if(s)renderActiveChart(s);
+}
 
 function addEntry(){
   const inp=document.getElementById('rotIn');const v=parseInt(inp.value.trim());
@@ -759,7 +807,19 @@ function switchMachine(i){ST.current=i;save();killCharts();closeDrawer();render(
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('show');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('show');}
 
-function onCI(){const v=parseInt(document.getElementById('ciSlider').value);ST.ciLevel=v;document.getElementById('ciPct').textContent=v+'%';save();const s=calcStats();if(s){renderCI(s);renderSuccess(s);renderKPI(s,mach(),true);renderDistBarChart(s);}}
+function onCI(){
+  const v=parseInt(document.getElementById('ciSlider').value);
+  if(ST.activeTab===2){
+    // 尤度帯モード：スライダー値を幅に使う（1=粗い=大きい刻み、10=細かい=小さい刻み）
+    ST.likeWidth=v;
+    const s=calcStats();if(s){killCharts();renderLikeChart(s);}
+  } else {
+    ST.ciLevel=v;
+    document.getElementById('ciPct').textContent=v+'%';
+    save();
+    const s=calcStats();if(s){renderCI(s);renderSuccess(s);renderKPI(s,mach(),true);renderDistBarChart(s);}
+  }
+}
 function toggleCollapse(){ST.colOpen=!ST.colOpen;save();document.getElementById('colSection').classList.toggle('open',ST.colOpen);document.getElementById('colArrow').classList.toggle('open',ST.colOpen);}
 function toggleCompDetail(){const d=document.getElementById('compDetail'),t=document.getElementById('compToggle');const open=d.classList.toggle('open');t.textContent=open?'詳細 ▴':'詳細 ▾';}
 function openSettings(){const{border,priorMu,priorSigma,shogyu}=ST.cfg;document.getElementById('setBorder').value=border;document.getElementById('setPriorMu').value=priorMu;document.getElementById('setPriorSigma').value=priorSigma;document.getElementById('setShogyu').value=shogyu;document.getElementById('settings-modal').classList.add('open');}
@@ -773,6 +833,8 @@ document.getElementById('ciSlider').value=ST.ciLevel;
 document.getElementById('ciPct').textContent=ST.ciLevel+'%';
 document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===ST.activeTab));
 document.querySelectorAll('.cwrap').forEach((w,j)=>w.classList.toggle('on',j===ST.activeTab));
+if(!ST.likeWidth)ST.likeWidth=5;
+updateSliderLabel();
 if(ST.colOpen){document.getElementById('colSection').classList.add('open');document.getElementById('colArrow').classList.add('open');}
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
