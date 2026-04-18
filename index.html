@@ -89,6 +89,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
 .rot-in:focus{border-color:var(--amber)}
 .rot-in:-webkit-autofill,.rot-in:-webkit-autofill:hover,.rot-in:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--card2) inset;-webkit-text-fill-color:var(--text);caret-color:var(--text)}
 .rot-in::placeholder{color:var(--sub2);font-size:12px}
+#rotIn::placeholder{color:var(--sub2);font-size:12px;text-align:center}
+#rotInWrap:focus-within{border-color:var(--amber)!important}
 .add-btn{flex-shrink:0;background:var(--amber);border:none;-webkit-appearance:none;appearance:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:0 16px;cursor:pointer;white-space:nowrap;transition:opacity .15s}
 .add-btn:active{opacity:.7}
 .hit-btn{width:100%;background:transparent;-webkit-appearance:none;appearance:none;border:1px solid var(--red);border-radius:6px;color:var(--red);font-family:var(--mono);font-size:12px;font-weight:700;padding:8px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;transition:background .15s}
@@ -211,6 +213,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
     <div class="dot" id="dot"></div>
     <span class="hdr-title" id="hdrTitle" onclick="renameMachine(ST.current)" style="cursor:pointer" title="タップで名前変更">KAITEN ANALYTICS</span>
     <div class="hdr-r">
+      <button id="undoBtn" onclick="doUndo()" disabled style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1;opacity:.35" title="直前の操作を取り消す">↶</button>
       <button onclick="location.reload()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1">↻</button>
       <button onclick="openExport()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-family:var(--mono);font-size:13px;padding:4px 9px;cursor:pointer">↓</button>
       <button class="gear" onclick="openSettings()">⚙</button>
@@ -300,7 +303,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
         </div>
         <form onsubmit="event.preventDefault();addEntry()" style="display:contents">
         <div class="input-row">
-          <input type="text" inputmode="text" enterkeyhint="go" class="rot-in" id="rotIn" placeholder="前任者の回転数 (例: 0)" autocomplete="off" autocorrect="off" autocapitalize="none">
+          <div style="flex:1;min-width:0;display:flex;align-items:stretch;background:var(--card2);border:1px solid var(--border2);border-radius:8px;overflow:hidden" id="rotInWrap">
+            <button type="button" onclick="adjustInput(-1)" style="background:transparent;border:none;color:var(--sub);font-family:var(--mono);font-size:18px;font-weight:700;padding:0 12px;cursor:pointer;flex-shrink:0;line-height:1">−</button>
+            <input type="text" inputmode="text" enterkeyhint="go" id="rotIn" placeholder="前任者の回転数 (例: 0)" autocomplete="off" autocorrect="off" autocapitalize="none" style="flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:18px;font-weight:600;padding:11px 4px;outline:none;text-align:center;-webkit-appearance:none;appearance:none;-webkit-text-fill-color:var(--text);opacity:1">
+            <button type="button" onclick="adjustInput(1)" style="background:transparent;border:none;color:var(--sub);font-family:var(--mono);font-size:18px;font-weight:700;padding:0 12px;cursor:pointer;flex-shrink:0;line-height:1">+</button>
+          </div>
           <button type="submit" class="add-btn">ADD</button>
           <button type="button" class="add-btn" onclick="showBulkInput()" style="background:var(--card2);color:var(--text);border:1px solid var(--border2);font-size:10px;line-height:1.3;padding:0 10px">一括<br>入力</button>
         </div>
@@ -467,6 +474,45 @@ let ST;try{ST=migrate(JSON.parse(localStorage.getItem('kt_v5')||'null'));}catch{
 function save(){localStorage.setItem('kt_v5',JSON.stringify(ST));}
 function mach(){return ST.machines[ST.current];}
 function curSess(){const s=mach().sessions;return s[s.length-1];}
+
+// ==== アンドゥスタック（最大10回、セッション中のみ保持） ====
+const _UNDO_MAX=10;
+let _undoStack=[];
+function _snapshotMachine(){
+  try{return JSON.parse(JSON.stringify(mach()));}catch{return null;}
+}
+function pushUndo(label){
+  const snap=_snapshotMachine();
+  if(!snap)return;
+  _undoStack.push({machineIdx:ST.current,machineId:mach().id,snap,label,ts:Date.now()});
+  if(_undoStack.length>_UNDO_MAX)_undoStack.shift();
+  updateUndoBtn();
+}
+function canUndo(){return _undoStack.length>0&&_undoStack[_undoStack.length-1].machineId===mach().id;}
+function doUndo(){
+  if(_undoStack.length===0)return;
+  const top=_undoStack[_undoStack.length-1];
+  // 現在の台と最後のスナップショットの台が一致する場合のみ適用
+  if(top.machineId!==mach().id){
+    showAlert('別の台で行った操作は取り消せません');
+    return;
+  }
+  _undoStack.pop();
+  // スナップショットの台IDと一致するインデックスを探す（台順序が変わっている可能性）
+  const idx=ST.machines.findIndex(m=>m.id===top.machineId);
+  if(idx<0){updateUndoBtn();return;}
+  ST.machines[idx]=top.snap;
+  ST.current=idx;
+  save();killCharts();render();
+}
+function updateUndoBtn(){
+  const btn=document.getElementById('undoBtn');
+  if(!btn)return;
+  const enabled=canUndo();
+  btn.disabled=!enabled;
+  btn.style.opacity=enabled?'1':'.35';
+  btn.style.cursor=enabled?'pointer':'default';
+}
 function rots(){const all=[];mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];all.push(v-prev);});});return all;}
 function ballsFor(sess,di){return (sess.dataBalls&&sess.dataBalls[di])||250;}
 function hitCount(){return mach().sessions.filter(s=>s.hit).length;}
@@ -546,6 +592,7 @@ function render(){
     proToggle.style.display=showPro?'flex':'none';
   }
   renderDrawerList();renderHistPanel(s);renderKPI(s,m,hasData);
+  updateUndoBtn();
   if(!s)return;
   renderSuccess(s);renderLK(s);renderBayes(s);renderCI(s);renderVar(s);renderActiveChart(s);
 }
@@ -710,7 +757,32 @@ function renderHistPanel(s){
   [...events].reverse().forEach(ev=>{
     const div=document.createElement('div');
     if(ev.type==='base'){div.className='hp-base';div.innerHTML=`<div class="hp-base-lbl">開始</div><div class="hp-base-val" onclick="editBase(${ev.si})" style="cursor:pointer;text-decoration:underline dotted">${ev.val}</div>`;}
-    else if(ev.type==='hit'){div.className='hp-hit';div.innerHTML=`<div class="hp-hit-icon">🎯</div><div class="hp-hit-label">当たり</div>`;}
+    else if(ev.type==='hit'){
+      div.className='hp-hit';
+      // このhitが取り消し可能か判定：直後のセッションが現セッションで、かつdataが空
+      const sessList=mach().sessions;
+      const nextSess=sessList[ev.si+1];
+      const isDeletable=nextSess&&nextSess===sessList[sessList.length-1]&&nextSess.data.length===0;
+      if(isDeletable){
+        div.style.cursor='pointer';
+        div.title='タップで当たりを取り消し';
+        div.innerHTML=`<div class="hp-hit-icon">🎯</div><div class="hp-hit-label">当たり</div><div style="font-family:var(--mono);font-size:6px;color:var(--sub2);margin-top:1px">タップで取消</div>`;
+        div.addEventListener('click',function(){
+          showConfirm('この当たりを取り消しますか？',ok=>{
+            if(!ok)return;
+            pushUndo('当たり削除');
+            const targetSess=sessList[ev.si];
+            targetSess.hit=false;
+            // 次の空セッションを削除
+            sessList.pop();
+            mach().updatedAt=Date.now();
+            save();killCharts();render();
+          });
+        });
+      } else {
+        div.innerHTML=`<div class="hp-hit-icon">🎯</div><div class="hp-hit-label">当たり</div>`;
+      }
+    }
     else{
       const dev=s?ev.rot-s.muPost:null;
       const devStr=dev===null?'':(dev>=0?'+'+f(dev,1):f(dev,1));
@@ -845,23 +917,43 @@ function setProBalls(b){
   }
 }
 
+function adjustInput(delta){
+  const inp=document.getElementById('rotIn');
+  const raw=inp.value.trim();
+  if(raw===''){
+    // 空欄なら前回値からスタート
+    const cur=curSess();
+    if(cur.base===null){
+      inp.value=Math.max(0,delta).toString();
+    } else {
+      const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;
+      inp.value=Math.max(0,last+delta).toString();
+    }
+  } else {
+    const v=parseInt(raw);
+    if(isNaN(v))return;
+    inp.value=Math.max(0,v+delta).toString();
+  }
+  // フォーカスを外す（キーボードが閉じた後も数字編集できる）
+  inp.blur();
+}
+
 function addEntry(){
   const inp=document.getElementById('rotIn');const v=parseInt(inp.value.trim());
   if(isNaN(v)||v<0){inp.style.borderColor='#f87171';setTimeout(()=>inp.style.borderColor='',800);return;}
   const cur=curSess();
+  // 事前にスナップショット取得
+  pushUndo('データ追加');
   if(cur.base===null){cur.base=v;}
   else{
     const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;
-    if(v<=last){showAlert(`前回の値（${last}）より大きい値を入力してください`);return;}
+    if(v<=last){_undoStack.pop();updateUndoBtn();showAlert(`前回の値（${last}）より大きい値を入力してください`);return;}
     cur.data.push(v);
-    // プロモードON時は球数を記録（250以外のときのみ）
     if(ST.cfg.proMode&&_proNextBalls!==250){
       if(!cur.dataBalls)cur.dataBalls=[];
-      // data配列と長さを合わせる（過去分は250で埋める）
       while(cur.dataBalls.length<cur.data.length-1)cur.dataBalls.push(250);
       cur.dataBalls.push(_proNextBalls);
     } else if(cur.dataBalls){
-      // dataBalls配列が存在する場合は同期を取る
       while(cur.dataBalls.length<cur.data.length-1)cur.dataBalls.push(250);
       cur.dataBalls.push(250);
     }
@@ -870,7 +962,7 @@ function addEntry(){
   save();inp.value='';inp.focus();killCharts();render();
 }
 
-function addHit(){const cur=curSess();if(cur.base===null||cur.data.length===0){showAlert('回転数データを少なくとも1件入力してください');return;}cur.hit=true;mach().sessions.push({base:null,data:[],hit:false});mach().updatedAt=Date.now();save();render();}
+function addHit(){const cur=curSess();if(cur.base===null||cur.data.length===0){showAlert('回転数データを少なくとも1件入力してください');return;}pushUndo('当たり記録');cur.hit=true;mach().sessions.push({base:null,data:[],hit:false});mach().updatedAt=Date.now();save();render();}
 
 function _cmodal(msg,withInput,defVal,cb,isText){
   const el=document.getElementById('cmodal'),inp=document.getElementById('cmodal-inp');
@@ -888,10 +980,22 @@ function showAlert(msg){_cmodal(msg,false,undefined,()=>{});document.getElementB
 function showConfirm(msg,cb){_cmodal(msg,false,undefined,v=>cb(v===true));}
 function showPrompt(msg,def,cb,isText){_cmodal(msg,true,def,cb,isText);}
 
-function undoHit(){const sess=mach().sessions;if(sess.length<2)return;const prev=sess[sess.length-2],cur=sess[sess.length-1];if(!prev.hit||cur.base!==null||cur.data.length>0)return;showConfirm('直前の当たりを取り消しますか？',ok=>{if(!ok)return;prev.hit=false;sess.pop();mach().updatedAt=Date.now();save();killCharts();render();});}
-function editBase(si){const sess=mach().sessions[si],next=sess.data.length>0?sess.data[0]:null;const msg=`開始回転数を入力${next!==null?'<br><small>(次の値 '+next+' より小さくしてください)</small>':''}`;showPrompt(msg,sess.base,raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値にしてください`);return;}sess.base=v;mach().updatedAt=Date.now();save();killCharts();render();});}
-function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:sess.data[di-1],next=di<sess.data.length-1?sess.data[di+1]:null;const msg=`累計回転数を入力<br><small>${prev}より大きく${next!==null?next+'より小さい値を入力':''}</small>`;showPrompt(msg,sess.data[di],raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)){showAlert('数値を入力してください');return;}if(v<=prev){showAlert(`前の値（${prev}）より大きい値を入力してください`);return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}sess.data[di]=v;mach().updatedAt=Date.now();save();killCharts();render();});}
-function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;const sess=mach().sessions[si];sess.data.splice(di,1);if(sess.dataBalls)sess.dataBalls.splice(di,1);mach().updatedAt=Date.now();save();killCharts();render();});}
+function undoHit(){
+  const sess=mach().sessions;if(sess.length<2)return;
+  const prev=sess[sess.length-2],cur=sess[sess.length-1];
+  // 条件拡張：直前が当たりで、現セッションにdataがまだ入っていなければbase入力後でも取り消し可
+  if(!prev.hit||cur.data.length>0)return;
+  showConfirm('直前の当たりを取り消しますか？',ok=>{
+    if(!ok)return;
+    pushUndo('当たり取り消し');
+    prev.hit=false;sess.pop();
+    mach().updatedAt=Date.now();
+    save();killCharts();render();
+  });
+}
+function editBase(si){const sess=mach().sessions[si],next=sess.data.length>0?sess.data[0]:null;const msg=`開始回転数を入力${next!==null?'<br><small>(次の値 '+next+' より小さくしてください)</small>':''}`;showPrompt(msg,sess.base,raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値にしてください`);return;}pushUndo('開始値編集');sess.base=v;mach().updatedAt=Date.now();save();killCharts();render();});}
+function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:sess.data[di-1],next=di<sess.data.length-1?sess.data[di+1]:null;const msg=`累計回転数を入力<br><small>${prev}より大きく${next!==null?next+'より小さい値を入力':''}</small>`;showPrompt(msg,sess.data[di],raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)){showAlert('数値を入力してください');return;}if(v<=prev){showAlert(`前の値（${prev}）より大きい値を入力してください`);return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}pushUndo('データ編集');sess.data[di]=v;mach().updatedAt=Date.now();save();killCharts();render();});}
+function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;pushUndo('データ削除');const sess=mach().sessions[si];sess.data.splice(di,1);if(sess.dataBalls)sess.dataBalls.splice(di,1);mach().updatedAt=Date.now();save();killCharts();render();});}
 
 function openExport(){
   const m=mach();let lines=[];
@@ -930,12 +1034,37 @@ function _showConflictDialog(name,cb){
   document.getElementById('conflict-cancel').onclick=()=>close('cancel');
   modal.style.display='flex';
 }
+function _validateMachine(m){
+  if(!m||typeof m!=='object')return false;
+  if(typeof m.id!=='string'||m.id.trim()==='')return false;
+  if(!Array.isArray(m.sessions))return false;
+  for(const sess of m.sessions){
+    if(!sess||typeof sess!=='object')return false;
+    if(sess.base!==null&&(typeof sess.base!=='number'||!isFinite(sess.base)||sess.base<0))return false;
+    if(!Array.isArray(sess.data))return false;
+    for(const v of sess.data){
+      if(typeof v!=='number'||!isFinite(v)||v<0)return false;
+    }
+    if(sess.dataBalls!==undefined){
+      if(!Array.isArray(sess.dataBalls))return false;
+      for(const b of sess.dataBalls){
+        if(typeof b!=='number'||(b!==125&&b!==250))return false;
+      }
+    }
+    if(typeof sess.hit!=='boolean'&&sess.hit!==undefined)return false;
+  }
+  return true;
+}
 function importData(){
   const raw=document.getElementById('importText').value.trim();
   if(!raw){showAlert('インポートするデータを貼り付けてください');return;}
   let incoming;
-  try{incoming=JSON.parse(raw);if(!Array.isArray(incoming))throw new Error();}
-  catch{showAlert('データの形式が正しくありません');return;}
+  try{incoming=JSON.parse(raw);}
+  catch{showAlert('データの形式が正しくありません（JSON解析エラー）');return;}
+  if(!Array.isArray(incoming)){showAlert('データの形式が正しくありません（配列ではありません）');return;}
+  // 各台の構造を検証
+  const invalidIdx=incoming.findIndex(m=>!_validateMachine(m));
+  if(invalidIdx>=0){showAlert(`データの形式が正しくありません（${invalidIdx+1}番目の台が不正）`);return;}
   // 現在の台IDリスト
   const existingIds=ST.machines.map(m=>m.id);
   // 衝突があるかチェック
@@ -946,7 +1075,7 @@ function importData(){
     incoming.forEach(im=>{
       if(!im.createdAt)im.createdAt=now;
       if(!im.updatedAt)im.updatedAt=now;
-      if(!im.sessions)im.sessions=[{base:null,data:[],hit:false}];
+      if(!im.sessions||im.sessions.length===0)im.sessions=[{base:null,data:[],hit:false}];
       ST.machines.push(im);
     });
     save();killCharts();closeExport();render();
@@ -966,7 +1095,7 @@ function importData(){
     const now=Date.now();
     if(!im.createdAt)im.createdAt=now;
     if(!im.updatedAt)im.updatedAt=now;
-    if(!im.sessions)im.sessions=[{base:null,data:[],hit:false}];
+    if(!im.sessions||im.sessions.length===0)im.sessions=[{base:null,data:[],hit:false}];
     if(!currentIds.includes(im.id)){
       ST.machines.push(im);
       currentIds.push(im.id);
@@ -994,7 +1123,7 @@ function importData(){
 }
 function showBulkInput(){document.getElementById('bulk-inp').value='';document.getElementById('bulk-modal').style.display='flex';setTimeout(()=>document.getElementById('bulk-inp').focus(),100);}
 function closeBulk(){document.getElementById('bulk-modal').style.display='none';}
-function addBulk(){const raw=document.getElementById('bulk-inp').value;const vals=raw.split(/[,、。・\.\s\u3000\uff0c\uff0e]+/).map(s=>parseInt(s.trim())).filter(v=>!isNaN(v)&&v>0);if(!vals.length){closeBulk();return;}const cur=curSess();let errors=[];vals.forEach(v=>{if(cur.base===null){cur.base=v;}else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;if(v<=last){errors.push(`${v}（前の値${last}以下のためスキップ）`);return;}cur.data.push(v);if(cur.dataBalls){cur.dataBalls.push(250);}}});mach().updatedAt=Date.now();save();killCharts();closeBulk();render();if(errors.length)showAlert('スキップされた値:\n'+errors.join('\n'));}
+function addBulk(){const raw=document.getElementById('bulk-inp').value;const vals=raw.split(/[,、。・\.\s\u3000\uff0c\uff0e]+/).map(s=>parseInt(s.trim())).filter(v=>!isNaN(v)&&v>0);if(!vals.length){closeBulk();return;}pushUndo('一括入力');const cur=curSess();let errors=[];vals.forEach(v=>{if(cur.base===null){cur.base=v;}else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;if(v<=last){errors.push(`${v}（前の値${last}以下のためスキップ）`);return;}cur.data.push(v);if(cur.dataBalls){cur.dataBalls.push(250);}}});mach().updatedAt=Date.now();save();killCharts();closeBulk();render();if(errors.length)showAlert('スキップされた値:\n'+errors.join('\n'));}
 
 let _longPressTimer=null;
 function startLongPress(i){_longPressTimer=setTimeout(()=>renameMachine(i),600);}
@@ -1049,7 +1178,7 @@ function closeSettings(){
   document.getElementById('settings-modal').classList.remove('open');
   killCharts();render();
 }
-function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
+function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;pushUndo('データリセット');mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
 
 // Enter key handled by form submit
 document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
