@@ -377,7 +377,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
       <button onclick="closeExport()" style="background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer">✕</button>
     </div>
     <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">SIMPLE — 現在の台の回転数リスト</div>
-    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">この台だけの回転数をコピー（メモ・バックアップ用）</div>
+    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">この台だけの回転数をコピー（メモ・バックアップ用）<br><span style="color:var(--amber-dim)">※ ½ マーク＝0.5k単位で記録</span></div>
     <textarea id="exportSimple" readonly rows="5" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:13px;padding:10px;resize:none;outline:none;line-height:1.9"></textarea>
     <button onclick="copySimple()" id="copySimpleBtn" style="width:100%;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:11px;margin-top:8px;cursor:pointer">コピー（この台）</button>
     <div style="height:1px;background:#2a2a2a;margin:16px 0"></div>
@@ -1024,7 +1024,15 @@ function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach
 
 function openExport(){
   const m=mach();let lines=[];
-  m.sessions.forEach(sess=>{if(sess.base===null)return;lines.push(String(sess.base));sess.data.forEach(v=>lines.push(String(v)));if(sess.hit)lines.push('🎯');});
+  m.sessions.forEach(sess=>{
+    if(sess.base===null)return;
+    lines.push(String(sess.base));
+    sess.data.forEach((v,i)=>{
+      const balls=(sess.dataBalls&&sess.dataBalls[i])||250;
+      lines.push(balls===125?`${v}½`:String(v));
+    });
+    if(sess.hit)lines.push('🎯');
+  });
   document.getElementById('exportSimple').value=lines.join('\n');
   document.getElementById('exportText').value=JSON.stringify(ST.machines,null,2);
   document.getElementById('importText').value='';
@@ -1072,6 +1080,7 @@ function _validateMachine(m){
     }
     if(sess.dataBalls!==undefined){
       if(!Array.isArray(sess.dataBalls))return false;
+      if(sess.dataBalls.length!==sess.data.length)return false;
       for(const b of sess.dataBalls){
         if(typeof b!=='number'||(b!==125&&b!==250))return false;
       }
