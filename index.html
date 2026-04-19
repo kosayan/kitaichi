@@ -54,16 +54,16 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
 .hist-panel::-webkit-scrollbar{display:none}
 .hp-empty{display:flex;align-items:center;justify-content:center;height:100%;writing-mode:vertical-rl;font-family:var(--sans);font-size:9px;color:var(--sub2);letter-spacing:.08em}
 .hp-item{border-bottom:1px solid var(--border);padding:5px 3px;text-align:center;flex-shrink:0}
-.hp-item-half{padding:2px 3px}
-.hp-item-half .hp-cumul{font-size:9px}
-.hp-item-half .hp-rot-sm{font-size:9px}
-.hp-item-half .hp-num{font-size:7px;margin-bottom:1px}
-.hp-item-half .hp-dev{font-size:8px}
-.hp-num{font-family:var(--mono);font-size:8px;color:var(--sub2);margin-bottom:2px}
+.hp-item-half{padding:4px 3px}
+.hp-item-half .hp-cumul{font-size:11px}
+.hp-item-half .hp-rot-sm{font-size:11px}
+.hp-item-half .hp-num{font-size:9px;margin-bottom:1px}
+.hp-item-half .hp-dev{font-size:10px}
+.hp-num{font-family:var(--mono);font-size:10px;color:var(--sub2);margin-bottom:2px}
 .hp-row2{display:flex;justify-content:center;align-items:baseline;gap:4px;margin-bottom:2px}
-.hp-cumul{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);line-height:1}
-.hp-rot-sm{font-family:var(--mono);font-size:11px;font-weight:700;line-height:1}
-.hp-dev{font-family:var(--mono);font-size:9px;font-weight:600;margin-top:0}
+.hp-cumul{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);line-height:1}
+.hp-rot-sm{font-family:var(--mono);font-size:13px;font-weight:700;line-height:1}
+.hp-dev{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:0}
 .hp-hit{border-bottom:1px solid rgba(255,255,255,.15);padding:6px 3px;text-align:center;flex-shrink:0;background:rgba(255,255,255,.12)}
 .hp-hit-icon{font-size:13px;line-height:1}
 .hp-hit-label{font-family:var(--mono);font-size:7px;color:var(--sub);margin-top:1px;letter-spacing:0}
@@ -201,6 +201,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
     <span style="font-family:var(--mono);font-size:10px;color:var(--sub);letter-spacing:.05em">並び順</span>
     <select id="sortSelect" onchange="onSortChange()" style="flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 8px;cursor:pointer;-webkit-appearance:none;appearance:none">
       <option value="recent">最後に打った順</option>
+      <option value="created">生成順（新しい順）</option>
       <option value="first">最初に打った順</option>
       <option value="name">名前順</option>
       <option value="meanrot">平均回転数順</option>
@@ -218,7 +219,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
     <div class="dot" id="dot"></div>
     <span class="hdr-title" id="hdrTitle" onclick="renameMachine(ST.current)" style="cursor:pointer" title="タップで名前変更">KAITEN ANALYTICS</span>
     <div class="hdr-r">
-      <button id="undoBtn" onclick="doUndo()" disabled style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1;opacity:.35" title="直前の操作を取り消す">↶</button>
+      <button id="undoBtn" onclick="doUndo()" disabled style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1;opacity:.35" title="直前の操作を取り消す">↩</button>
       <button onclick="location.reload()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1">↻</button>
       <button onclick="openExport()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-family:var(--mono);font-size:13px;padding:4px 9px;cursor:pointer">↓</button>
       <button class="gear" onclick="openSettings()">⚙</button>
@@ -308,7 +309,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
             <button type="button" onclick="adjustInput(1)" style="background:transparent;border:none;color:var(--sub);font-family:var(--mono);font-size:18px;font-weight:700;padding:0 12px;cursor:pointer;flex-shrink:0;line-height:1">+</button>
           </div>
           <button type="submit" class="add-btn">ADD</button>
-          <button type="button" class="add-btn" onclick="showBulkInput()" style="background:var(--card2);color:var(--text);border:1px solid var(--border2);font-size:10px;line-height:1.3;padding:0 10px">一括<br>入力</button>
+          <button type="button" id="bulkBtn" class="add-btn" onclick="showBulkInput()" style="background:var(--card2);color:var(--text);border:1px solid var(--border2);font-size:10px;line-height:1.3;padding:0 10px">一括<br>入力</button>
         </div>
         </form>
         <div style="display:flex;gap:6px;align-items:stretch">
@@ -358,12 +359,15 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
           <span class="collapse-arrow" id="colArrow">▼</span>
         </button>
         <div class="collapsible" id="colSection">
-          <div class="stag"><span class="sn">04</span>ベイズ更新（Beta-Binomial）</div>
-          <div class="card"><div class="bayes-grid" id="bayesGrid"></div></div>
+          <div class="stag"><span class="sn">04</span>分散チェック</div>
+          <div class="card" id="varCard"></div>
           <div class="stag"><span class="sn">05</span>信頼区間 / 信用区間</div>
           <div class="card" id="ciCard"></div>
-          <div class="stag"><span class="sn">06</span>分散チェック</div>
-          <div class="card" id="varCard"></div>
+          <div class="stag"><span class="sn">06</span>ベイズ更新（Beta-Binomial）</div>
+          <div class="card">
+            <div class="bayes-grid" id="bayesGrid"></div>
+            <div id="bayesExplain" style="padding:10px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--sub);line-height:1.75"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -487,14 +491,34 @@ function _snapshotMachine(){
 function pushUndo(label){
   const snap=_snapshotMachine();
   if(!snap)return;
-  _undoStack.push({machineIdx:ST.current,machineId:mach().id,snap,label,ts:Date.now()});
+  _undoStack.push({type:'machine',machineIdx:ST.current,machineId:mach().id,snap,label,ts:Date.now()});
   if(_undoStack.length>_UNDO_MAX)_undoStack.shift();
   updateUndoBtn();
 }
-function canUndo(){return _undoStack.length>0&&_undoStack[_undoStack.length-1].machineId===mach().id;}
+function pushUndoFull(label){
+  // 全台に影響する操作用（台削除など）
+  try{
+    const snap=JSON.parse(JSON.stringify(ST));
+    _undoStack.push({type:'full',snap,label,ts:Date.now()});
+    if(_undoStack.length>_UNDO_MAX)_undoStack.shift();
+    updateUndoBtn();
+  }catch{}
+}
+function canUndo(){
+  if(_undoStack.length===0)return false;
+  const top=_undoStack[_undoStack.length-1];
+  if(top.type==='full')return true;
+  return top.machineId===mach().id;
+}
 function doUndo(){
   if(_undoStack.length===0)return;
   const top=_undoStack[_undoStack.length-1];
+  if(top.type==='full'){
+    _undoStack.pop();
+    ST=top.snap;
+    save();killCharts();render();
+    return;
+  }
   // 現在の台と最後のスナップショットの台が一致する場合のみ適用
   if(top.machineId!==mach().id){
     showAlert('別の台で行った操作は取り消せません');
@@ -524,13 +548,17 @@ function allEvents(){const events=[];let dataIdx=0;mach().sessions.forEach((sess
 function calcStats(){
   const r=rots(),n=r.length;if(!n)return null;
   const{border,priorMu,priorSigma,shogyu}=ST.cfg;const ci=ST.ciLevel;
-  const nEff=250+shogyu*priorMu,p0=priorMu/nEff,sp=priorSigma/nEff;
+  const nEff=250+shogyu*priorMu,p0=priorMu/nEff;
+  // priorSigma（回転数空間）→ sp（確率空間）の正しい変換
+  // dp/drot = 250/(250+sh·μ)² を掛けることで、回転数のSDを確率のSDに正しく変換
+  const sp=priorSigma*250/(nEff*nEff);
   const kappa=Math.max(2,p0*(1-p0)/(sp*sp)-1);
   const a0=kappa*p0,b0=kappa*(1-p0);
-  let S=0,Nballs=0;
-  mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;const balls=ballsFor(sess,i);S+=rot;Nballs+=balls+shogyu*rot;});});
-  // 過分散補正 k(N) = max(1.3, 1 + 2.0/√N)
-  const kOver=Math.max(1.3,1+2.0/Math.sqrt(n));
+  let S=0,Nballs=0,totalBalls=0;
+  mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;const balls=ballsFor(sess,i);S+=rot;Nballs+=balls+shogyu*rot;totalBalls+=balls;});});
+  const nEffData=totalBalls/250;
+  // 過分散補正 k(nEffData) = max(1.3, 1 + 2.0/√nEffData) — 1k換算した実効サンプル数（0.5k=0.5）
+  const kOver=Math.max(1.3,1+2.0/Math.sqrt(nEffData));
   const aPostRaw=a0+S,bPostRaw=b0+(Nballs-S);
   const aPost=aPostRaw/kOver,bPost=bPostRaw/kOver;
   const pPost=aPost/(aPost+bPost),muPost=pToRot(pPost,shogyu);
@@ -556,16 +584,43 @@ function calcStats(){
     lk[`r${i}`]=betaCDF(rotToP(bounds[i+1],shogyu),aPost,bPost)-betaCDF(rotToP(bounds[i],shogyu),aPost,bPost);
   }
   lk.above=1-betaCDF(rotToP(bounds[bounds.length-1],shogyu),aPost,bPost);
-  const mean=r.reduce((a,b)=>a+b,0)/n;let sVar=null,sSD=null,cv=null,vj=null;
-  if(n>=2){sVar=r.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);sSD=Math.sqrt(sVar);cv=sSD/mean;if(cv<.08)vj={label:'非常に安定',color:'#4ade80',bg:'rgba(74,222,128,.1)'};else if(cv<.15)vj={label:'安定',color:'#86efac',bg:'rgba(134,239,172,.1)'};else if(cv<.25)vj={label:'やや不安定',color:'#facc15',bg:'rgba(250,204,21,.1)'};else vj={label:'不安定',color:'#f87171',bg:'rgba(248,113,113,.1)'};}
-  // 総合スコア計算（dataTrustを過分散補正に合わせて緩める）
-  const dataTrust=n/(n+1.0);
-  const theoreticalCV=0.21; // 250球・20回転の理論CV
-  const meanCV=n>=2&&cv!==null?cv/Math.sqrt(n):theoreticalCV/Math.sqrt(Math.max(1,n));
+  // 球数で重み付けした平均（0.5kサンプルは重み0.5）＝ 最尤推定量
+  const mean=nEffData>0?S/nEffData:0;
+  let sVar=null,sSD=null,cv=null,vj=null,dispersion=null;
+  if(n>=2){
+    sVar=r.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);
+    sSD=Math.sqrt(sVar);
+    cv=sSD/mean;
+    // 分散パラメータ（Binomial fit の χ²/df）= 最も理論的に正確な過分散指標
+    // 1.0 = 完璧な Binomial 理論通り、>1 = 過分散（台の状態不安定）、<1 = 過少分散
+    const pEst=Nballs>0?S/Nballs:0;
+    if(pEst>0&&pEst<1){
+      let chi2=0;
+      mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{
+        const prev=i===0?sess.base:sess.data[i-1];
+        const rot=v-prev;
+        const balls=ballsFor(sess,i);
+        const expected=balls*pEst;
+        const variance=balls*pEst*(1-pEst);
+        if(variance>0)chi2+=(rot-expected)**2/variance;
+      });});
+      dispersion=chi2/(n-1);
+    }
+    // 判定: dispersion ベース（各サンプルの球数を個別に考慮した厳密な過分散検定）
+    const d=dispersion!==null?dispersion:1.5;
+    if(d<0.8)vj={label:'非常に安定',color:'#4ade80',bg:'rgba(74,222,128,.1)'};
+    else if(d<1.3)vj={label:'安定',color:'#86efac',bg:'rgba(134,239,172,.1)'};
+    else if(d<2.0)vj={label:'やや不安定',color:'#facc15',bg:'rgba(250,204,21,.1)'};
+    else vj={label:'不安定',color:'#f87171',bg:'rgba(248,113,113,.1)'};
+  }
+  // 総合スコア計算（nEffDataベースで 0.5k を正しく重み付け）
+  const dataTrust=nEffData/(nEffData+1.0);
+  const theoreticalCV=0.21; // フォールバック値
+  const meanCV=n>=2&&cv!==null?cv/Math.sqrt(nEffData):theoreticalCV/Math.sqrt(Math.max(1,nEffData));
   const stabTrust=1/(1+meanCV*1);
   const trustCoef=dataTrust*stabTrust;
   const composite=0.5+(pSuc-0.5)*trustCoef;
-  return{n,mean,sVar,sSD,cv,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,lkBounds,ci,border,a0,b0,priorMu,shogyu,dataTrust,stabTrust,trustCoef,composite,kOver};
+  return{n,nEff:nEffData,mean,sVar,sSD,cv,dispersion,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,lkBounds,ci,border,a0,b0,priorMu,shogyu,dataTrust,stabTrust,trustCoef,composite,kOver,totalBalls};
 }
 
 let charts={};
@@ -592,6 +647,12 @@ function render(){
     const showPro=ST.cfg.proMode&&!isInit;
     proToggle.style.display=showPro?'flex':'none';
   }
+  // 一括入力ボタン：proMode中はグレーアウト
+  const bulkBtn=document.getElementById('bulkBtn');
+  if(bulkBtn){
+    bulkBtn.style.opacity=ST.cfg.proMode?'0.4':'1';
+    bulkBtn.title=ST.cfg.proMode?'プロモード中は使用不可':'';
+  }
   renderDrawerList();renderHistPanel(s);renderKPI(s,m,hasData);
   updateUndoBtn();
   if(!s)return;
@@ -605,7 +666,7 @@ function renderDrawerList(){
   document.getElementById('machineList').innerHTML=sorted.map(({m,i})=>{
     const n=rots_for(m),isActive=i===ST.current;
     const mu=muPost_for(m),mean=mean_for(m);
-    const dateStr=formatDate(m.updatedAt);
+    const dateStr=formatDate(m.createdAt);
     let infoLines=`<div class="machine-item-n">N=${n} / データなし${dateStr?' · '+dateStr:''}</div>`;
     if(mu!==null&&mean!==null){
       infoLines=`<div class="machine-item-n">N=${n}${dateStr?' · '+dateStr:''}</div><div class="machine-item-n" style="margin-top:2px">推定 ${mu.toFixed(1)}回 / 実測 ${mean.toFixed(1)}回</div>`;
@@ -618,8 +679,8 @@ function renderDrawerList(){
 }
 
 function rots_for(m){let c=0;m.sessions.forEach(sess=>{if(sess.base!==null)c+=sess.data.length;});return c;}
-function mean_for(m){const r=[];m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const balls=(sess.dataBalls&&sess.dataBalls[i])||250;const rot=v-prev;r.push(rot*(250/balls));});});return r.length?r.reduce((a,b)=>a+b,0)/r.length:null;}
-function muPost_for(m){const{priorMu,priorSigma,shogyu}=ST.cfg;const nEff=250+shogyu*priorMu,p0=priorMu/nEff,sp=priorSigma/nEff;const kappa=Math.max(2,p0*(1-p0)/(sp*sp)-1);const a0=kappa*p0,b0=kappa*(1-p0);let S=0,Nb=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;const balls=(sess.dataBalls&&sess.dataBalls[i])||250;S+=rot;Nb+=balls+shogyu*rot;});});if(S===0)return null;const aP=a0+S,bP=b0+(Nb-S),pP=aP/(aP+bP);return pToRot(pP,shogyu);}
+function mean_for(m){let S=0,totalBalls=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const balls=(sess.dataBalls&&sess.dataBalls[i])||250;const rot=v-prev;S+=rot;totalBalls+=balls;});});return totalBalls>0?S/(totalBalls/250):null;}
+function muPost_for(m){const{priorMu,priorSigma,shogyu}=ST.cfg;const nEff=250+shogyu*priorMu,p0=priorMu/nEff,sp=priorSigma*250/(nEff*nEff);const kappa=Math.max(2,p0*(1-p0)/(sp*sp)-1);const a0=kappa*p0,b0=kappa*(1-p0);let S=0,Nb=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;const balls=(sess.dataBalls&&sess.dataBalls[i])||250;S+=rot;Nb+=balls+shogyu*rot;});});if(S===0)return null;const aP=a0+S,bP=b0+(Nb-S),pP=aP/(aP+bP);return pToRot(pP,shogyu);}
 
 function formatDate(ts){
   if(!ts)return '';
@@ -636,6 +697,7 @@ function sortMachines(machines){
   const sb=ST.sortBy||'recent';
   const arr=machines.map((m,i)=>({m,i}));
   if(sb==='recent')arr.sort((a,b)=>(b.m.updatedAt||0)-(a.m.updatedAt||0));
+  else if(sb==='created')arr.sort((a,b)=>(b.m.createdAt||0)-(a.m.createdAt||0));
   else if(sb==='first')arr.sort((a,b)=>(a.m.createdAt||0)-(b.m.createdAt||0));
   else if(sb==='name')arr.sort((a,b)=>a.m.id.localeCompare(b.m.id,'ja'));
   else if(sb==='meanrot'){arr.sort((a,b)=>{const ma=mean_for(a.m),mb=mean_for(b.m);if(ma===null)return 1;if(mb===null)return -1;return mb-ma;});}
@@ -746,7 +808,21 @@ function renderLK(s){
 
 function renderBayes(s){
   const pct=v=>(v*100).toFixed(4)+'%';
-  document.getElementById('bayesGrid').innerHTML=[{l:'事前 α₀',v:f(s.a0,1),d:`p₀=${pct(s.a0/(s.a0+s.b0))}`},{l:'事後 α*',v:f(s.aPost,1),d:`β*=${f(s.bPost,1)}`},{l:'事前 μ₀',v:f(s.priorMu)+'回',d:'ユーザー設定'},{l:'事後 μ*',v:f(s.muPost)+'回',d:`SD≈${f(s.sdRot,2)}回`}].map(c=>`<div class="bayes-cell"><div class="bayes-lbl">${c.l}</div><div class="bayes-val">${c.v}</div><div class="bayes-desc">${c.d}</div></div>`).join('');
+  document.getElementById('bayesGrid').innerHTML=[
+    {l:'事前 α₀',v:f(s.a0,1),d:`打つ前の仮想"当たり"カウント（p₀=${pct(s.a0/(s.a0+s.b0))}）`},
+    {l:'事後 α*',v:f(s.aPost,1),d:`α₀+実データ、過分散k=${f(s.kOver,2)}で補正。β*=${f(s.bPost,1)}`},
+    {l:'事前 μ₀',v:f(s.priorMu)+'回',d:'設定した打つ前の予想回転数'},
+    {l:'事後 μ*',v:f(s.muPost)+'回',d:`最終推定値 / SD≈${f(s.sdRot,2)}回`}
+  ].map(c=>`<div class="bayes-cell"><div class="bayes-lbl">${c.l}</div><div class="bayes-val">${c.v}</div><div class="bayes-desc">${c.d}</div></div>`).join('');
+  const explainEl=document.getElementById('bayesExplain');
+  if(explainEl){
+    explainEl.innerHTML=`
+<strong style="color:var(--text)">考え方</strong>：打つ前の予想（<em>事前分布</em>）を実データで更新して、より確かな推定（<em>事後分布</em>）を得る手法です。データが増えるほど事前の影響が薄れ、実測値に近づきます。<br><br>
+<strong style="color:var(--text)">α と β</strong>：α は「当たり側」、β は「ハズレ側」の仮想カウント。Beta分布の形を決めるパラメータで、<strong>α+β が大きいほど確信が強い</strong>（データ追加で動きにくくなる）。現在 α*+β* ≈ ${f(s.aPost+s.bPost,0)}。<br><br>
+<strong style="color:var(--text)">μ と SD</strong>：μ* = α\*/(α\*+β\*) を回転数に変換したもの＝最終推定値。SD は推定のブレ幅で、<strong>データ増加とともに縮小＝精度UP</strong>。<br><br>
+<strong style="color:var(--text)">過分散補正 k(nEff)=${f(s.kOver,2)}</strong>：実際のデータは理論値より散らばる傾向があるため、α*とβ*を k で割って分布を少し広げ、判定を慎重側に寄せています。<br><br>
+<span style="color:var(--sub2);font-size:10px">※ 回転数rを確率pに p=r/(250+賞球×r) で変換してからα/βで扱い、最後にrに戻すのが計算の骨格。</span>`;
+  }
 }
 
 function renderCI(s){
@@ -755,8 +831,9 @@ function renderCI(s){
 
 function renderVar(s){
   if(s.n<2){document.getElementById('varCard').innerHTML='<div style="padding:12px;color:var(--sub);font-size:12px">N≥2で分散チェックが有効になります</div>';return;}
-  const desc={'非常に安定':'回転数のばらつきが極めて小さく、台の挙動が安定しています。','安定':'標準的な範囲内のばらつきです。平均値は十分に信頼できます。','やや不安定':'ばらつきがやや大きいです。数回計測して確認を推奨します。','不安定':'回転数の変動が大きく、台の状態が不安定です。'}[s.vj.label];
-  document.getElementById('varCard').innerHTML=`<div class="var-wrap"><div class="var-top"><div class="var-metrics"><div class="vm"><div class="v-l">分散 s²</div><div class="v-v">${f(s.sVar,2)}</div></div><div class="vm"><div class="v-l">標準偏差</div><div class="v-v">±${f(s.sSD,2)}</div></div><div class="vm"><div class="v-l">変動係数</div><div class="v-v">${(s.cv*100).toFixed(1)}%</div></div></div><div class="vbadge" style="color:${s.vj.color};background:${s.vj.bg}">${s.vj.label}</div></div><div class="var-desc">${desc}</div></div>`;
+  const desc={'非常に安定':'分散パラメータが1より小さく、理論値より安定しています。データが揃い続ければ高信頼と言えます。','安定':'分散パラメータが理論値近辺。測定ノイズ以上の変動はなく、台の挙動は安定しています。','やや不安定':'分散パラメータがやや高め。真の変動か偶然か見極めのためデータ追加を推奨。','不安定':'分散パラメータが理論値の2倍超。台の真の状態が変動している可能性大。'}[s.vj.label];
+  const dispStr=s.dispersion!==null?f(s.dispersion,2):'N/A';
+  document.getElementById('varCard').innerHTML=`<div class="var-wrap"><div class="var-top"><div class="var-metrics"><div class="vm"><div class="v-l">標準偏差</div><div class="v-v">±${f(s.sSD,2)}</div></div><div class="vm"><div class="v-l">変動係数</div><div class="v-v">${(s.cv*100).toFixed(1)}%</div></div><div class="vm"><div class="v-l">分散パラメータ</div><div class="v-v">${dispStr}</div></div></div><div class="vbadge" style="color:${s.vj.color};background:${s.vj.bg}">${s.vj.label}</div></div><div class="var-desc">${desc}<br><small style="color:var(--sub2);display:block;margin-top:4px">※ 分散パラメータ = χ²/(n-1)。各サンプルの球数を考慮した Binomial fit の厳密指標。1.0=理論通り、>1=過分散（真の不安定）、<1=過少分散</small></div></div>`;
 }
 
 function renderHistPanel(s){
@@ -795,13 +872,16 @@ function renderHistPanel(s){
       }
     }
     else{
-      const dev=s?ev.rotNorm-s.muPost:null;
+      // 生値ベースで表示・比較（0.5kはborderもmuPostも×0.5して生値空間で比較）
+      const ballK=ev.balls/250;
+      const borderAdj=ST.cfg.border*ballK;
+      const expRaw=s?s.muPost*ballK:null;
+      const dev=expRaw===null?null:ev.rot-expRaw;
       const devStr=dev===null?'':(dev>=0?'+'+f(dev,1):f(dev,1));
       const devColor=dev===null?'var(--sub)':dev>=0?'#4ade80':'#f87171';
-      const border=ST.cfg.border;
-      const rotColor=ev.rotNorm>=border*1.1?'#4ade80':ev.rotNorm>=border?'#a3e635':ev.rotNorm>=border*0.9?'#facc15':'#f87171';
-      const halfMark=ev.balls===125?'<span style="font-family:var(--mono);font-size:7px;color:var(--amber);margin-left:2px">½</span>':'';
-      const rotDisp=ev.balls===125?ev.rotNorm.toFixed(0):ev.rot.toString();
+      const rotColor=ev.rot>=borderAdj*1.1?'#4ade80':ev.rot>=borderAdj?'#a3e635':ev.rot>=borderAdj*0.9?'#facc15':'#f87171';
+      const halfMark=ev.balls===125?'<span style="font-family:var(--mono);font-size:8px;color:var(--amber);margin-left:2px">½</span>':'';
+      const rotDisp=ev.rot.toString();
       div.className='hp-item'+(ev.balls===125?' hp-item-half':'');
       div.style.cssText='position:relative;cursor:pointer';
       div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${rotDisp}</span></div><div class="hp-dev" style="color:${devColor}">${devStr}</div><button onclick="event.stopPropagation();deleteDataPoint(${ev.si},${ev.di})" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:#f87171;border:none;border-radius:4px;color:#000;font-size:9px;font-weight:700;padding:3px 6px;cursor:pointer" class="del-dp-btn">削除</button>`;
@@ -1155,7 +1235,13 @@ function importData(){
   };
   processNext();
 }
-function showBulkInput(){document.getElementById('bulk-inp').value='';document.getElementById('bulk-modal').style.display='flex';setTimeout(()=>document.getElementById('bulk-inp').focus(),100);}
+function showBulkInput(){
+  if(ST.cfg.proMode){
+    showAlert('プロモード中は一括入力が無効です。\n0.5k/1k単位の混在を避けるため、1件ずつ入力してください。');
+    return;
+  }
+  document.getElementById('bulk-inp').value='';document.getElementById('bulk-modal').style.display='flex';setTimeout(()=>document.getElementById('bulk-inp').focus(),100);
+}
 function closeBulk(){document.getElementById('bulk-modal').style.display='none';}
 function addBulk(){const raw=document.getElementById('bulk-inp').value;const vals=raw.split(/[,、。・\.\s\u3000\uff0c\uff0e]+/).map(s=>parseInt(s.trim())).filter(v=>!isNaN(v)&&v>0);if(!vals.length){closeBulk();return;}pushUndo('一括入力');const cur=curSess();let errors=[];vals.forEach(v=>{if(cur.base===null){cur.base=v;}else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;if(v<=last){errors.push(`${v}（前の値${last}以下のためスキップ）`);return;}cur.data.push(v);if(cur.dataBalls){cur.dataBalls.push(250);}}});mach().updatedAt=Date.now();save();killCharts();closeBulk();render();if(errors.length)showAlert('スキップされた値:\n'+errors.join('\n'));}
 
@@ -1163,7 +1249,7 @@ let _longPressTimer=null;
 function startLongPress(i){_longPressTimer=setTimeout(()=>renameMachine(i),600);}
 function cancelLongPress(){clearTimeout(_longPressTimer);}
 function renameMachine(i){showPrompt(`台の名前を入力`,ST.machines[i].id,raw=>{if(raw===null||raw.trim()==='')return;ST.machines[i].id=raw.trim();save();render();},true);}
-function deleteMachine(i){showConfirm(`「${ST.machines[i].id}」を削除しますか？`,ok=>{if(!ok)return;ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
+function deleteMachine(i){showConfirm(`「${ST.machines[i].id}」を削除しますか？`,ok=>{if(!ok)return;pushUndoFull('台削除');ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
 function addMachine(){const num=ST.machines.length+1;ST.machines.push(defMachine(`台${String(num).padStart(4,'0')}`));ST.current=ST.machines.length-1;save();killCharts();closeDrawer();render();}
 function switchMachine(i){ST.current=i;save();killCharts();closeDrawer();render();}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('show');}
