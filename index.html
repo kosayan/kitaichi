@@ -217,7 +217,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
   <header>
     <button class="menu-btn" onclick="openDrawer()">☰</button>
     <div class="dot" id="dot"></div>
-    <span class="hdr-title" id="hdrTitle" onclick="renameMachine(ST.current)" style="cursor:pointer" title="タップで名前変更">KAITEN ANALYTICS</span>
+    <span class="hdr-title" id="hdrTitle" onclick="renameMachine(ST.current)" style="cursor:pointer" title="タップで名前・機種を編集">KAITEN ANALYTICS</span>
     <div class="hdr-r">
       <button id="undoBtn" onclick="doUndo()" disabled style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1;opacity:.35" title="直前の操作を取り消す">↩</button>
       <button onclick="location.reload()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1">↻</button>
@@ -394,6 +394,15 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
     <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">全台エクスポートのテキストを貼り付け → 追加形式で復元<br>同名台がある場合は確認あり</div>
     <textarea id="importText" rows="5" placeholder="ここにエクスポートデータを貼り付け..." style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:11px;padding:10px;resize:none;outline:none;line-height:1.7"></textarea>
     <button onclick="importData()" style="width:100%;background:transparent;border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-family:var(--mono);font-size:13px;font-weight:700;padding:11px;margin-top:8px;cursor:pointer">インポート</button>
+    <div style="height:1px;background:#2a2a2a;margin:16px 0"></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">FILE — ファイルで保存/読込</div>
+    <div style="font-size:11px;color:var(--sub2);margin-bottom:8px">JSONファイルとして保存、またはファイルから復元<br>Simple形式（現在の台のみ）もテキストファイルで保存可</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <button onclick="downloadFullJSON()" style="width:100%;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:12px;font-weight:700;padding:10px;cursor:pointer">↓ 全台JSONファイルで保存</button>
+      <button onclick="downloadSimpleTxt()" style="width:100%;background:transparent;border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-family:var(--mono);font-size:12px;font-weight:700;padding:10px;cursor:pointer">↓ 現在の台をテキストで保存</button>
+      <input type="file" id="fileImportInp" accept=".json,.txt,application/json,text/plain" style="display:none" onchange="onFileSelected(event)">
+      <button onclick="document.getElementById('fileImportInp').click()" style="width:100%;background:transparent;border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-family:var(--mono);font-size:12px;font-weight:700;padding:10px;cursor:pointer">↑ ファイルから読込（JSON/Simple）</button>
+    </div>
   </div>
 </div>
 
@@ -435,6 +444,37 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
   </div>
 </div>
 
+<div id="edit-machine-modal" style="display:none;position:fixed;inset:0;z-index:750;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center">
+  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:80dvh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:14px">台の情報を編集</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">台の名前</div>
+    <input type="text" id="editName-inp" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:14px;padding:10px;outline:none;margin-bottom:16px">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">機種名</div>
+    <div style="font-size:10px;color:var(--sub2);margin-bottom:6px">入力すると候補を絞り込み・タップで選択・空欄で機種なし</div>
+    <input type="text" id="editModel-inp" placeholder="機種名または検索..." style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:14px;padding:10px;outline:none;margin-bottom:8px">
+    <div id="editModel-list" style="margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeEditMachine()" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
+      <button onclick="saveEditMachine()" style="flex:1;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;cursor:pointer">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="model-modal" style="display:none;position:fixed;inset:0;z-index:750;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center">
+  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px;max-height:80dvh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:6px" id="model-title">機種を選択</div>
+    <div style="font-size:11px;color:#909090;margin-bottom:12px">機種別に学習データが蓄積され、推定精度が向上します</div>
+    <div id="model-list" style="margin-bottom:12px"></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin:12px 0 6px;letter-spacing:.08em">新しい機種を入力</div>
+    <input type="text" id="model-new-inp" placeholder="例: Pスーパー海物語IN沖縄5" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:14px;padding:10px;outline:none;margin-bottom:10px">
+    <div style="display:flex;gap:8px">
+      <button onclick="closeModelModal()" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
+      <button onclick="confirmModelNew()" style="flex:1;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;cursor:pointer">新規で追加</button>
+    </div>
+    <button onclick="confirmModelNone()" style="width:100%;background:transparent;border:none;color:var(--sub2);font-family:var(--mono);font-size:11px;padding:12px;cursor:pointer;margin-top:4px;text-decoration:underline">機種名なしで続ける</button>
+  </div>
+</div>
+
 <div id="settings-modal">
   <div class="sheet">
     <div class="sheet-title">
@@ -442,29 +482,70 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
       <button class="close-btn" onclick="closeSettings()">✕</button>
     </div>
     <div class="set-row">
-      <div class="set-lbl">ボーダー回転数（デフォルト: 17）</div>
+      <div class="set-lbl">ボーダー回転数（デフォルト: 17）
+        <button onclick="toggleHelp('helpBorder')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
+      </div>
+      <div id="helpBorder" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+        <strong style="color:var(--text)">意味</strong>：収支がプラマイ0になる回転数（等価換算）。この値を上回るほど期待値プラス。<br>
+        <strong style="color:var(--text)">使われ方</strong>：ボーダー超えの確率、推定期待値、履歴の色分け（緑=超え、赤=割れ）の基準。<br>
+        <strong style="color:var(--text)">変更時の注意</strong>：機種ごとに違うので、遊技前に必ず最新の攻略値を入れ直す。等価/交換率で変わる点も考慮。
+      </div>
       <input type="number" class="set-in" id="setBorder" value="17" inputmode="decimal" step="0.5">
     </div>
     <div class="set-row">
-      <div class="set-lbl">事前分布 μ₀ — 打つ前の予想回転数（デフォルト: 19）</div>
+      <div class="set-lbl">事前分布 μ₀ — 打つ前の予想回転数（デフォルト: 19）
+        <button onclick="toggleHelp('helpMu')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
+      </div>
+      <div id="helpMu" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+        <strong style="color:var(--text)">意味</strong>：打つ前の「この台はこのくらい回るだろう」という予想値。ベイズ推定の出発点。<br>
+        <strong style="color:var(--text)">使われ方</strong>：データが少ないうちは推定値がμ₀寄りに、データが増えるにつれ実測値寄りに遷移する。<br>
+        <strong style="color:var(--text)">変更時の注意</strong>：ボーダー+2〜3くらいが一般的（釘調整が平均なら）。大きく外れた値を入れるとN=30くらいまで推定がズレ続ける。迷ったらデフォルト。
+      </div>
       <input type="number" class="set-in" id="setPriorMu" value="19" inputmode="decimal" step="0.5">
     </div>
     <div class="set-row">
-      <div class="set-lbl">事前分布 σ₀ — 予想の不確かさ（デフォルト: 2.5）</div>
+      <div class="set-lbl">事前分布 σ₀ — 予想の不確かさ（デフォルト: 2.5）
+        <button onclick="toggleHelp('helpSigma')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
+      </div>
+      <div id="helpSigma" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+        <strong style="color:var(--text)">意味</strong>：「μ₀の予想がどれくらい自信あるか」の逆指標。小さいほど強い自信、大きいほど弱い自信。<br>
+        <strong style="color:var(--text)">使われ方</strong>：小さい値→事前が強い→少ないデータでは推定がμ₀から動きにくい。大きい値→事前が弱い→実データが即座に反映される。<br>
+        <strong style="color:var(--text)">変更時の注意</strong>：2.5が標準。1.0以下にすると序盤の推定が固定されすぎ、5.0以上は事前がほぼ無効化される。通常は触らない。
+      </div>
       <input type="number" class="set-in" id="setPriorSigma" value="2.5" inputmode="decimal" step="0.5">
     </div>
     <div class="set-row">
-      <div class="set-lbl">1回転あたり賞球数（デフォルト: 1）</div>
+      <div class="set-lbl">1回転あたり賞球数（デフォルト: 1）
+        <button onclick="toggleHelp('helpShogyu')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
+      </div>
+      <div id="helpShogyu" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+        <strong style="color:var(--text)">意味</strong>：1回スタートチャッカーに入賞した時の払い出し球数。スルーチャッカー通過で増えるわけではない（※大当たり中は別）。<br>
+        <strong style="color:var(--text)">使われ方</strong>：回転効率の補正。賞球1なら実質250球で1k、賞球3なら250+3×19≈307球で1k回せる計算に。<br>
+        <strong style="color:var(--text)">変更時の注意</strong>：多くの機種は1。一部のヘソ賞球3や4の機種もある。説明書やネット情報で確認。
+      </div>
       <input type="number" class="set-in" id="setShogyu" value="1" inputmode="numeric" step="1" min="0">
     </div>
     <div class="set-row">
-      <div class="set-lbl">プロモード — 0.5k（125球）単位の入力を可能にする<br><small style="color:var(--sub2)">初期のサンプル数不足対策として、細かい刻みで入力可能</small></div>
+      <div class="set-lbl">プロモード — 0.5k（125球）単位の入力を可能にする
+        <button onclick="toggleHelp('helpPro')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
+        <br><small style="color:var(--sub2)">初期のサンプル数不足対策として、細かい刻みで入力可能</small>
+      </div>
+      <div id="helpPro" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+        <strong style="color:var(--text)">意味</strong>：通常1k単位で記録する回転数を、0.5k（125球）単位でも記録可能にする。<br>
+        <strong style="color:var(--text)">使われ方</strong>：序盤にサンプル数を稼ぎたい時や、試し打ちで早く傾向を掴みたい時に有効。<br>
+        <strong style="color:var(--text)">変更時の注意</strong>：0.5kサンプルは統計的に重み0.5として計算される（n=2サンプル ≈ nEff=1）。一括入力は無効化される。混在しても内部処理は正確だが、手数は増える。迷ったらOFF。
+      </div>
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:6px">
         <input type="checkbox" id="setProMode" style="width:20px;height:20px;cursor:pointer;accent-color:var(--amber)">
         <span id="setProModeLabel" style="font-family:var(--mono);font-size:12px;color:var(--sub)">OFF</span>
       </label>
     </div>
     <button class="reset-btn" onclick="confirmReset()">この台のデータをリセット</button>
+    <div style="height:1px;background:var(--border);margin:16px 0"></div>
+    <div class="set-row">
+      <div class="set-lbl" style="margin-bottom:8px">機種別学習統計</div>
+      <div id="modelStatsList" style="font-size:11px;color:var(--sub);line-height:1.7"></div>
+    </div>
   </div>
 </div>
 
@@ -474,9 +555,11 @@ function betaCDF(x,a,b){if(x<=0)return 0;if(x>=1)return 1;if(x>(a+1)/(a+b+2))ret
 function normInv(p){const a=[2.50662823884,-18.61500062529,41.39119773534,-25.44106049637];const b=[-8.4735109309,23.08336743743,-21.06224101826,3.13082909833];const c=[.3374754822726147,.9761690190917186,.1607979714918209,.0276438810333863,.0038405729373609,.0003951896511349,.0000321767881768,.0000002888167364,.0000003960315187];const q=p-.5;let r,z;if(Math.abs(q)<=.42){r=q*q;z=q*(((a[3]*r+a[2])*r+a[1])*r+a[0])/((((b[3]*r+b[2])*r+b[1])*r+b[0])*r+1);}else{r=p<.5?p:1-p;r=Math.sqrt(-Math.log(r));z=c[0]+r*(c[1]+r*(c[2]+r*(c[3]+r*(c[4]+r*(c[5]+r*(c[6]+r*(c[7]+r*c[8])))))));if(q<0)z=-z;}return z;}
 function rotToP(rot,sh){return rot/(250+sh*rot);}
 function pToRot(p,sh){return 250*p/Math.max(1e-9,1-sh*p);}
-function defMachine(id){const now=Date.now();return{id,sessions:[{base:null,data:[],hit:false}],createdAt:now,updatedAt:now};}
+// HTMLエスケープ（XSS対策）: ユーザー入力を innerHTML に埋め込む前に必ず通す
+function escapeHtml(s){if(s===null||s===undefined)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function defMachine(id){const now=Date.now();return{id,model:null,sessions:[{base:null,data:[],hit:false}],createdAt:now,updatedAt:now};}
 function defState(){return{machines:[defMachine('台0001')],current:0,cfg:{border:17,priorMu:19,priorSigma:2.5,shogyu:1,proMode:false},ciLevel:95,likeWidth:5,colOpen:false,activeTab:0,sortBy:'recent'};}
-function migrate(st){if(!st)return defState();if(!st.machines)return defState();const now=Date.now();st.machines.forEach(m=>{if(m.entries!==undefined&&m.sessions===undefined){if(!m.entries||m.entries.length===0){m.sessions=[{base:null,data:[],hit:false}];}else{m.sessions=[{base:m.entries[0],data:m.entries.slice(1),hit:false}];}delete m.entries;delete m.hits;}if(!m.sessions)m.sessions=[{base:null,data:[],hit:false}];if(!m.createdAt)m.createdAt=now;if(!m.updatedAt)m.updatedAt=now;});if(st.cfg&&!st.cfg.shogyu)st.cfg.shogyu=1;if(st.cfg&&st.cfg.proMode===undefined)st.cfg.proMode=false;if(!st.activeTab)st.activeTab=0;if(!st.sortBy)st.sortBy='recent';return st;}
+function migrate(st){if(!st)return defState();if(!st.machines)return defState();const now=Date.now();st.machines.forEach(m=>{if(m.entries!==undefined&&m.sessions===undefined){if(!m.entries||m.entries.length===0){m.sessions=[{base:null,data:[],hit:false}];}else{m.sessions=[{base:m.entries[0],data:m.entries.slice(1),hit:false}];}delete m.entries;delete m.hits;}if(!m.sessions)m.sessions=[{base:null,data:[],hit:false}];if(!m.createdAt)m.createdAt=now;if(!m.updatedAt)m.updatedAt=now;if(m.model===undefined)m.model=null;});if(st.cfg&&!st.cfg.shogyu)st.cfg.shogyu=1;if(st.cfg&&st.cfg.proMode===undefined)st.cfg.proMode=false;if(!st.activeTab)st.activeTab=0;if(!st.sortBy)st.sortBy='recent';return st;}
 let ST;try{ST=migrate(JSON.parse(localStorage.getItem('kt_v5')||'null'));}catch{ST=defState();}
 function save(){localStorage.setItem('kt_v5',JSON.stringify(ST));}
 function mach(){return ST.machines[ST.current];}
@@ -545,6 +628,71 @@ function ballsFor(sess,di){return (sess.dataBalls&&sess.dataBalls[di])||250;}
 function hitCount(){return mach().sessions.filter(s=>s.hit).length;}
 function allEvents(){const events=[];let dataIdx=0;mach().sessions.forEach((sess,si)=>{if(sess.base!==null){events.push({type:'base',val:sess.base,si});}sess.data.forEach((v,di)=>{const prev=di===0?sess.base:sess.data[di-1];const balls=(sess.dataBalls&&sess.dataBalls[di])||250;const rot=v-prev;const rotNorm=rot*(250/balls);dataIdx++;events.push({type:'data',cumul:v,rot,rotNorm,balls,idx:dataIdx,si,di});});if(sess.hit){events.push({type:'hit',si});}});return events;}
 
+// ==== 機種別統計学習 ====
+const _LEARN_ALPHA=50; // 学習強度：サンプル数αでデフォルトと半々、以降実データ寄り
+const _DEFAULT_DISPERSION=1.3;
+
+function _sessionStatsForDispersion(m){
+  // 1台のデータから dispersion 計算用の生データを返す
+  const samples=[]; let S=0,Nballs=0;
+  m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{
+    const prev=i===0?sess.base:sess.data[i-1];
+    const rot=v-prev;
+    const balls=(sess.dataBalls&&sess.dataBalls[i])||250;
+    samples.push({rot,balls});
+    S+=rot;Nballs+=balls+ST.cfg.shogyu*rot;
+  });});
+  return {samples,S,Nballs};
+}
+
+function aggregateModelStats(excludeMachineId){
+  // 全機種の{samples, totalN, dispersion}を返す
+  // excludeMachineId: 指定すると該当IDの台を除外（自己参照防止）
+  const byModel={};
+  ST.machines.forEach(m=>{
+    if(excludeMachineId!==undefined&&m.id===excludeMachineId)return;
+    const key=m.model||null;
+    if(key===null)return;
+    if(!byModel[key])byModel[key]={samples:[],S:0,Nballs:0,machineCount:0};
+    const s=_sessionStatsForDispersion(m);
+    if(s.samples.length===0)return;
+    byModel[key].samples.push(...s.samples);
+    byModel[key].S+=s.S;
+    byModel[key].Nballs+=s.Nballs;
+    byModel[key].machineCount++;
+  });
+  // 各機種の dispersion を計算
+  Object.keys(byModel).forEach(k=>{
+    const d=byModel[k];
+    if(d.samples.length<2||d.Nballs===0){d.dispersion=null;d.n=d.samples.length;return;}
+    const pEst=d.S/d.Nballs;
+    if(pEst<=0||pEst>=1){d.dispersion=null;d.n=d.samples.length;return;}
+    let chi2=0;
+    d.samples.forEach(sm=>{
+      const expected=sm.balls*pEst;
+      const variance=sm.balls*pEst*(1-pEst);
+      if(variance>0)chi2+=(sm.rot-expected)**2/variance;
+    });
+    d.dispersion=chi2/(d.samples.length-1);
+    d.n=d.samples.length;
+    d.avgMu=pToRot(pEst,ST.cfg.shogyu);
+  });
+  return byModel;
+}
+
+function learnedDispersionFor(model){
+  // 指定機種の学習済みdispersion係数と学習強度を返す（現在の台を除外）
+  if(!model)return {effective:_DEFAULT_DISPERSION,learned:null,weight:0,n:0,machineCount:0};
+  const all=aggregateModelStats(mach().id);
+  const d=all[model];
+  if(!d||d.dispersion===null||d.n<2){
+    return {effective:_DEFAULT_DISPERSION,learned:null,weight:0,n:d?d.n:0,machineCount:d?d.machineCount:0};
+  }
+  const weight=d.n/(d.n+_LEARN_ALPHA);
+  const effective=_DEFAULT_DISPERSION*(1-weight)+d.dispersion*weight;
+  return {effective,learned:d.dispersion,weight,n:d.n,machineCount:d.machineCount,avgMu:d.avgMu};
+}
+
 function calcStats(){
   const r=rots(),n=r.length;if(!n)return null;
   const{border,priorMu,priorSigma,shogyu}=ST.cfg;const ci=ST.ciLevel;
@@ -557,8 +705,12 @@ function calcStats(){
   let S=0,Nballs=0,totalBalls=0;
   mach().sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const rot=v-prev;const balls=ballsFor(sess,i);S+=rot;Nballs+=balls+shogyu*rot;totalBalls+=balls;});});
   const nEffData=totalBalls/250;
-  // 過分散補正 k(nEffData) = max(1.3, 1 + 2.0/√nEffData) — 1k換算した実効サンプル数（0.5k=0.5）
-  const kOver=Math.max(1.3,1+2.0/Math.sqrt(nEffData));
+  // 機種別学習 dispersion を取得（未設定 or 学習不足なら1.3デフォルト）
+  const learn=learnedDispersionFor(mach().model);
+  const baseDispersion=learn.effective;
+  // 過分散補正 k = max(baseDispersion, 1 + 2.0/√nEffData × baseDispersion/1.3)
+  // 学習値が高い機種ほど慎重に、低い機種は素直に推定
+  const kOver=Math.max(baseDispersion, 1+2.0/Math.sqrt(nEffData)*baseDispersion/_DEFAULT_DISPERSION);
   const aPostRaw=a0+S,bPostRaw=b0+(Nballs-S);
   const aPost=aPostRaw/kOver,bPost=bPostRaw/kOver;
   const pPost=aPost/(aPost+bPost),muPost=pToRot(pPost,shogyu);
@@ -620,7 +772,7 @@ function calcStats(){
   const stabTrust=1/(1+meanCV*1);
   const trustCoef=dataTrust*stabTrust;
   const composite=0.5+(pSuc-0.5)*trustCoef;
-  return{n,nEff:nEffData,mean,sVar,sSD,cv,dispersion,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,lkBounds,ci,border,a0,b0,priorMu,shogyu,dataTrust,stabTrust,trustCoef,composite,kOver,totalBalls};
+  return{n,nEff:nEffData,mean,sVar,sSD,cv,dispersion,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,lkBounds,ci,border,a0,b0,priorMu,shogyu,dataTrust,stabTrust,trustCoef,composite,kOver,totalBalls,learn};
 }
 
 let charts={};
@@ -629,7 +781,7 @@ function fp(v){return v===null?'-.-%':(v*100).toFixed(1)+'%';}
 
 function render(){
   const s=calcStats(),m=mach(),n=s?s.n:0,cur=curSess(),hasData=n>0;
-  document.getElementById('hdrTitle').textContent=m.id;
+  document.getElementById('hdrTitle').innerHTML=m.model?`${escapeHtml(m.id)}<span style="color:var(--sub2);margin:0 4px">/</span><span style="font-size:12px;font-weight:500;color:var(--amber-dim)">${escapeHtml(m.model)}</span>`:escapeHtml(m.id);
   document.getElementById('dot').classList.toggle('live',hasData);
   document.getElementById('empty-state').classList.toggle('hidden',hasData);
   document.getElementById('stats-sec').classList.toggle('hidden',!hasData);
@@ -674,7 +826,7 @@ function renderDrawerList(){
       infoLines=`<div class="machine-item-n">N=${n} / 推定 ${mu.toFixed(1)}回${dateStr?' · '+dateStr:''}</div>`;
     }
     const delBtn=ST.machines.length>1?`<button onclick="event.stopPropagation();deleteMachine(${i})" style="background:none;border:1px solid #555;border-radius:6px;color:#f87171;font-family:var(--mono);font-size:11px;padding:3px 8px;cursor:pointer;flex-shrink:0">削除</button>`:'';
-    return `<div class="machine-item ${isActive?'active':''}" onclick="switchMachine(${i})" ontouchstart="startLongPress(${i})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()"><div style="flex:1;min-width:0"><div class="machine-item-name">${m.id}</div>${infoLines}</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${isActive?'<span style="color:var(--amber);font-size:12px">●</span>':''}${delBtn}</div></div>`;
+    return `<div class="machine-item ${isActive?'active':''}" onclick="switchMachine(${i})" ontouchstart="startLongPress(${i})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()"><div style="flex:1;min-width:0"><div class="machine-item-name">${escapeHtml(m.id)}</div>${m.model?`<div style="font-family:var(--mono);font-size:9px;color:var(--amber-dim);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(m.model)}</div>`:''}${infoLines}</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${isActive?'<span style="color:var(--amber);font-size:12px">●</span>':''}${delBtn}</div></div>`;
   }).join('');
 }
 
@@ -833,7 +985,21 @@ function renderVar(s){
   if(s.n<2){document.getElementById('varCard').innerHTML='<div style="padding:12px;color:var(--sub);font-size:12px">N≥2で分散チェックが有効になります</div>';return;}
   const desc={'非常に安定':'分散パラメータが1より小さく、理論値より安定しています。データが揃い続ければ高信頼と言えます。','安定':'分散パラメータが理論値近辺。測定ノイズ以上の変動はなく、台の挙動は安定しています。','やや不安定':'分散パラメータがやや高め。真の変動か偶然か見極めのためデータ追加を推奨。','不安定':'分散パラメータが理論値の2倍超。台の真の状態が変動している可能性大。'}[s.vj.label];
   const dispStr=s.dispersion!==null?f(s.dispersion,2):'N/A';
-  document.getElementById('varCard').innerHTML=`<div class="var-wrap"><div class="var-top"><div class="var-metrics"><div class="vm"><div class="v-l">標準偏差</div><div class="v-v">±${f(s.sSD,2)}</div></div><div class="vm"><div class="v-l">変動係数</div><div class="v-v">${(s.cv*100).toFixed(1)}%</div></div><div class="vm"><div class="v-l">分散パラメータ</div><div class="v-v">${dispStr}</div></div></div><div class="vbadge" style="color:${s.vj.color};background:${s.vj.bg}">${s.vj.label}</div></div><div class="var-desc">${desc}<br><small style="color:var(--sub2);display:block;margin-top:4px">※ 分散パラメータ = χ²/(n-1)。各サンプルの球数を考慮した Binomial fit の厳密指標。1.0=理論通り、>1=過分散（真の不安定）、<1=過少分散</small></div></div>`;
+  // 機種学習状況の表示
+  let learnHTML='';
+  const m=mach();
+  if(m.model){
+    const lrn=s.learn;
+    const wPct=(lrn.weight*100).toFixed(0);
+    if(lrn.learned!==null){
+      learnHTML=`<div style="margin-top:8px;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.6"><strong style="color:var(--amber)">■ 機種別学習</strong>「${escapeHtml(m.model)}」<br>${lrn.machineCount}台・${lrn.n}サンプル / 平均dispersion: <strong>${f(lrn.learned,2)}</strong> / 学習強度: <strong>${wPct}%</strong><br><small style="color:var(--sub2)">→ 本台の kOver 係数を <strong>${f(s.kOver,2)}</strong> に調整（デフォルト1.3に対して機種傾向を加味）<br>※ 他の同機種台のデータから学習（自己参照なし）</small></div>`;
+    } else {
+      learnHTML=`<div style="margin-top:8px;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub2)"><strong style="color:var(--sub)">■ 機種別学習</strong>「${escapeHtml(m.model)}」<br>他の同機種台のデータ蓄積中（現在${lrn.n}サンプル、他台なしか不足）</div>`;
+    }
+  } else {
+    learnHTML=`<div style="margin-top:8px;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub2)">■ 機種未設定（タップで設定: <a onclick="editModel()" style="color:var(--amber);cursor:pointer;text-decoration:underline">機種を入力</a>）→ 設定すると学習データが蓄積されます</div>`;
+  }
+  document.getElementById('varCard').innerHTML=`<div class="var-wrap"><div class="var-top"><div class="var-metrics"><div class="vm"><div class="v-l">標準偏差</div><div class="v-v">±${f(s.sSD,2)}</div></div><div class="vm"><div class="v-l">変動係数</div><div class="v-v">${(s.cv*100).toFixed(1)}%</div></div><div class="vm"><div class="v-l">分散パラメータ</div><div class="v-v">${dispStr}</div></div></div><div class="vbadge" style="color:${s.vj.color};background:${s.vj.bg}">${s.vj.label}</div></div><div class="var-desc">${desc}<br><small style="color:var(--sub2);display:block;margin-top:4px">※ 分散パラメータ = χ²/(n-1)。各サンプルの球数を考慮した Binomial fit の厳密指標。1.0=理論通り、>1=過分散（真の不安定）、<1=過少分散</small></div>${learnHTML}</div>`;
 }
 
 function renderHistPanel(s){
@@ -1139,7 +1305,7 @@ function _uniqueName(name,existingIds){
 }
 function _showConflictDialog(name,cb){
   const modal=document.getElementById('conflict-modal');
-  document.getElementById('conflict-msg').innerHTML=`「<strong style="color:var(--amber)">${name}</strong>」はすでに存在します。<br>どうしますか？`;
+  document.getElementById('conflict-msg').innerHTML=`「<strong style="color:var(--amber)">${escapeHtml(name)}</strong>」はすでに存在します。<br>どうしますか？`;
   const close=(action)=>{modal.style.display='none';cb(action);};
   document.getElementById('conflict-overwrite').onclick=()=>close('overwrite');
   document.getElementById('conflict-addnew').onclick=()=>close('addnew');
@@ -1189,6 +1355,7 @@ function importData(){
     incoming.forEach(im=>{
       if(!im.createdAt)im.createdAt=now;
       if(!im.updatedAt)im.updatedAt=now;
+      if(im.model===undefined)im.model=null;
       if(!im.sessions||im.sessions.length===0)im.sessions=[{base:null,data:[],hit:false}];
       ST.machines.push(im);
     });
@@ -1209,6 +1376,7 @@ function importData(){
     const now=Date.now();
     if(!im.createdAt)im.createdAt=now;
     if(!im.updatedAt)im.updatedAt=now;
+    if(im.model===undefined)im.model=null;
     if(!im.sessions||im.sessions.length===0)im.sessions=[{base:null,data:[],hit:false}];
     if(!currentIds.includes(im.id)){
       ST.machines.push(im);
@@ -1242,15 +1410,263 @@ function showBulkInput(){
   }
   document.getElementById('bulk-inp').value='';document.getElementById('bulk-modal').style.display='flex';setTimeout(()=>document.getElementById('bulk-inp').focus(),100);
 }
+
+// ==== ファイル保存 / 読込 ====
+function _todayStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function _downloadBlob(filename,content,mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},200);
+}
+function downloadFullJSON(){
+  const json=JSON.stringify(ST.machines,null,2);
+  _downloadBlob(`kaiten_backup_${_todayStr()}.json`,json,'application/json');
+}
+function downloadSimpleTxt(){
+  const m=mach();
+  let lines=[];
+  lines.push(`# ${m.id}`);
+  if(m.model)lines.push(`# 機種: ${m.model}`);
+  lines.push('');
+  m.sessions.forEach(sess=>{
+    if(sess.base===null)return;
+    lines.push(String(sess.base));
+    sess.data.forEach((v,i)=>{
+      const balls=(sess.dataBalls&&sess.dataBalls[i])||250;
+      lines.push(balls===125?`${v}½`:String(v));
+    });
+    if(sess.hit)lines.push('🎯');
+  });
+  const safeName=m.id.replace(/[^\w\-一-龠ぁ-んァ-ヶ]/g,'_');
+  _downloadBlob(`${safeName}_${_todayStr()}.txt`,lines.join('\n'),'text/plain');
+}
+function onFileSelected(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const text=ev.target.result;
+    e.target.value=''; // 同じファイル再選択可に
+    // JSONとして解釈を試みる
+    try{
+      const parsed=JSON.parse(text);
+      if(Array.isArray(parsed)){
+        // 全台JSON形式
+        document.getElementById('importText').value=text;
+        importData();
+        return;
+      }
+    }catch{}
+    // テキスト形式の場合、現在の台への追加形式として試みる
+    showConfirm('テキスト形式のファイルです。現在の台に追加しますか？',ok=>{
+      if(!ok)return;
+      _importSimpleText(text);
+    });
+  };
+  reader.onerror=()=>showAlert('ファイルの読み込みに失敗しました');
+  reader.readAsText(file);
+}
+function _importSimpleText(text){
+  // Simpleテキストをパース（#コメント行無視、🎯はhit、末尾½は125球）
+  const cur=curSess();
+  pushUndo('ファイル追加');
+  let errors=[],added=0;
+  text.split(/\r?\n/).forEach(line=>{
+    line=line.trim();
+    if(!line||line.startsWith('#'))return;
+    if(line==='🎯'){
+      if(cur.base!==null&&cur.data.length>0){
+        cur.hit=true;
+        mach().sessions.push({base:null,data:[],hit:false});
+      }
+      return;
+    }
+    const isHalf=line.endsWith('½');
+    const numStr=isHalf?line.slice(0,-1):line;
+    const v=parseInt(numStr);
+    if(isNaN(v)||v<0)return;
+    const curNow=curSess();
+    if(curNow.base===null){
+      curNow.base=v;
+      added++;
+      return;
+    }
+    const last=curNow.data.length>0?curNow.data[curNow.data.length-1]:curNow.base;
+    if(v<=last){errors.push(`${line}（${last}以下のためスキップ）`);return;}
+    curNow.data.push(v);
+    if(isHalf||ST.cfg.proMode){
+      if(!curNow.dataBalls)curNow.dataBalls=[];
+      while(curNow.dataBalls.length<curNow.data.length-1)curNow.dataBalls.push(250);
+      curNow.dataBalls.push(isHalf?125:250);
+    } else if(curNow.dataBalls){
+      while(curNow.dataBalls.length<curNow.data.length-1)curNow.dataBalls.push(250);
+      curNow.dataBalls.push(250);
+    }
+    added++;
+  });
+  mach().updatedAt=Date.now();
+  save();killCharts();closeExport();render();
+  let msg=`${added}件を追加しました`;
+  if(errors.length)msg+='\n\nスキップ:\n'+errors.slice(0,5).join('\n');
+  showAlert(msg);
+}
 function closeBulk(){document.getElementById('bulk-modal').style.display='none';}
 function addBulk(){const raw=document.getElementById('bulk-inp').value;const vals=raw.split(/[,、。・\.\s\u3000\uff0c\uff0e]+/).map(s=>parseInt(s.trim())).filter(v=>!isNaN(v)&&v>0);if(!vals.length){closeBulk();return;}pushUndo('一括入力');const cur=curSess();let errors=[];vals.forEach(v=>{if(cur.base===null){cur.base=v;}else{const last=cur.data.length>0?cur.data[cur.data.length-1]:cur.base;if(v<=last){errors.push(`${v}（前の値${last}以下のためスキップ）`);return;}cur.data.push(v);if(cur.dataBalls){cur.dataBalls.push(250);}}});mach().updatedAt=Date.now();save();killCharts();closeBulk();render();if(errors.length)showAlert('スキップされた値:\n'+errors.join('\n'));}
 
 let _longPressTimer=null;
 function startLongPress(i){_longPressTimer=setTimeout(()=>renameMachine(i),600);}
 function cancelLongPress(){clearTimeout(_longPressTimer);}
-function renameMachine(i){showPrompt(`台の名前を入力`,ST.machines[i].id,raw=>{if(raw===null||raw.trim()==='')return;ST.machines[i].id=raw.trim();save();render();},true);}
-function deleteMachine(i){showConfirm(`「${ST.machines[i].id}」を削除しますか？`,ok=>{if(!ok)return;pushUndoFull('台削除');ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
-function addMachine(){const num=ST.machines.length+1;ST.machines.push(defMachine(`台${String(num).padStart(4,'0')}`));ST.current=ST.machines.length-1;save();killCharts();closeDrawer();render();}
+const _MODEL_LIST_DEFAULT_COUNT=5;
+let _modelListExpanded=false;
+function renameMachine(i){
+  // 名前と機種名を同時編集するモーダルを開く
+  const m=ST.machines[i];
+  document.getElementById('editName-inp').value=m.id;
+  document.getElementById('editModel-inp').value=m.model||'';
+  _editMachineIdx=i;
+  _modelListExpanded=false;
+  _modelUsageCache=_getModelUsage();
+  _renderEditModelList();
+  document.getElementById('edit-machine-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('editName-inp').focus(),100);
+  // 入力欄に文字が入るたびリストを絞り込み
+  const inp=document.getElementById('editModel-inp');
+  inp.oninput=()=>_renderEditModelList();
+}
+function _renderEditModelList(){
+  const inp=document.getElementById('editModel-inp');
+  const list=document.getElementById('editModel-list');
+  const filterRaw=(inp.value||'').trim().toLowerCase();
+  const usage=_modelUsageCache;
+  let filtered=usage;
+  if(filterRaw){
+    filtered=usage.filter(([name])=>name.toLowerCase().includes(filterRaw));
+  }
+  if(usage.length===0){
+    list.innerHTML='<div style="padding:8px;color:var(--sub2);font-size:10px;text-align:center">過去の機種履歴なし</div>';
+    return;
+  }
+  if(filtered.length===0){
+    list.innerHTML='<div style="padding:8px;color:var(--sub2);font-size:11px;text-align:center">該当なし<br><small>このまま保存すると新しい機種として登録されます</small></div>';
+    return;
+  }
+  // 表示件数制御：フィルタ時は全部、通常時はデフォルト5件
+  const showAll=filterRaw||_modelListExpanded;
+  const displayList=showAll?filtered:filtered.slice(0,_MODEL_LIST_DEFAULT_COUNT);
+  const hiddenCount=filtered.length-displayList.length;
+  const items=displayList.map((entry,visibleIdx)=>{
+    const name=entry[0],info=entry[1];
+    // オリジナルインデックスを _modelUsageCache から検索
+    const origIdx=usage.findIndex(u=>u[0]===name);
+    return `<div onclick="_pickModel(${origIdx})" style="padding:8px 10px;background:var(--card2);border:1px solid var(--border2);border-radius:6px;margin-bottom:4px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px"><span style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">${escapeHtml(name)}</span><span style="color:var(--sub2);font-size:10px;flex-shrink:0">${info.count}台</span></div>`;
+  }).join('');
+  const expandBtn=(!filterRaw&&hiddenCount>0)?`<div onclick="_toggleModelListExpand()" style="padding:6px;text-align:center;color:var(--amber);font-family:var(--mono);font-size:11px;cursor:pointer;text-decoration:underline">他 ${hiddenCount} 件を表示 ▾</div>`:'';
+  const collapseBtn=(!filterRaw&&_modelListExpanded&&filtered.length>_MODEL_LIST_DEFAULT_COUNT)?`<div onclick="_toggleModelListExpand()" style="padding:6px;text-align:center;color:var(--sub);font-family:var(--mono);font-size:11px;cursor:pointer;text-decoration:underline">折りたたむ ▴</div>`:'';
+  const header=filterRaw?`<div style="font-family:var(--mono);font-size:9px;color:var(--sub2);margin-bottom:4px">一致: ${filtered.length}件</div>`:`<div style="font-family:var(--mono);font-size:9px;color:var(--sub2);margin-bottom:4px">最近使った機種</div>`;
+  list.innerHTML=header+`<div style="max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch">${items}</div>${expandBtn}${collapseBtn}`;
+}
+function _pickModel(idx){
+  const entry=_modelUsageCache[idx];
+  if(!entry)return;
+  document.getElementById('editModel-inp').value=entry[0];
+  _renderEditModelList();
+}
+function _toggleModelListExpand(){
+  _modelListExpanded=!_modelListExpanded;
+  _renderEditModelList();
+}
+let _editMachineIdx=null;
+function closeEditMachine(){
+  document.getElementById('edit-machine-modal').style.display='none';
+  _editMachineIdx=null;
+  _modelUsageCache=[];
+  _modelListExpanded=false;
+}
+function saveEditMachine(){
+  if(_editMachineIdx===null)return;
+  const m=ST.machines[_editMachineIdx];
+  const newName=document.getElementById('editName-inp').value.trim();
+  const newModel=document.getElementById('editModel-inp').value.trim();
+  if(!newName){showAlert('台の名前を入力してください');return;}
+  m.id=newName;
+  m.model=newModel||null;
+  m.updatedAt=Date.now();
+  save();
+  closeEditMachine();
+  killCharts();render();
+}
+function deleteMachine(i){showConfirm(`「${escapeHtml(ST.machines[i].id)}」を削除しますか？`,ok=>{if(!ok)return;pushUndoFull('台削除');ST.machines.splice(i,1);if(ST.current>=ST.machines.length)ST.current=ST.machines.length-1;save();killCharts();render();});}
+// ==== 機種選択モーダル ====
+let _modelCallback=null; // 選択完了後のコールバック
+let _modelUsageCache=[]; // インデックス参照用キャッシュ
+function _getModelUsage(){
+  // 機種ごとの使用回数と最終使用日時
+  const byModel={};
+  ST.machines.forEach(m=>{
+    if(!m.model)return;
+    if(!byModel[m.model])byModel[m.model]={count:0,lastUsed:0};
+    byModel[m.model].count++;
+    if(m.updatedAt>byModel[m.model].lastUsed)byModel[m.model].lastUsed=m.updatedAt;
+  });
+  return Object.entries(byModel).sort((a,b)=>b[1].lastUsed-a[1].lastUsed);
+}
+function openModelModal(title,cb){
+  _modelCallback=cb;
+  document.getElementById('model-title').textContent=title;
+  document.getElementById('model-new-inp').value='';
+  const list=document.getElementById('model-list');
+  const usage=_getModelUsage();
+  _modelUsageCache=usage;
+  if(usage.length===0){
+    list.innerHTML='<div style="padding:10px;color:var(--sub2);font-size:11px;text-align:center">過去の機種履歴なし</div>';
+  } else {
+    list.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">過去の機種（タップで選択）</div>'+
+      usage.map(([name,info],idx)=>`<div onclick="confirmModelSelectedIdx(${idx})" style="padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--mono);font-size:13px;color:var(--text)">${escapeHtml(name)}</span><span style="font-family:var(--mono);font-size:10px;color:var(--sub2)">${info.count}台</span></div>`).join('');
+  }
+  document.getElementById('model-modal').style.display='flex';
+}
+function closeModelModal(){document.getElementById('model-modal').style.display='none';_modelCallback=null;_modelUsageCache=[];}
+function confirmModelSelectedIdx(idx){
+  const entry=_modelUsageCache[idx];
+  if(!entry)return;
+  if(_modelCallback)_modelCallback(entry[0]);
+  closeModelModal();
+}
+function confirmModelNew(){
+  const v=document.getElementById('model-new-inp').value.trim();
+  if(!v){showAlert('機種名を入力してください');return;}
+  if(_modelCallback)_modelCallback(v);
+  closeModelModal();
+}
+function confirmModelNone(){
+  if(_modelCallback)_modelCallback(null);
+  closeModelModal();
+}
+function editModel(){
+  const m=mach();
+  openModelModal('機種を設定',sel=>{
+    m.model=sel;
+    m.updatedAt=Date.now();
+    save();killCharts();render();
+  });
+}
+function addMachine(){
+  // Fix 2: undo対応
+  pushUndoFull('新規台追加');
+  // Fix 6: 機種なしで即作成、後で追加可能
+  const num=ST.machines.length+1;
+  const newM=defMachine(`台${String(num).padStart(4,'0')}`);
+  ST.machines.push(newM);
+  ST.current=ST.machines.length-1;
+  save();killCharts();closeDrawer();render();
+}
 function switchMachine(i){ST.current=i;save();killCharts();closeDrawer();render();}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('show');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('show');}
@@ -1281,6 +1697,23 @@ function openSettings(){
   pmCb.checked=!!proMode;
   pmLbl.textContent=proMode?'ON（0.5k刻み入力有効）':'OFF';
   pmCb.onchange=()=>{pmLbl.textContent=pmCb.checked?'ON（0.5k刻み入力有効）':'OFF';};
+  // 機種別統計を描画
+  const mList=document.getElementById('modelStatsList');
+  if(mList){
+    const all=aggregateModelStats();
+    const keys=Object.keys(all);
+    if(keys.length===0){
+      mList.innerHTML='<div style="color:var(--sub2);font-size:11px">まだ機種データがありません</div>';
+    } else {
+      mList.innerHTML=keys.map(k=>{
+        const d=all[k];
+        const disp=d.dispersion!==null?f(d.dispersion,2):'—';
+        const mu=d.avgMu!==undefined?f(d.avgMu,1)+'回':'—';
+        const weight=d.dispersion!==null?((d.n/(d.n+_LEARN_ALPHA))*100).toFixed(0)+'%':'—';
+        return `<div style="padding:8px 10px;background:var(--card2);border-radius:6px;margin-bottom:6px"><div style="font-family:var(--mono);font-size:12px;color:var(--text);font-weight:600;margin-bottom:3px">${escapeHtml(k)}</div><div style="font-family:var(--mono);font-size:10px;color:var(--sub)">${d.machineCount}台 / ${d.n}サンプル / 平均推定: ${mu} / dispersion: ${disp} / 学習強度: ${weight}</div></div>`;
+      }).join('');
+    }
+  }
   document.getElementById('settings-modal').classList.add('open');
 }
 function closeSettings(){
@@ -1298,7 +1731,12 @@ function closeSettings(){
   document.getElementById('settings-modal').classList.remove('open');
   killCharts();render();
 }
-function confirmReset(){showConfirm(`${mach().id}のデータを全て削除しますか？`,ok=>{if(!ok)return;pushUndo('データリセット');mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
+function confirmReset(){showConfirm(`${escapeHtml(mach().id)}のデータを全て削除しますか？`,ok=>{if(!ok)return;pushUndo('データリセット');mach().sessions=[{base:null,data:[],hit:false}];save();closeSettings();killCharts();render();});}
+function toggleHelp(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+}
 
 // Enter key handled by form submit
 document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
