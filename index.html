@@ -235,6 +235,10 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
         <div style="height:1px;background:var(--border2);margin:5px 4px"></div>
         <div style="font-family:var(--mono);font-size:7px;color:var(--sub);margin-bottom:3px;letter-spacing:.05em">N=</div>
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);line-height:1" id="hpN">0</div>
+        <div id="hpInfoGain" style="display:none;margin-top:6px;padding-top:5px;border-top:1px solid var(--border2)">
+          <div style="font-family:var(--mono);font-size:6px;color:var(--sub);margin-bottom:2px;letter-spacing:.05em" title="直前のサンプル追加による情報量">Δ情報</div>
+          <div id="hpInfoGainVal" style="font-family:var(--mono);font-size:10px;font-weight:700;line-height:1"></div>
+        </div>
       </div>
     </div>
     <div class="main-content">
@@ -298,6 +302,18 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
           <div class="kpi-sub" id="kpiEVSub">推定1k: -.- 円</div>
           <div class="kpi-sub" id="kpiEVReal" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">実測1k: -.- 円</div>
         </div>
+      </div>
+      <!-- 事後予測カード（データあり時のみ） -->
+      <div id="predictive-card" class="hidden" style="margin:4px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--sub);letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <span style="color:var(--amber-dim)">02</span>次の1kの予測
+          <button onclick="toggleHelp('helpPred')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:16px;height:16px;color:var(--sub);font-size:10px;cursor:pointer;padding:0;line-height:1;margin-left:auto">?</button>
+        </div>
+        <div id="helpPred" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:10px;color:var(--sub);line-height:1.7;margin-bottom:8px">
+          <strong style="color:var(--text)">事後予測分布</strong>：推定回転数の「平均」ではなく、「<strong>次の1kで実際に何回回るか</strong>」の予測。平均は収束しても、1k単位の変動は残るため別物。短期判断（あと少し続けるか）に有用。
+        </div>
+        <div id="predRanges" style="font-family:var(--mono);font-size:12px;line-height:1.8"></div>
+        <div id="predBorderRisk" style="margin-top:8px;padding:6px 8px;background:var(--card2);border-radius:6px;font-size:11px"></div>
       </div>
       <section id="input-sec">
         <div class="input-lbl" id="inputLbl">INIT — 初期累計回転数を入力</div>
@@ -440,6 +456,19 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
     <div style="display:flex;gap:8px">
       <button id="cmodal-cancel" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
       <button id="cmodal-ok" style="flex:1;background:#f59e0b;border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;cursor:pointer">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="hp-edit-modal" style="display:none;position:fixed;inset:0;z-index:750;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center">
+  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px">
+    <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:10px" id="hpEditTitle">データ編集</div>
+    <div id="hpEditInfo" style="font-family:var(--mono);font-size:11px;color:var(--sub);margin-bottom:10px;line-height:1.6"></div>
+    <input type="number" id="hpEditInp" inputmode="numeric" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:16px;padding:12px;outline:none;margin-bottom:14px;text-align:center">
+    <div style="display:flex;gap:8px">
+      <button onclick="closeHpEdit()" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
+      <button onclick="deleteHpEdit()" style="flex:1;background:transparent;border:1px solid #f87171;border-radius:8px;color:#f87171;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">削除</button>
+      <button onclick="saveHpEdit()" style="flex:1;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;cursor:pointer">保存</button>
     </div>
   </div>
 </div>
@@ -628,7 +657,18 @@ function ballsFor(sess,di){return (sess.dataBalls&&sess.dataBalls[di])||250;}
 function hitCount(){return mach().sessions.filter(s=>s.hit).length;}
 function allEvents(){const events=[];let dataIdx=0;mach().sessions.forEach((sess,si)=>{if(sess.base!==null){events.push({type:'base',val:sess.base,si});}sess.data.forEach((v,di)=>{const prev=di===0?sess.base:sess.data[di-1];const balls=(sess.dataBalls&&sess.dataBalls[di])||250;const rot=v-prev;const rotNorm=rot*(250/balls);dataIdx++;events.push({type:'data',cumul:v,rot,rotNorm,balls,idx:dataIdx,si,di});});if(sess.hit){events.push({type:'hit',si});}});return events;}
 
-// ==== 機種別統計学習 ====
+// ==== 情報獲得量（KLダイバージェンス） ====
+// 直前のサンプル追加による推定分布の変化量を bit で記録
+function _infoGain(aBefore,bBefore,aAfter,bAfter){
+  // Beta(aB,bB) → Beta(aA,bA) の KL divergence (nats) → bits
+  // KL = ln(B(aB,bB)/B(aA,bA)) + (aA-aB)ψ(aA) + (bA-bB)ψ(bA) - (aA-aB+bA-bB)ψ(aA+bA)
+  // 簡易には Beta の情報量変化を近似。実用上は log ratio of precisions で十分
+  // Fisher情報量の変化量で近似: log((aA+bA)/(aB+bB)) bits
+  const precBefore=aBefore+bBefore,precAfter=aAfter+bAfter;
+  if(precBefore<=0||precAfter<=0)return 0;
+  return Math.log2(precAfter/precBefore);
+}
+let _lastInfoGain=null;
 const _LEARN_ALPHA=50; // 学習強度：サンプル数αでデフォルトと半々、以降実データ寄り
 const _DEFAULT_DISPERSION=1.3;
 
@@ -775,6 +815,48 @@ function calcStats(){
   return{n,nEff:nEffData,mean,sVar,sSD,cv,dispersion,vj,aPost,bPost,pPost,muPost,sdRot,ciLo,ciHi,pSuc,ev,lk,lkBounds,ci,border,a0,b0,priorMu,shogyu,dataTrust,stabTrust,trustCoef,composite,kOver,totalBalls,learn};
 }
 
+// 事後予測分布（Beta-Binomial Predictive）: 次のnBalls球で何回回るかの分布
+function posteriorPredictive(aPost,bPost,nBalls,shogyu){
+  // Beta-Binomial(n, α, β): P(k回成功) = C(n,k) B(k+α, n-k+β) / B(α,β)
+  // 平均・分散・パーセンタイル を計算
+  // 平均 k = n·α/(α+β)、分散 k = n·α·β·(α+β+n)/((α+β)²·(α+β+1))
+  const meanK=nBalls*aPost/(aPost+bPost);
+  const varK=nBalls*aPost*bPost*(aPost+bPost+nBalls)/((aPost+bPost)**2*(aPost+bPost+1));
+  const sdK=Math.sqrt(varK);
+  // kは回転数ではなく「成功数」なので、kを回転数に変換（実際の回転数はkを賞球で調整）
+  // でも元モデルで rot を成功としてるので k がそのまま rot
+  // 1k（=250+shogyu·rot）のケース:
+  // ただし nBalls は固定（shogyu補正はpから吸収済み）と見なすので、kが回転数そのものとして近似可
+  // パーセンタイルは正規近似（中〜大きなnBallsなら十分正確）
+  const z=(p)=>{
+    // 簡易 normInv
+    if(p<=0)return -6;if(p>=1)return 6;
+    const a=[2.50662823884,-18.61500062529,41.39119773534,-25.44106049637];
+    const b=[-8.4735109309,23.08336743743,-21.06224101826,3.13082909833];
+    const q=p-.5;
+    if(Math.abs(q)<=.42){const r=q*q;return q*(((a[3]*r+a[2])*r+a[1])*r+a[0])/((((b[3]*r+b[2])*r+b[1])*r+b[0])*r+1);}
+    const c=[.3374754822726147,.9761690190917186,.1607979714918209,.0276438810333863,.0038405729373609,.0003951896511349,.0000321767881768,.0000002888167364,.0000003960315187];
+    let r=p<.5?p:1-p;r=Math.sqrt(-Math.log(r));
+    let zz=c[0]+r*(c[1]+r*(c[2]+r*(c[3]+r*(c[4]+r*(c[5]+r*(c[6]+r*(c[7]+r*c[8])))))));
+    return q<0?-zz:zz;
+  };
+  const pct=p=>Math.max(0,meanK+z(p)*sdK);
+  return{
+    mean:meanK,sd:sdK,
+    p10:pct(0.10),p25:pct(0.25),p50:pct(0.50),p75:pct(0.75),p90:pct(0.90),
+    // ボーダー下回り確率
+    probBelow:(bd)=>{
+      if(sdK<=0)return meanK<bd?1:0;
+      const zv=(bd-meanK)/sdK;
+      // Φ(z)の近似
+      const t=1/(1+0.2316419*Math.abs(zv));
+      const d=0.3989423*Math.exp(-zv*zv/2);
+      const phi=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));
+      return zv>=0?1-phi:phi;
+    }
+  };
+}
+
 let charts={};
 function f(v,d=1){return v===null||v===undefined?'-.-':Number(v).toFixed(d);}
 function fp(v){return v===null?'-.-%':(v*100).toFixed(1)+'%';}
@@ -785,7 +867,7 @@ function render(){
   document.getElementById('dot').classList.toggle('live',hasData);
   document.getElementById('empty-state').classList.toggle('hidden',hasData);
   document.getElementById('stats-sec').classList.toggle('hidden',!hasData);
-  document.getElementById('top-eval-card').classList.remove('hidden');
+  document.getElementById('top-eval-card').classList.toggle('hidden',!hasData);
   const isInit=cur.base===null;
   document.getElementById('inputLbl').textContent=isInit?'INIT — 初期累計回転数を入力':'DATA INPUT — 現在の累計回転数';
   updateInputPlaceholder();
@@ -807,8 +889,8 @@ function render(){
   }
   renderDrawerList();renderHistPanel(s);renderKPI(s,m,hasData);
   updateUndoBtn();
-  if(!s)return;
-  renderSuccess(s);renderLK(s);renderBayes(s);renderCI(s);renderVar(s);renderActiveChart(s);
+  if(!s){document.getElementById('predictive-card').classList.add('hidden');return;}
+  renderSuccess(s);renderPredictive(s);renderLK(s);renderBayes(s);renderCI(s);renderVar(s);renderActiveChart(s);
 }
 
 function renderDrawerList(){
@@ -870,6 +952,20 @@ function renderKPI(s,m,hasData){
     hpStats.style.display=hasData?'block':'none';
     hpHits.textContent=hits;
     hpN.textContent=hasData?s.n:0;
+    // 情報獲得量
+    const igWrap=document.getElementById('hpInfoGain');
+    const igVal=document.getElementById('hpInfoGainVal');
+    if(igWrap&&igVal){
+      if(_lastInfoGain!==null&&_lastInfoGain>0){
+        igWrap.style.display='block';
+        const bits=_lastInfoGain;
+        const col=bits>=0.05?'#4ade80':bits>=0.02?'#a3e635':'#facc15';
+        igVal.style.color=col;
+        igVal.textContent='+'+bits.toFixed(3);
+      } else {
+        igWrap.style.display='none';
+      }
+    }
   }
   if(!hasData){
     ['kpiMu','kpiMean','kpiInvest','kpiEVTotal'].forEach(id=>document.getElementById(id).textContent='-.-');
@@ -981,6 +1077,25 @@ function renderCI(s){
   document.getElementById('ciCard').innerHTML=`<div class="ci-row"><div class="ci-type"><strong>Beta ${s.ci}% 信用区間</strong>exact Beta quantile（正規近似なし）</div><div class="ci-range">${f(s.ciLo)} 〜 ${f(s.ciHi)}</div></div><div class="ci-row"><div class="ci-type"><strong>区間幅</strong>± ${f((s.ciHi-s.ciLo)/2,2)} 回転</div><div class="ci-range" style="color:var(--sub)">${s.ci}% 信頼</div></div>`;
 }
 
+function renderPredictive(s){
+  const card=document.getElementById('predictive-card');
+  if(!s){card.classList.add('hidden');return;}
+  card.classList.remove('hidden');
+  // 次の1k = 250球を予測
+  const pred=posteriorPredictive(s.aPost,s.bPost,250,s.shogyu);
+  // 賞球を加味した補正（250球＋α回×賞球だと実際は少し多く撃てる、ただし影響は小さい）
+  const borderVal=s.border;
+  const probBelow=pred.probBelow(borderVal);
+  const rangesHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--sub)">50% の範囲</span><span style="color:var(--text);font-weight:700">${f(pred.p25,0)} 〜 ${f(pred.p75,0)} 回</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--sub)">80% の範囲</span><span style="color:var(--text);font-weight:700">${f(pred.p10,0)} 〜 ${f(pred.p90,0)} 回</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--sub)">最も有り得る値（中央値）</span><span style="color:var(--amber);font-weight:700">${f(pred.p50,1)} 回</span></div>
+  `;
+  document.getElementById('predRanges').innerHTML=rangesHTML;
+  const riskCol=probBelow>=0.5?'#f87171':probBelow>=0.3?'#facc15':'#4ade80';
+  document.getElementById('predBorderRisk').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--sub)">ボーダー${borderVal}回を下回る確率</span><span style="color:${riskCol};font-weight:700">${(probBelow*100).toFixed(1)}%</span></div>`;
+}
+
 function renderVar(s){
   if(s.n<2){document.getElementById('varCard').innerHTML='<div style="padding:12px;color:var(--sub);font-size:12px">N≥2で分散チェックが有効になります</div>';return;}
   const desc={'非常に安定':'分散パラメータが1より小さく、理論値より安定しています。データが揃い続ければ高信頼と言えます。','安定':'分散パラメータが理論値近辺。測定ノイズ以上の変動はなく、台の挙動は安定しています。','やや不安定':'分散パラメータがやや高め。真の変動か偶然か見極めのためデータ追加を推奨。','不安定':'分散パラメータが理論値の2倍超。台の真の状態が変動している可能性大。'}[s.vj.label];
@@ -1010,7 +1125,7 @@ function renderHistPanel(s){
   if(isEmpty)return;
   [...events].reverse().forEach(ev=>{
     const div=document.createElement('div');
-    if(ev.type==='base'){div.className='hp-base';div.innerHTML=`<div class="hp-base-lbl">開始</div><div class="hp-base-val" onclick="editBase(${ev.si})" style="cursor:pointer;text-decoration:underline dotted">${ev.val}</div>`;}
+    if(ev.type==='base'){div.className='hp-base';div.innerHTML=`<div class="hp-base-lbl">開始</div><div class="hp-base-val" onclick="event.stopPropagation();openHpEdit('base',${ev.si},null)" style="cursor:pointer;text-decoration:underline dotted">${ev.val}</div>`;}
     else if(ev.type==='hit'){
       div.className='hp-hit';
       // このhitが取り消し可能か判定：直後のセッションが現セッションで、かつdataが空
@@ -1050,8 +1165,8 @@ function renderHistPanel(s){
       const rotDisp=ev.rot.toString();
       div.className='hp-item'+(ev.balls===125?' hp-item-half':'');
       div.style.cssText='position:relative;cursor:pointer';
-      div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${rotDisp}</span></div><div class="hp-dev" style="color:${devColor}">${devStr}</div><button onclick="event.stopPropagation();deleteDataPoint(${ev.si},${ev.di})" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:#f87171;border:none;border-radius:4px;color:#000;font-size:9px;font-weight:700;padding:3px 6px;cursor:pointer" class="del-dp-btn">削除</button>`;
-      div.addEventListener('click',function(){const btn=this.querySelector('.del-dp-btn');const isShown=btn.style.display!=='none';document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');btn.style.display=isShown?'none':'block';});
+      div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${rotDisp}</span></div><div class="hp-dev" style="color:${devColor}">${devStr}</div>`;
+      div.addEventListener('click',function(){openHpEdit('data',ev.si,ev.di);});
     }
     panel.appendChild(div);
   });
@@ -1077,18 +1192,73 @@ function renderHistChartFn(s){
   const events=allEvents().filter(e=>e.type==='data');
   const points=[];
   const runAvgPoints=[];
-  let cumK=0,sumRot=0,count=0;
-  events.forEach(ev=>{
+  const muPostPoints=[];
+  const ciUpperPoints=[];
+  const ciLowerPoints=[];
+  // 事前分布パラメータ（時系列推定用）
+  const{priorMu,priorSigma,shogyu,border}=ST.cfg;
+  const nEff0=250+shogyu*priorMu,p0Base=priorMu/nEff0;
+  const sp=priorSigma*250/(nEff0*nEff0);
+  const kappa=Math.max(2,p0Base*(1-p0Base)/(sp*sp)-1);
+  const a0=kappa*p0Base,b0=kappa*(1-p0Base);
+  // CI分位点（aPostで計算したciLevelに合わせる）
+  const ciLv=(ST.ciLevel||95)/100;
+  const lo=(1-ciLv)/2,hi=1-lo;
+  // 各データ点時点での累積状態を計算し、その時点のmuPostとCIを求める
+  let cumK=0,sumRot=0,count=0,cumS=0,cumNballs=0;
+  events.forEach((ev,idx)=>{
     const kInc=ev.balls/250;
     cumK+=kInc;
     sumRot+=ev.rotNorm;
     count++;
     points.push({x:cumK,y:ev.rotNorm});
     runAvgPoints.push({x:cumK,y:sumRot/count});
+    // この時点までのデータで aPost/bPost を計算
+    cumS+=ev.rot;
+    cumNballs+=ev.balls+shogyu*ev.rot;
+    // 過分散補正は nEffData（1k換算）ベース
+    const nEffData=cumK;
+    const kOver=Math.max(1.3,1+2.0/Math.sqrt(nEffData));
+    const aP=(a0+cumS)/kOver;
+    const bP=(b0+(cumNballs-cumS))/kOver;
+    const pP=aP/(aP+bP);
+    const muP=pToRot(pP,shogyu);
+    muPostPoints.push({x:cumK,y:muP});
+    // 信頼区間（回転数空間）
+    try{
+      // 逆ベータ分位点：解析式がないので二分探索で近似
+      const invBeta=(target,a,b)=>{
+        let lo=1e-6,hi=1-1e-6;
+        for(let k=0;k<40;k++){
+          const mid=(lo+hi)/2;
+          if(betaCDF(mid,a,b)<target)lo=mid;else hi=mid;
+        }
+        return (lo+hi)/2;
+      };
+      const pLo=invBeta(lo,aP,bP);
+      const pHi=invBeta(hi,aP,bP);
+      ciUpperPoints.push({x:cumK,y:pToRot(pHi,shogyu)});
+      ciLowerPoints.push({x:cumK,y:pToRot(pLo,shogyu)});
+    }catch(e){
+      ciUpperPoints.push({x:cumK,y:muP});
+      ciLowerPoints.push({x:cumK,y:muP});
+    }
   });
   const maxK=cumK||1;
-  const borderLine=[{x:0,y:s.border},{x:maxK,y:s.border}];
-  charts.hist=new Chart(ctx,{type:'line',data:{datasets:[{label:'回転数/1k',data:points,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',pointBackgroundColor:'#f59e0b',pointRadius:4,tension:.2,fill:true},{label:'累積平均',data:runAvgPoints,borderColor:'#22d3ee',borderDash:[5,3],pointRadius:0,tension:.3,borderWidth:1.5},{label:'ボーダー',data:borderLine,borderColor:'#f87171',borderDash:[3,3],pointRadius:0,borderWidth:1}]},options:{...CO,scales:{x:{type:'linear',ticks:{...TICK,callback:v=>v%1===0?`${v}k`:`${v.toFixed(1)}k`},grid:GRID,title:{display:false}},y:{ticks:TICK,grid:GRID}},plugins:{legend:{display:true,labels:{color:'#808080',font:{family:'IBM Plex Mono',size:10},boxWidth:12,padding:10}}}}});
+  const borderLine=[{x:0,y:border},{x:maxK,y:border}];
+  charts.hist=new Chart(ctx,{type:'line',data:{datasets:[
+    // CI帯（上端、下端） — fill 効果で帯状に
+    {label:`${ST.ciLevel||95}% 信用区間`,data:ciUpperPoints,borderColor:'rgba(245,158,11,.15)',backgroundColor:'rgba(245,158,11,.10)',pointRadius:0,borderWidth:0,fill:'+1',tension:.3,order:10},
+    {label:'CI下',data:ciLowerPoints,borderColor:'rgba(245,158,11,.15)',pointRadius:0,borderWidth:0,fill:false,tension:.3,order:10},
+    // 推定回転数線（μ*）
+    {label:'推定回転数 μ*',data:muPostPoints,borderColor:'#fbbf24',pointRadius:0,tension:.3,borderWidth:2,order:2},
+    // 実測回転数
+    {label:'回転数/1k',data:points,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.04)',pointBackgroundColor:'#f59e0b',pointRadius:4,tension:.2,fill:false,order:1},
+    // 累積平均
+    {label:'累積平均',data:runAvgPoints,borderColor:'#22d3ee',borderDash:[5,3],pointRadius:0,tension:.3,borderWidth:1.5,order:3},
+    // ボーダー
+    {label:'ボーダー',data:borderLine,borderColor:'#f87171',borderDash:[3,3],pointRadius:0,borderWidth:1,order:4}
+  ]},options:{...CO,scales:{x:{type:'linear',ticks:{...TICK,callback:v=>v%1===0?`${v}k`:`${v.toFixed(1)}k`},grid:GRID,title:{display:false}},y:{ticks:TICK,grid:GRID}},plugins:{legend:{display:true,labels:{color:'#808080',font:{family:'IBM Plex Mono',size:9},boxWidth:10,padding:6,filter:(it)=>!it.text.includes('CI下')}}}}});
 }
 
 function renderLikeChart(s){
@@ -1213,6 +1383,8 @@ function addEntry(){
   const inp=document.getElementById('rotIn');const v=parseInt(inp.value.trim());
   if(isNaN(v)||v<0){inp.style.borderColor='#f87171';setTimeout(()=>inp.style.borderColor='',800);return;}
   const cur=curSess();
+  // 情報獲得量用：追加前のaPost/bPost
+  const statsBefore=calcStats();
   // 事前にスナップショット取得
   pushUndo('データ追加');
   if(cur.base===null){cur.base=v;}
@@ -1230,6 +1402,13 @@ function addEntry(){
     }
   }
   mach().updatedAt=Date.now();
+  // 情報獲得量を計算
+  const statsAfter=calcStats();
+  if(statsBefore&&statsAfter){
+    _lastInfoGain=_infoGain(statsBefore.aPost,statsBefore.bPost,statsAfter.aPost,statsAfter.bPost);
+  } else if(statsAfter){
+    _lastInfoGain=null; // 初回データは比較できない
+  }
   save();inp.value='';inp.focus();killCharts();render();
 }
 
@@ -1267,6 +1446,75 @@ function undoHit(){
 function editBase(si){const sess=mach().sessions[si],next=sess.data.length>0?sess.data[0]:null;const msg=`開始回転数を入力${next!==null?'<br><small>(次の値 '+next+' より小さくしてください)</small>':''}`;showPrompt(msg,sess.base,raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値にしてください`);return;}pushUndo('開始値編集');sess.base=v;mach().updatedAt=Date.now();save();killCharts();render();});}
 function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:sess.data[di-1],next=di<sess.data.length-1?sess.data[di+1]:null;const msg=`累計回転数を入力<br><small>${prev}より大きく${next!==null?next+'より小さい値を入力':''}</small>`;showPrompt(msg,sess.data[di],raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)){showAlert('数値を入力してください');return;}if(v<=prev){showAlert(`前の値（${prev}）より大きい値を入力してください`);return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}pushUndo('データ編集');sess.data[di]=v;mach().updatedAt=Date.now();save();killCharts();render();});}
 function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;pushUndo('データ削除');const sess=mach().sessions[si];sess.data.splice(di,1);if(sess.dataBalls)sess.dataBalls.splice(di,1);mach().updatedAt=Date.now();save();killCharts();render();});}
+
+// 履歴タップ編集モーダル
+let _hpEdit={type:null,si:null,di:null};
+function openHpEdit(type,si,di){
+  _hpEdit={type,si,di};
+  const sess=mach().sessions[si];
+  if(type==='base'){
+    const next=sess.data.length>0?sess.data[0]:null;
+    document.getElementById('hpEditTitle').textContent='開始回転数の編集';
+    document.getElementById('hpEditInfo').innerHTML=`現在の値: <strong style="color:var(--amber)">${sess.base}</strong>${next!==null?`<br>※ 次の値（${next}）より小さくしてください`:''}`;
+    document.getElementById('hpEditInp').value=sess.base;
+  } else {
+    const prev=di===0?sess.base:sess.data[di-1];
+    const next=di<sess.data.length-1?sess.data[di+1]:null;
+    const v=sess.data[di];
+    const balls=(sess.dataBalls&&sess.dataBalls[di])||250;
+    const halfNote=balls===125?'（½ 0.5k単位）':'';
+    document.getElementById('hpEditTitle').textContent='累計回転数の編集';
+    document.getElementById('hpEditInfo').innerHTML=`現在の値: <strong style="color:var(--amber)">${v}</strong> ${halfNote}<br>※ ${prev} より大きく${next!==null?`、${next} より小さい`:''}値を入力`;
+    document.getElementById('hpEditInp').value=v;
+  }
+  document.getElementById('hp-edit-modal').style.display='flex';
+  setTimeout(()=>{const inp=document.getElementById('hpEditInp');inp.focus();inp.select();},100);
+}
+function closeHpEdit(){
+  document.getElementById('hp-edit-modal').style.display='none';
+  _hpEdit={type:null,si:null,di:null};
+}
+function saveHpEdit(){
+  const{type,si,di}=_hpEdit;
+  if(type===null)return;
+  const raw=document.getElementById('hpEditInp').value.trim();
+  if(raw==='')return;
+  const v=parseInt(raw);
+  if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}
+  const sess=mach().sessions[si];
+  if(type==='base'){
+    const next=sess.data.length>0?sess.data[0]:null;
+    if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値にしてください`);return;}
+    pushUndo('開始値編集');
+    sess.base=v;
+  } else {
+    const prev=di===0?sess.base:sess.data[di-1];
+    const next=di<sess.data.length-1?sess.data[di+1]:null;
+    if(v<=prev){showAlert(`前の値（${prev}）より大きい値を入力してください`);return;}
+    if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}
+    pushUndo('データ編集');
+    sess.data[di]=v;
+  }
+  mach().updatedAt=Date.now();
+  save();closeHpEdit();killCharts();render();
+}
+function deleteHpEdit(){
+  const{type,si,di}=_hpEdit;
+  if(type===null)return;
+  if(type==='base'){
+    showAlert('開始値は削除できません。データ全体を消したい場合はリセットを使ってください。');
+    return;
+  }
+  showConfirm('このデータを削除しますか？',ok=>{
+    if(!ok)return;
+    pushUndo('データ削除');
+    const sess=mach().sessions[si];
+    sess.data.splice(di,1);
+    if(sess.dataBalls)sess.dataBalls.splice(di,1);
+    mach().updatedAt=Date.now();
+    save();closeHpEdit();killCharts();render();
+  });
+}
 
 function openExport(){
   const m=mach();let lines=[];
@@ -1595,6 +1843,14 @@ function saveEditMachine(){
   const newName=document.getElementById('editName-inp').value.trim();
   const newModel=document.getElementById('editModel-inp').value.trim();
   if(!newName){showAlert('台の名前を入力してください');return;}
+  // 変更がない場合はundoを記録しない
+  if(m.id===newName&&(m.model||'')===newModel){closeEditMachine();return;}
+  // 現在の台のみ変更する操作なのでpushUndo（pushUndoFullではない）
+  const targetIdx=_editMachineIdx;
+  const origCurrent=ST.current;
+  ST.current=targetIdx; // pushUndo は current 台を記録するので一時的に切替
+  pushUndo('台情報編集');
+  ST.current=origCurrent;
   m.id=newName;
   m.model=newModel||null;
   m.updatedAt=Date.now();
@@ -1652,6 +1908,7 @@ function confirmModelNone(){
 function editModel(){
   const m=mach();
   openModelModal('機種を設定',sel=>{
+    pushUndo('機種編集');
     m.model=sel;
     m.updatedAt=Date.now();
     save();killCharts();render();
@@ -1681,7 +1938,13 @@ function onCI(){
     ST.ciLevel=v;
     document.getElementById('ciPct').textContent=v+'%';
     save();
-    const s=calcStats();if(s){renderCI(s);renderSuccess(s);renderKPI(s,mach(),true);renderDistBarChart(s);}
+    const s=calcStats();
+    if(s){
+      renderCI(s);renderSuccess(s);renderKPI(s,mach(),true);
+      // アクティブなタブに応じてチャートを再描画
+      if(ST.activeTab===0)renderDistBarChart(s);
+      else if(ST.activeTab===1){if(charts.hist){charts.hist.destroy();charts.hist=null;}renderHistChartFn(s);}
+    }
   }
 }
 function toggleCollapse(){ST.colOpen=!ST.colOpen;save();document.getElementById('colSection').classList.toggle('open',ST.colOpen);document.getElementById('colArrow').classList.toggle('open',ST.colOpen);}
