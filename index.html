@@ -303,18 +303,6 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
           <div class="kpi-sub" id="kpiEVReal" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">実測1k: -.- 円</div>
         </div>
       </div>
-      <!-- 事後予測カード（データあり時のみ） -->
-      <div id="predictive-card" class="hidden" style="margin:4px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--sub);letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
-          <span style="color:var(--amber-dim)">02</span>次の1kの予測
-          <button onclick="toggleHelp('helpPred')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:16px;height:16px;color:var(--sub);font-size:10px;cursor:pointer;padding:0;line-height:1;margin-left:auto">?</button>
-        </div>
-        <div id="helpPred" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:10px;color:var(--sub);line-height:1.7;margin-bottom:8px">
-          <strong style="color:var(--text)">事後予測分布</strong>：推定回転数の「平均」ではなく、「<strong>次の1kで実際に何回回るか</strong>」の予測。平均は収束しても、1k単位の変動は残るため別物。短期判断（あと少し続けるか）に有用。
-        </div>
-        <div id="predRanges" style="font-family:var(--mono);font-size:12px;line-height:1.8"></div>
-        <div id="predBorderRisk" style="margin-top:8px;padding:6px 8px;background:var(--card2);border-radius:6px;font-size:11px"></div>
-      </div>
       <section id="input-sec">
         <div class="input-lbl" id="inputLbl">INIT — 初期累計回転数を入力</div>
         <form onsubmit="event.preventDefault();addEntry()" style="display:contents">
@@ -337,6 +325,18 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
           </div>
         </div>
       </section>
+      <!-- 事後予測カード（データあり時のみ） -->
+      <div id="predictive-card" class="hidden" style="margin:4px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--sub);letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <span style="color:var(--amber-dim)">02</span>次の1kの予測
+          <button onclick="toggleHelp('helpPred')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:16px;height:16px;color:var(--sub);font-size:10px;cursor:pointer;padding:0;line-height:1;margin-left:auto">?</button>
+        </div>
+        <div id="helpPred" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:10px;color:var(--sub);line-height:1.7;margin-bottom:8px">
+          <strong style="color:var(--text)">事後予測分布</strong>：推定回転数の「平均」ではなく、「<strong>次の1kで実際に何回回るか</strong>」の予測。平均は収束しても、1k単位の変動は残るため別物。短期判断（あと少し続けるか）に有用。
+        </div>
+        <div id="predRanges" style="font-family:var(--mono);font-size:12px;line-height:1.8"></div>
+        <div id="predBorderRisk" style="margin-top:8px;padding:6px 8px;background:var(--card2);border-radius:6px;font-size:11px"></div>
+      </div>
       <div id="graph-sec">
         <div class="ctabs">
           <button class="ctab on" onclick="switchTab(0)">分布</button>
