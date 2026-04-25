@@ -344,7 +344,13 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
           <button class="ctab" onclick="switchTab(2)">尤度帯</button>
         </div>
         <div class="cwrap on" id="cw0"><canvas id="distChart" height="180"></canvas></div>
-        <div class="cwrap"    id="cw1"><canvas id="histChart" height="180"></canvas></div>
+        <div class="cwrap"    id="cw1" style="position:relative">
+          <canvas id="histChart" height="180"></canvas>
+          <div id="loupe" style="display:none;position:absolute;width:200px;height:140px;border:2px solid var(--amber);border-radius:8px;background:#0a0a0a;box-shadow:0 4px 16px rgba(0,0,0,.6);overflow:hidden;pointer-events:none;z-index:50">
+            <canvas id="loupeCanvas" width="400" height="280" style="width:100%;height:100%;display:block"></canvas>
+            <div id="loupeIndicator" style="position:absolute;top:6px;left:6px;font-family:var(--mono);font-size:9px;color:var(--amber);background:rgba(0,0,0,.6);padding:2px 5px;border-radius:3px"></div>
+          </div>
+        </div>
         <div class="cwrap"    id="cw2"><canvas id="likeChart" height="180"></canvas></div>
         <div id="ci-sec" style="padding:8px 0 0">
           <div class="slider-row">
@@ -1259,6 +1265,104 @@ function renderHistChartFn(s){
     // ボーダー
     {label:'ボーダー',data:borderLine,borderColor:'#f87171',borderDash:[3,3],pointRadius:0,borderWidth:1,order:4}
   ]},options:{...CO,scales:{x:{type:'linear',ticks:{...TICK,callback:v=>v%1===0?`${v}k`:`${v.toFixed(1)}k`},grid:GRID,title:{display:false}},y:{ticks:TICK,grid:GRID}},plugins:{legend:{display:true,labels:{color:'#808080',font:{family:'IBM Plex Mono',size:9},boxWidth:10,padding:6,filter:(it)=>!it.text.includes('CI下')}}}}});
+  // ルーペ用イベント設定
+  _attachLoupe();
+}
+
+// ==== ルーペ機能 ====
+const _LOUPE_ZOOM=3;
+const _LOUPE_HOLD_MS=300;
+let _loupeTimer=null,_loupeActive=false;
+
+function _attachLoupe(){
+  const canvas=document.getElementById('histChart');
+  if(!canvas||canvas._loupeBound)return;
+  canvas._loupeBound=true;
+  const start=(e)=>{
+    const t=e.touches?e.touches[0]:e;
+    const rect=canvas.getBoundingClientRect();
+    const x=t.clientX-rect.left,y=t.clientY-rect.top;
+    if(x<0||x>rect.width||y<0||y>rect.height)return;
+    if(_loupeTimer)clearTimeout(_loupeTimer);
+    _loupeTimer=setTimeout(()=>{
+      _loupeActive=true;
+      _showLoupe(x,y);
+    },_LOUPE_HOLD_MS);
+  };
+  const move=(e)=>{
+    if(!_loupeActive)return;
+    e.preventDefault();
+    const t=e.touches?e.touches[0]:e;
+    const rect=canvas.getBoundingClientRect();
+    const x=t.clientX-rect.left,y=t.clientY-rect.top;
+    if(x<0||x>rect.width||y<0||y>rect.height){_hideLoupe();return;}
+    _showLoupe(x,y);
+  };
+  const end=()=>{
+    if(_loupeTimer){clearTimeout(_loupeTimer);_loupeTimer=null;}
+    if(_loupeActive)_hideLoupe();
+  };
+  canvas.addEventListener('touchstart',start,{passive:true});
+  canvas.addEventListener('touchmove',move,{passive:false});
+  canvas.addEventListener('touchend',end);
+  canvas.addEventListener('touchcancel',end);
+  canvas.addEventListener('mousedown',start);
+  canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('mouseup',end);
+  canvas.addEventListener('mouseleave',end);
+}
+
+function _showLoupe(x,y){
+  const loupe=document.getElementById('loupe');
+  const canvas=document.getElementById('histChart');
+  const lcv=document.getElementById('loupeCanvas');
+  if(!loupe||!canvas||!lcv)return;
+  const rect=canvas.getBoundingClientRect();
+  // ルーペ表示位置：押した位置の真上、画面端で位置調整
+  const lw=loupe.offsetWidth||200,lh=loupe.offsetHeight||140;
+  let lx=x-lw/2,ly=y-lh-30;
+  if(lx<2)lx=2;
+  if(lx+lw>rect.width-2)lx=rect.width-lw-2;
+  if(ly<2)ly=y+30; // 上に出せない場合は下に
+  loupe.style.left=lx+'px';
+  loupe.style.top=ly+'px';
+  loupe.style.display='block';
+  // 拡大描画（高解像度のためdevicePixelRatio相当）
+  const dpr=window.devicePixelRatio||1;
+  const lctx=lcv.getContext('2d');
+  // canvasの内部解像度を取得
+  const sw=lcv.width,sh=lcv.height;
+  // 元canvasから sw/zoom × sh/zoom 領域を切り取って拡大
+  const srcW=sw/_LOUPE_ZOOM,srcH=sh/_LOUPE_ZOOM;
+  // x,y は CSS px。元canvasの内部解像度に変換
+  const scaleX=canvas.width/rect.width,scaleY=canvas.height/rect.height;
+  const cx=x*scaleX,cy=y*scaleY;
+  let sx=cx-srcW/2,sy=cy-srcH/2;
+  // 範囲外クリップ
+  if(sx<0)sx=0;if(sy<0)sy=0;
+  if(sx+srcW>canvas.width)sx=canvas.width-srcW;
+  if(sy+srcH>canvas.height)sy=canvas.height-srcH;
+  lctx.imageSmoothingEnabled=true;
+  lctx.imageSmoothingQuality='high';
+  lctx.fillStyle='#0a0a0a';
+  lctx.fillRect(0,0,sw,sh);
+  lctx.drawImage(canvas,sx,sy,srcW,srcH,0,0,sw,sh);
+  // 中心マーカー（押してる位置の中心点）
+  const mx=(cx-sx)*_LOUPE_ZOOM,my=(cy-sy)*_LOUPE_ZOOM;
+  lctx.strokeStyle='rgba(245,158,11,.5)';
+  lctx.lineWidth=1.5;
+  lctx.beginPath();
+  lctx.moveTo(mx-8,my);lctx.lineTo(mx+8,my);
+  lctx.moveTo(mx,my-8);lctx.lineTo(mx,my+8);
+  lctx.stroke();
+  // ズーム表示
+  document.getElementById('loupeIndicator').textContent=`×${_LOUPE_ZOOM}`;
+}
+
+function _hideLoupe(){
+  _loupeActive=false;
+  const loupe=document.getElementById('loupe');
+  if(loupe)loupe.style.display='none';
 }
 
 function renderLikeChart(s){
