@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 
 <html lang="ja">
@@ -229,13 +232,19 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
   <div style="display:flex">
     <div class="hist-panel" id="histPanel" ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()">
       <div class="hp-empty" id="hpEmpty">履 歴</div>
-      <div class="hp-stats" id="hpStats" style="display:none;border-bottom:3px solid var(--amber-dim);padding:6px 3px 8px;text-align:center;flex-shrink:0;background:rgba(245,158,11,.08)">
-        <div style="font-family:var(--mono);font-size:7px;color:var(--amber-dim);margin-bottom:3px;letter-spacing:.05em">当たり</div>
-        <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--amber);line-height:1" id="hpHits">0</div>
-        <div style="height:1px;background:var(--border2);margin:5px 4px"></div>
-        <div style="font-family:var(--mono);font-size:7px;color:var(--sub);margin-bottom:3px;letter-spacing:.05em">N=</div>
-        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);line-height:1" id="hpN">0</div>
-        <div id="hpInfoGain" style="display:none;margin-top:6px;padding-top:5px;border-top:1px solid var(--border2)">
+      <div class="hp-stats" id="hpStats" style="display:none;border-bottom:3px solid var(--amber-dim);padding:8px 2px;flex-shrink:0;background:rgba(245,158,11,.08)">
+        <div style="display:flex;align-items:center;justify-content:center;gap:0">
+          <div style="flex:1;text-align:center;padding:0 2px">
+            <div style="font-family:var(--mono);font-size:7px;color:var(--sub);margin-bottom:2px;letter-spacing:.05em">N</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);line-height:1" id="hpN">0</div>
+          </div>
+          <div style="width:1px;height:24px;background:var(--border2)"></div>
+          <div style="flex:1;text-align:center;padding:0 2px">
+            <div style="font-family:var(--mono);font-size:7px;color:var(--amber-dim);margin-bottom:2px;letter-spacing:.05em">🎯</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--amber);line-height:1" id="hpHits">0</div>
+          </div>
+        </div>
+        <div id="hpInfoGain" style="display:none;margin-top:6px;padding-top:5px;border-top:1px solid var(--border2);text-align:center">
           <div style="font-family:var(--mono);font-size:6px;color:var(--sub);margin-bottom:2px;letter-spacing:.05em" title="直前のサンプル追加による情報量">Δ情報</div>
           <div id="hpInfoGainVal" style="font-family:var(--mono);font-size:10px;font-weight:700;line-height:1"></div>
         </div>
@@ -467,15 +476,22 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
   <div id="loupeIndicator" style="position:absolute;top:6px;left:6px;font-family:var(--mono);font-size:9px;color:var(--amber);background:rgba(0,0,0,.6);padding:2px 5px;border-radius:3px"></div>
 </div>
 
-<div id="hp-edit-modal" style="display:none;position:fixed;inset:0;z-index:750;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center">
-  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:20px 20px 0 0;padding:20px 20px 44px;width:100%;max-width:480px">
-    <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:#e8e8e8;margin-bottom:10px" id="hpEditTitle">データ編集</div>
-    <div id="hpEditInfo" style="font-family:var(--mono);font-size:11px;color:var(--sub);margin-bottom:10px;line-height:1.6"></div>
-    <input type="number" id="hpEditInp" inputmode="numeric" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:16px;padding:12px;outline:none;margin-bottom:14px;text-align:center">
-    <div style="display:flex;gap:8px">
-      <button onclick="closeHpEdit()" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">キャンセル</button>
-      <button onclick="deleteHpEdit()" style="flex:1;background:transparent;border:1px solid #f87171;border-radius:8px;color:#f87171;font-family:var(--mono);font-size:13px;padding:12px;cursor:pointer">削除</button>
-      <button onclick="saveHpEdit()" style="flex:1;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:12px;cursor:pointer">保存</button>
+<div id="hp-edit-modal" onclick="if(event.target.id==='hp-edit-modal')closeHpEdit()" style="display:none;position:fixed;inset:0;z-index:750;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px">
+  <div onclick="event.stopPropagation()" style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:16px;padding:20px;width:100%;max-width:380px;max-height:85dvh;overflow-y:auto">
+    <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:#e8e8e8;margin-bottom:8px" id="hpEditTitle">データ編集</div>
+    <div id="hpEditInfo" style="font-family:var(--mono);font-size:11px;color:var(--sub);margin-bottom:14px;line-height:1.6"></div>
+    <input type="number" id="hpEditInp" inputmode="numeric" style="width:100%;background:#111;border:1px solid #3a3a3a;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:18px;padding:14px;outline:none;margin-bottom:12px;text-align:center;font-weight:700">
+    <div id="hpEditBallsWrap" style="display:none;margin-bottom:14px">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);margin-bottom:6px;letter-spacing:.08em">投資単位</div>
+      <div style="display:inline-flex;align-items:center;gap:2px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:2px">
+        <button type="button" id="hpEditHalf" onclick="setHpEditBalls(125)" style="background:transparent;border:none;color:var(--sub);padding:6px 12px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px">0.5k</button>
+        <button type="button" id="hpEditFull" onclick="setHpEditBalls(250)" style="background:var(--amber);border:none;color:#000;padding:6px 12px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700">1k</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button onclick="closeHpEdit()" style="flex:1;background:transparent;border:1px solid #444;border-radius:8px;color:#909090;font-family:var(--mono);font-size:13px;padding:13px;cursor:pointer">キャンセル</button>
+      <button onclick="deleteHpEdit()" id="hpEditDeleteBtn" style="flex:1;background:transparent;border:1px solid #f87171;border-radius:8px;color:#f87171;font-family:var(--mono);font-size:13px;padding:13px;cursor:pointer">削除</button>
+      <button onclick="saveHpEdit()" style="flex:1;background:var(--amber);border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:13px;font-weight:700;padding:13px;cursor:pointer">保存</button>
     </div>
   </div>
 </div>
@@ -887,6 +903,8 @@ function render(){
   if(proToggle){
     const showPro=ST.cfg.proMode&&!isInit;
     proToggle.style.display=showPro?'flex':'none';
+    // 表示中なら 0.5k/1k 選択状態を再描画（前の選択を維持）
+    if(showPro)setProBalls(_proNextBalls);
   }
   // 一括入力ボタン：proMode中はグレーアウト
   const bulkBtn=document.getElementById('bulkBtn');
@@ -1160,19 +1178,16 @@ function renderHistPanel(s){
       }
     }
     else{
-      // 生値ベースで表示・比較（0.5kはborderもmuPostも×0.5して生値空間で比較）
+      // 生値ベースで表示・比較（0.5kはborderも×0.5して生値空間で比較）
       const ballK=ev.balls/250;
       const borderAdj=ST.cfg.border*ballK;
-      const expRaw=s?s.muPost*ballK:null;
-      const dev=expRaw===null?null:ev.rot-expRaw;
-      const devStr=dev===null?'':(dev>=0?'+'+f(dev,1):f(dev,1));
-      const devColor=dev===null?'var(--sub)':dev>=0?'#4ade80':'#f87171';
-      const rotColor=ev.rot>=borderAdj*1.1?'#4ade80':ev.rot>=borderAdj?'#a3e635':ev.rot>=borderAdj*0.9?'#facc15':'#f87171';
+      // 回転数の色：ボーダー以上＝緑、未満＝赤、ぴったり＝白
+      const rotColor=ev.rot>borderAdj?'#4ade80':ev.rot<borderAdj?'#f87171':'var(--text)';
       const halfMark=ev.balls===125?'<span style="font-family:var(--mono);font-size:8px;color:var(--amber);margin-left:2px">½</span>':'';
       const rotDisp=ev.rot.toString();
       div.className='hp-item'+(ev.balls===125?' hp-item-half':'');
       div.style.cssText='position:relative;cursor:pointer';
-      div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${rotDisp}</span></div><div class="hp-dev" style="color:${devColor}">${devStr}</div>`;
+      div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${rotDisp}</span></div>`;
       div.addEventListener('click',function(){openHpEdit('data',ev.si,ev.di);});
     }
     panel.appendChild(div);
@@ -1440,9 +1455,11 @@ function switchTab(i){
   const s=calcStats();if(s)renderActiveChart(s);
 }
 
-let _proNextBalls=250;
+let _proNextBalls=parseInt(localStorage.getItem('kt_proBalls')||'250');
+if(_proNextBalls!==125&&_proNextBalls!==250)_proNextBalls=250;
 function setProBalls(b){
   _proNextBalls=b;
+  try{localStorage.setItem('kt_proBalls',String(b));}catch{}
   const half=document.getElementById('proHalfBtn'),full=document.getElementById('proFullBtn');
   if(b===125){
     half.style.cssText='background:var(--amber);border:none;color:#000;padding:6px 10px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700';
@@ -1555,37 +1572,55 @@ function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:se
 function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;pushUndo('データ削除');const sess=mach().sessions[si];sess.data.splice(di,1);if(sess.dataBalls)sess.dataBalls.splice(di,1);mach().updatedAt=Date.now();save();killCharts();render();});}
 
 // 履歴タップ編集モーダル
-let _hpEdit={type:null,si:null,di:null};
+let _hpEdit={type:null,si:null,di:null,balls:250};
+function setHpEditBalls(b){
+  _hpEdit.balls=b;
+  const half=document.getElementById('hpEditHalf'),full=document.getElementById('hpEditFull');
+  if(b===125){
+    half.style.cssText='background:var(--amber);border:none;color:#000;padding:6px 12px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700';
+    full.style.cssText='background:transparent;border:none;color:var(--sub);padding:6px 12px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px';
+  } else {
+    half.style.cssText='background:transparent;border:none;color:var(--sub);padding:6px 12px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px';
+    full.style.cssText='background:var(--amber);border:none;color:#000;padding:6px 12px;cursor:pointer;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700';
+  }
+}
 function openHpEdit(type,si,di){
-  _hpEdit={type,si,di};
+  _hpEdit={type,si,di,balls:250};
   const sess=mach().sessions[si];
+  const ballsWrap=document.getElementById('hpEditBallsWrap');
+  const delBtn=document.getElementById('hpEditDeleteBtn');
   if(type==='base'){
     const next=sess.data.length>0?sess.data[0]:null;
     document.getElementById('hpEditTitle').textContent='開始回転数の編集';
     document.getElementById('hpEditInfo').innerHTML=`現在の値: <strong style="color:var(--amber)">${sess.base}</strong>${next!==null?`<br>※ 次の値（${next}）より小さくしてください`:''}`;
     document.getElementById('hpEditInp').value=sess.base;
+    ballsWrap.style.display='none';
+    delBtn.style.display='none'; // baseは削除不可（混乱回避）
   } else {
     const prev=di===0?sess.base:sess.data[di-1];
     const next=di<sess.data.length-1?sess.data[di+1]:null;
     const v=sess.data[di];
-    const balls=(sess.dataBalls&&sess.dataBalls[di])||250;
-    const halfNote=balls===125?'（½ 0.5k単位）':'';
-    document.getElementById('hpEditTitle').textContent='累計回転数の編集';
-    document.getElementById('hpEditInfo').innerHTML=`現在の値: <strong style="color:var(--amber)">${v}</strong> ${halfNote}<br>※ ${prev} より大きく${next!==null?`、${next} より小さい`:''}値を入力`;
+    const curBalls=(sess.dataBalls&&sess.dataBalls[di])||250;
+    _hpEdit.balls=curBalls;
+    document.getElementById('hpEditTitle').textContent='回転数の編集';
+    document.getElementById('hpEditInfo').innerHTML=`現在の累計: <strong style="color:var(--amber)">${v}</strong>（${curBalls===125?'0.5k':'1k'}単位）<br>※ ${prev} より大きく${next!==null?`、${next} より小さい`:''}値を入力`;
     document.getElementById('hpEditInp').value=v;
+    ballsWrap.style.display='block';
+    setHpEditBalls(curBalls);
+    delBtn.style.display='';
   }
   document.getElementById('hp-edit-modal').style.display='flex';
-  setTimeout(()=>{const inp=document.getElementById('hpEditInp');inp.focus();inp.select();},100);
+  setTimeout(()=>{const inp=document.getElementById('hpEditInp');inp.focus();},100);
 }
 function closeHpEdit(){
   document.getElementById('hp-edit-modal').style.display='none';
-  _hpEdit={type:null,si:null,di:null};
+  _hpEdit={type:null,si:null,di:null,balls:250};
 }
 function saveHpEdit(){
-  const{type,si,di}=_hpEdit;
+  const{type,si,di,balls}=_hpEdit;
   if(type===null)return;
   const raw=document.getElementById('hpEditInp').value.trim();
-  if(raw==='')return;
+  if(raw===''){showAlert('値を入力してください');return;}
   const v=parseInt(raw);
   if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}
   const sess=mach().sessions[si];
@@ -1601,23 +1636,34 @@ function saveHpEdit(){
     if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}
     pushUndo('データ編集');
     sess.data[di]=v;
+    // balls変更：dataBalls 配列の整合性確保
+    if(!sess.dataBalls){
+      // まだ dataBalls 配列がない場合、全件250で初期化してから該当だけ書き換え
+      if(balls!==250){
+        sess.dataBalls=new Array(sess.data.length).fill(250);
+        sess.dataBalls[di]=balls;
+      }
+    } else {
+      sess.dataBalls[di]=balls;
+      // dataBalls 全てが 250 ならば配列ごと削除（クリーンな状態を保つ）
+      if(sess.dataBalls.every(b=>b===250))delete sess.dataBalls;
+    }
   }
   mach().updatedAt=Date.now();
   save();closeHpEdit();killCharts();render();
 }
 function deleteHpEdit(){
   const{type,si,di}=_hpEdit;
-  if(type===null)return;
-  if(type==='base'){
-    showAlert('開始値は削除できません。データ全体を消したい場合はリセットを使ってください。');
-    return;
-  }
+  if(type===null||type==='base')return;
   showConfirm('このデータを削除しますか？',ok=>{
     if(!ok)return;
     pushUndo('データ削除');
     const sess=mach().sessions[si];
     sess.data.splice(di,1);
-    if(sess.dataBalls)sess.dataBalls.splice(di,1);
+    if(sess.dataBalls){
+      sess.dataBalls.splice(di,1);
+      if(sess.dataBalls.every(b=>b===250))delete sess.dataBalls;
+    }
     mach().updatedAt=Date.now();
     save();closeHpEdit();killCharts();render();
   });
