@@ -86,9 +86,12 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
 .kpi-val-sm{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1}
 .kpi.hi .kpi-val{color:var(--amber)}
 .kpi-sub{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:4px}
-.kpi-extra{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:12px}
-.ke .ke-l{font-size:9px;color:var(--sub2);margin-bottom:2px}
-.ke .ke-v{font-family:var(--mono);font-size:12px;font-weight:600}
+.kpi-extra{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:12px}
+.ke{flex:1}
+.ke .ke-l{font-size:10px;color:var(--sub);margin-bottom:3px}
+.ke .ke-v{font-family:var(--mono);font-weight:700}
+#kpiMean{font-size:22px}
+#kpiInvest{font-size:18px;color:var(--text)}
 #input-sec{padding:0 12px 8px;border-bottom:1px solid var(--border)}
 .input-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--sub);margin-bottom:7px;display:flex;align-items:center;gap:6px}
 .input-lbl::before{content:'01';color:var(--amber-dim)}
@@ -533,59 +536,58 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
       <span>// SETTINGS</span>
       <button class="close-btn" onclick="closeSettings()">✕</button>
     </div>
-    <div class="set-row">
-      <div class="set-lbl">ボーダー回転数（デフォルト: 17）
-        <button onclick="toggleHelp('helpBorder')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;cursor:pointer;position:relative" onclick="document.getElementById('setBorder').focus();">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);letter-spacing:.05em">ボーダー</div>
+          <button onclick="event.stopPropagation();toggleHelp('helpBorder')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:16px;height:16px;color:var(--sub);font-size:10px;cursor:pointer;padding:0;line-height:1">?</button>
+        </div>
+        <input type="number" class="set-in" id="setBorder" value="17" inputmode="decimal" step="0.5" style="width:100%;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:22px;font-weight:700;padding:6px 0;outline:none;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--sub2);text-align:center">デフォルト 17</div>
       </div>
-      <div id="helpBorder" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
-        <strong style="color:var(--text)">意味</strong>：収支がプラマイ0になる回転数（等価換算）。この値を上回るほど期待値プラス。<br>
-        <strong style="color:var(--text)">使われ方</strong>：ボーダー超えの確率、推定期待値、履歴の色分け（緑=超え、赤=割れ）の基準。<br>
-        <strong style="color:var(--text)">変更時の注意</strong>：機種ごとに違うので、遊技前に必ず最新の攻略値を入れ直す。等価/交換率で変わる点も考慮。
+      <div style="background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;cursor:pointer;position:relative" onclick="document.getElementById('setPriorMu').focus();">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);letter-spacing:.05em">μ₀ 予想回転</div>
+          <button onclick="event.stopPropagation();toggleHelp('helpMu')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:16px;height:16px;color:var(--sub);font-size:10px;cursor:pointer;padding:0;line-height:1">?</button>
+        </div>
+        <input type="number" class="set-in" id="setPriorMu" value="19" inputmode="decimal" step="0.5" style="width:100%;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:22px;font-weight:700;padding:6px 0;outline:none;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--sub2);text-align:center">デフォルト 19</div>
       </div>
-      <input type="number" class="set-in" id="setBorder" value="17" inputmode="decimal" step="0.5">
+      <div style="background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;cursor:pointer;position:relative" onclick="document.getElementById('setPriorSigma').focus();">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);letter-spacing:.05em">σ₀ 不確かさ</div>
+          <button onclick="event.stopPropagation();toggleHelp('helpSigma')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:16px;height:16px;color:var(--sub);font-size:10px;cursor:pointer;padding:0;line-height:1">?</button>
+        </div>
+        <input type="number" class="set-in" id="setPriorSigma" value="2.5" inputmode="decimal" step="0.5" style="width:100%;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:22px;font-weight:700;padding:6px 0;outline:none;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--sub2);text-align:center">デフォルト 2.5</div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;cursor:pointer;position:relative" onclick="document.getElementById('setShogyu').focus();">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--amber-dim);letter-spacing:.05em">賞球</div>
+          <button onclick="event.stopPropagation();toggleHelp('helpShogyu')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:16px;height:16px;color:var(--sub);font-size:10px;cursor:pointer;padding:0;line-height:1">?</button>
+        </div>
+        <input type="number" class="set-in" id="setShogyu" value="1" inputmode="numeric" step="1" min="0" style="width:100%;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:22px;font-weight:700;padding:6px 0;outline:none;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--sub2);text-align:center">デフォルト 1</div>
+      </div>
+    </div>
+    <div id="helpBorder" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+      <strong style="color:var(--text)">ボーダー回転数</strong>：収支がプラマイ0になる回転数。この値を上回るほど期待値プラス。機種ごとに違うので、遊技前に必ず最新の攻略値を入れ直す。
+    </div>
+    <div id="helpMu" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+      <strong style="color:var(--text)">事前分布 μ₀</strong>：打つ前の予想回転数。ベイズ推定の出発点。データが少ないうちは推定値が μ₀ 寄りに、データ蓄積で実測値寄りに遷移。ボーダー+2〜3が一般的。迷ったらデフォルト。
+    </div>
+    <div id="helpSigma" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+      <strong style="color:var(--text)">事前分布 σ₀</strong>：μ₀ への自信の逆指標。小さいほど事前が強く、少ないデータでは μ₀ から動きにくい。大きいほど実データ即反映。2.5 が標準。通常は触らない。
+    </div>
+    <div id="helpShogyu" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
+      <strong style="color:var(--text)">賞球数</strong>：1 回転で払い出される球数（ヘソ賞球）。回転効率の補正に使用。多くの機種は 1。説明書で確認。
     </div>
     <div class="set-row">
-      <div class="set-lbl">事前分布 μ₀ — 打つ前の予想回転数（デフォルト: 19）
-        <button onclick="toggleHelp('helpMu')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
-      </div>
-      <div id="helpMu" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
-        <strong style="color:var(--text)">意味</strong>：打つ前の「この台はこのくらい回るだろう」という予想値。ベイズ推定の出発点。<br>
-        <strong style="color:var(--text)">使われ方</strong>：データが少ないうちは推定値がμ₀寄りに、データが増えるにつれ実測値寄りに遷移する。<br>
-        <strong style="color:var(--text)">変更時の注意</strong>：ボーダー+2〜3くらいが一般的（釘調整が平均なら）。大きく外れた値を入れるとN=30くらいまで推定がズレ続ける。迷ったらデフォルト。
-      </div>
-      <input type="number" class="set-in" id="setPriorMu" value="19" inputmode="decimal" step="0.5">
-    </div>
-    <div class="set-row">
-      <div class="set-lbl">事前分布 σ₀ — 予想の不確かさ（デフォルト: 2.5）
-        <button onclick="toggleHelp('helpSigma')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
-      </div>
-      <div id="helpSigma" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
-        <strong style="color:var(--text)">意味</strong>：「μ₀の予想がどれくらい自信あるか」の逆指標。小さいほど強い自信、大きいほど弱い自信。<br>
-        <strong style="color:var(--text)">使われ方</strong>：小さい値→事前が強い→少ないデータでは推定がμ₀から動きにくい。大きい値→事前が弱い→実データが即座に反映される。<br>
-        <strong style="color:var(--text)">変更時の注意</strong>：2.5が標準。1.0以下にすると序盤の推定が固定されすぎ、5.0以上は事前がほぼ無効化される。通常は触らない。
-      </div>
-      <input type="number" class="set-in" id="setPriorSigma" value="2.5" inputmode="decimal" step="0.5">
-    </div>
-    <div class="set-row">
-      <div class="set-lbl">1回転あたり賞球数（デフォルト: 1）
-        <button onclick="toggleHelp('helpShogyu')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
-      </div>
-      <div id="helpShogyu" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
-        <strong style="color:var(--text)">意味</strong>：1回スタートチャッカーに入賞した時の払い出し球数。スルーチャッカー通過で増えるわけではない（※大当たり中は別）。<br>
-        <strong style="color:var(--text)">使われ方</strong>：回転効率の補正。賞球1なら実質250球で1k、賞球3なら250+3×19≈307球で1k回せる計算に。<br>
-        <strong style="color:var(--text)">変更時の注意</strong>：多くの機種は1。一部のヘソ賞球3や4の機種もある。説明書やネット情報で確認。
-      </div>
-      <input type="number" class="set-in" id="setShogyu" value="1" inputmode="numeric" step="1" min="0">
-    </div>
-    <div class="set-row">
-      <div class="set-lbl">プロモード — 0.5k（125球）単位の入力を可能にする
+      <div class="set-lbl">プロモード — 0.5k（125球）単位の入力
         <button onclick="toggleHelp('helpPro')" style="background:none;border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;color:var(--sub);font-size:11px;cursor:pointer;margin-left:6px;padding:0;line-height:1">?</button>
-        <br><small style="color:var(--sub2)">初期のサンプル数不足対策として、細かい刻みで入力可能</small>
       </div>
       <div id="helpPro" style="display:none;padding:8px 10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:6px">
-        <strong style="color:var(--text)">意味</strong>：通常1k単位で記録する回転数を、0.5k（125球）単位でも記録可能にする。<br>
-        <strong style="color:var(--text)">使われ方</strong>：序盤にサンプル数を稼ぎたい時や、試し打ちで早く傾向を掴みたい時に有効。<br>
-        <strong style="color:var(--text)">変更時の注意</strong>：0.5kサンプルは統計的に重み0.5として計算される（n=2サンプル ≈ nEff=1）。一括入力は無効化される。混在しても内部処理は正確だが、手数は増える。迷ったらOFF。
+        <strong style="color:var(--text)">プロモード</strong>：通常1k単位で記録する回転数を0.5k（125球）単位でも記録可能に。0.5kサンプルは統計的に重み0.5として計算される。一括入力は無効化。迷ったらOFF。
       </div>
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:6px">
         <input type="checkbox" id="setProMode" style="width:20px;height:20px;cursor:pointer;accent-color:var(--amber)">
@@ -595,8 +597,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
     <button class="reset-btn" onclick="confirmReset()">この台のデータをリセット</button>
     <div style="height:1px;background:var(--border);margin:16px 0"></div>
     <div class="set-row">
-      <div class="set-lbl" style="margin-bottom:8px">機種別学習統計</div>
-      <div id="modelStatsList" style="font-size:11px;color:var(--sub);line-height:1.7"></div>
+      <div onclick="document.getElementById('modelStatsList').style.display=document.getElementById('modelStatsList').style.display==='none'?'block':'none';this.querySelector('.arr').textContent=document.getElementById('modelStatsList').style.display==='none'?'▶':'▼';" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:6px 0">
+        <div class="set-lbl" style="margin:0">機種別学習統計</div>
+        <span class="arr" style="color:var(--amber-dim);font-size:11px">▶</span>
+      </div>
+      <div id="modelStatsList" style="font-size:11px;color:var(--sub);line-height:1.7;display:none"></div>
     </div>
   </div>
 </div>
@@ -922,20 +927,28 @@ function renderDrawerList(){
   const sortSel=document.getElementById('sortSelect');
   if(sortSel&&sortSel.value!==ST.sortBy)sortSel.value=ST.sortBy||'recent';
   const sorted=sortMachines(ST.machines);
+  const border=ST.cfg.border;
   document.getElementById('machineList').innerHTML=sorted.map(({m,i})=>{
     const n=rots_for(m),isActive=i===ST.current;
     const mu=muPost_for(m),mean=mean_for(m);
+    const invest=invest_for(m);
     const dateStr=formatDate(m.createdAt);
-    let infoLines=`<div class="machine-item-n">N=${n} / データなし${dateStr?' · '+dateStr:''}</div>`;
-    if(mu!==null&&mean!==null){
-      infoLines=`<div class="machine-item-n">N=${n}${dateStr?' · '+dateStr:''}</div><div class="machine-item-n" style="margin-top:2px">推定 ${mu.toFixed(1)}回 / 実測 ${mean.toFixed(1)}回</div>`;
-    }else if(mu!==null){
-      infoLines=`<div class="machine-item-n">N=${n} / 推定 ${mu.toFixed(1)}回${dateStr?' · '+dateStr:''}</div>`;
+    let infoLines;
+    if(mean!==null&&mu!==null){
+      // 実測の色：ボーダー基準で緑/赤/白
+      const meanCol=mean>border?'#4ade80':mean<border?'#f87171':'var(--text)';
+      infoLines=`<div class="machine-item-n" style="margin-top:2px"><span style="color:${meanCol};font-weight:700;font-size:12px">実測 ${mean.toFixed(1)}回</span> <span style="color:var(--sub2)">/ 推定 ${mu.toFixed(1)}回</span></div><div class="machine-item-n" style="margin-top:1px;color:var(--sub2)">N=${n} · 投資 ${invest.toFixed(1)}k${dateStr?' · '+dateStr:''}</div>`;
+    } else if(mu!==null){
+      infoLines=`<div class="machine-item-n" style="margin-top:2px;color:var(--sub2)">推定 ${mu.toFixed(1)}回</div><div class="machine-item-n" style="margin-top:1px;color:var(--sub2)">N=${n} · 投資 ${invest.toFixed(1)}k${dateStr?' · '+dateStr:''}</div>`;
+    } else {
+      infoLines=`<div class="machine-item-n" style="color:var(--sub2)">データなし${dateStr?' · '+dateStr:''}</div>`;
     }
     const delBtn=ST.machines.length>1?`<button onclick="event.stopPropagation();deleteMachine(${i})" style="background:none;border:1px solid #555;border-radius:6px;color:#f87171;font-family:var(--mono);font-size:11px;padding:3px 8px;cursor:pointer;flex-shrink:0">削除</button>`:'';
     return `<div class="machine-item ${isActive?'active':''}" onclick="switchMachine(${i})" ontouchstart="startLongPress(${i})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()"><div style="flex:1;min-width:0"><div class="machine-item-name">${escapeHtml(m.id)}</div>${m.model?`<div style="font-family:var(--mono);font-size:9px;color:var(--amber-dim);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(m.model)}</div>`:''}${infoLines}</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${isActive?'<span style="color:var(--amber);font-size:12px">●</span>':''}${delBtn}</div></div>`;
   }).join('');
 }
+
+function invest_for(m){let totalBalls=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{totalBalls+=(sess.dataBalls&&sess.dataBalls[i])||250;});});return totalBalls/250;}
 
 function rots_for(m){let c=0;m.sessions.forEach(sess=>{if(sess.base!==null)c+=sess.data.length;});return c;}
 function mean_for(m){let S=0,totalBalls=0;m.sessions.forEach(sess=>{if(sess.base===null)return;sess.data.forEach((v,i)=>{const prev=i===0?sess.base:sess.data[i-1];const balls=(sess.dataBalls&&sess.dataBalls[i])||250;const rot=v-prev;S+=rot;totalBalls+=balls;});});return totalBalls>0?S/(totalBalls/250):null;}
@@ -1018,6 +1031,9 @@ function renderKPI(s,m,hasData){
   const investK=totalBalls/250;
   const investStr=investK%1===0?`${investK}k`:`${investK.toFixed(1)}k`;
   document.getElementById('kpiMean').textContent=f(s.mean)+'回';
+  // 平均 vs ボーダー で色変化（同値は白、上は緑、下は赤）
+  const meanEl=document.getElementById('kpiMean');
+  meanEl.style.color=s.mean>s.border?'#4ade80':s.mean<s.border?'#f87171':'var(--text)';
   document.getElementById('kpiInvest').textContent=investStr;
   // 期待値はinvestKベースで計算
   const evTotal=s.ev*investK;
@@ -1503,6 +1519,49 @@ function adjustInput(delta){
   inp.blur();
 }
 
+// ==== 入力欄スワイプ増減 ====
+function _attachSwipeInput(){
+  const inp=document.getElementById('rotIn');
+  if(!inp||inp._swipeBound)return;
+  inp._swipeBound=true;
+  let startX=null,startY=null,startVal=null,swiping=false;
+  const PX_PER_UNIT=8; // 8pxごとに±1
+  inp.addEventListener('touchstart',(e)=>{
+    if(e.touches.length!==1)return;
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    const cur=parseInt(inp.value);
+    startVal=isNaN(cur)?0:cur;
+    swiping=false;
+  },{passive:true});
+  inp.addEventListener('touchmove',(e)=>{
+    if(startX===null||e.touches.length!==1)return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=e.touches[0].clientY-startY;
+    // 縦移動が大きいか、横移動が10px未満なら通常動作（スクロール優先）
+    if(!swiping){
+      if(Math.abs(dx)<10)return;
+      if(Math.abs(dy)>Math.abs(dx)){startX=null;return;}
+      swiping=true;
+      inp.blur();
+    }
+    e.preventDefault();
+    const absDx=Math.abs(dx);
+    let delta=Math.floor(absDx/PX_PER_UNIT);
+    if(absDx>200)delta=Math.floor(25+(absDx-200)/4); // 加速
+    if(dx<0)delta=-delta;
+    const newV=Math.max(0,startVal+delta);
+    if(String(newV)!==inp.value){
+      inp.value=String(newV);
+      if(navigator.vibrate){try{navigator.vibrate(1);}catch{}}
+    }
+  },{passive:false});
+  const reset=()=>{startX=null;startY=null;swiping=false;};
+  inp.addEventListener('touchend',reset);
+  inp.addEventListener('touchcancel',reset);
+}
+setTimeout(_attachSwipeInput,100);
+
 function addEntry(){
   const inp=document.getElementById('rotIn');const v=parseInt(inp.value.trim());
   if(isNaN(v)||v<0){inp.style.borderColor='#f87171';setTimeout(()=>inp.style.borderColor='',800);return;}
@@ -1546,7 +1605,7 @@ function _cmodal(msg,withInput,defVal,cb,isText){
   if(withInput){inp.value=defVal!==undefined?defVal:'';inp.type=isText?'text':'number';inp.inputMode=isText?'text':'numeric';}
   el.style.display='flex';
   const ok=()=>{el.style.display='none';cb(withInput?inp.value:true);};
-  const cancel=()=>{el.style.display='none';document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');cb(null);};
+  const cancel=()=>{el.style.display='none';cb(null);};
   document.getElementById('cmodal-ok').onclick=ok;document.getElementById('cmodal-cancel').onclick=cancel;
   if(withInput){setTimeout(()=>inp.focus(),100);inp.onkeydown=e=>{if(e.key==='Enter')ok();};}
 }
@@ -1567,9 +1626,7 @@ function undoHit(){
     save();killCharts();render();
   });
 }
-function editBase(si){const sess=mach().sessions[si],next=sess.data.length>0?sess.data[0]:null;const msg=`開始回転数を入力${next!==null?'<br><small>(次の値 '+next+' より小さくしてください)</small>':''}`;showPrompt(msg,sess.base,raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)||v<0){showAlert('正の整数を入力してください');return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値にしてください`);return;}pushUndo('開始値編集');sess.base=v;mach().updatedAt=Date.now();save();killCharts();render();});}
-function editData(si,di){const sess=mach().sessions[si],prev=di===0?sess.base:sess.data[di-1],next=di<sess.data.length-1?sess.data[di+1]:null;const msg=`累計回転数を入力<br><small>${prev}より大きく${next!==null?next+'より小さい値を入力':''}</small>`;showPrompt(msg,sess.data[di],raw=>{if(raw===null||raw==='')return;const v=parseInt(raw);if(isNaN(v)){showAlert('数値を入力してください');return;}if(v<=prev){showAlert(`前の値（${prev}）より大きい値を入力してください`);return;}if(next!==null&&v>=next){showAlert(`次の値（${next}）より小さい値を入力してください`);return;}pushUndo('データ編集');sess.data[di]=v;mach().updatedAt=Date.now();save();killCharts();render();});}
-function deleteDataPoint(si,di){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');showConfirm('このデータを削除しますか？',ok=>{document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');if(!ok)return;pushUndo('データ削除');const sess=mach().sessions[si];sess.data.splice(di,1);if(sess.dataBalls)sess.dataBalls.splice(di,1);mach().updatedAt=Date.now();save();killCharts();render();});}
+function _cancelDelBtns(){}
 
 // 履歴タップ編集モーダル
 let _hpEdit={type:null,si:null,di:null,balls:250};
@@ -2121,7 +2178,7 @@ function openSettings(){
     if(keys.length===0){
       mList.innerHTML='<div style="color:var(--sub2);font-size:11px">まだ機種データがありません</div>';
     } else {
-      mList.innerHTML=keys.map(k=>{
+      mList.innerHTML='<div style="color:var(--sub2);font-size:10px;margin-bottom:6px">※ 全機種データの集計（閲覧用）。実際の学習には対象台を除いた値が使われます</div>'+keys.map(k=>{
         const d=all[k];
         const disp=d.dispersion!==null?f(d.dispersion,2):'—';
         const mu=d.avgMu!==undefined?f(d.avgMu,1)+'回':'—';
@@ -2167,7 +2224,7 @@ if(ST.colOpen){document.getElementById('colSection').classList.add('open');docum
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-document.addEventListener('click',e=>{if(!e.target.closest('.hp-item')&&!e.target.closest('#cmodal')){document.querySelectorAll('.del-dp-btn').forEach(b=>b.style.display='none');}});
+document.addEventListener('click',e=>{});
 
 render();
 
