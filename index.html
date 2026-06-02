@@ -697,7 +697,7 @@ function _infoGain(aBefore,bBefore,aAfter,bAfter){
   return Math.log2(precAfter/precBefore);
 }
 let _lastInfoGain=null;
-const _LEARN_ALPHA=50; // 学習強度：サンプル数αでデフォルトと半々、以降実データ寄り
+const _LEARN_ALPHA=30; // 学習強度の調整係数（小さいほど機種別学習が早く効く）
 const _DEFAULT_DISPERSION=1.3;
 
 function _sessionStatsForDispersion(m){
@@ -1264,14 +1264,14 @@ function renderHistChartFn(s){
     muPostPoints.push({x:cumK,y:muP});
     // 信頼区間（回転数空間）
     try{
-      // 逆ベータ分位点：解析式がないので二分探索で近似
+      // 逆ベータ分位点：二分探索（20回で精度10⁻⁷、十分高速）
       const invBeta=(target,a,b)=>{
-        let lo=1e-6,hi=1-1e-6;
-        for(let k=0;k<40;k++){
-          const mid=(lo+hi)/2;
-          if(betaCDF(mid,a,b)<target)lo=mid;else hi=mid;
+        let bLo=1e-6,bHi=1-1e-6;
+        for(let k=0;k<20;k++){
+          const mid=(bLo+bHi)/2;
+          if(betaCDF(mid,a,b)<target)bLo=mid;else bHi=mid;
         }
-        return (lo+hi)/2;
+        return (bLo+bHi)/2;
       };
       const pLo=invBeta(lo,aP,bP);
       const pHi=invBeta(hi,aP,bP);
@@ -1525,20 +1525,28 @@ function _attachSwipeInput(){
   if(!inp||inp._swipeBound)return;
   inp._swipeBound=true;
   let startX=null,startY=null,startVal=null,swiping=false;
-  const PX_PER_UNIT=8; // 8pxごとに±1
+  const PX_PER_UNIT=16; // 16pxごとに±1（穏やかに）
   inp.addEventListener('touchstart',(e)=>{
     if(e.touches.length!==1)return;
     startX=e.touches[0].clientX;
     startY=e.touches[0].clientY;
+    // 初期値の決定：入力欄に値があればそれ、なければ直前の累計値（base or 最新data）
     const cur=parseInt(inp.value);
-    startVal=isNaN(cur)?0:cur;
+    if(!isNaN(cur)){
+      startVal=cur;
+    } else {
+      // 直前の累計値を初期値に
+      const sess=curSess();
+      if(sess.data.length>0)startVal=sess.data[sess.data.length-1];
+      else if(sess.base!==null)startVal=sess.base;
+      else startVal=0;
+    }
     swiping=false;
   },{passive:true});
   inp.addEventListener('touchmove',(e)=>{
     if(startX===null||e.touches.length!==1)return;
     const dx=e.touches[0].clientX-startX;
     const dy=e.touches[0].clientY-startY;
-    // 縦移動が大きいか、横移動が10px未満なら通常動作（スクロール優先）
     if(!swiping){
       if(Math.abs(dx)<10)return;
       if(Math.abs(dy)>Math.abs(dx)){startX=null;return;}
@@ -1548,7 +1556,8 @@ function _attachSwipeInput(){
     e.preventDefault();
     const absDx=Math.abs(dx);
     let delta=Math.floor(absDx/PX_PER_UNIT);
-    if(absDx>200)delta=Math.floor(25+(absDx-200)/4); // 加速
+    // 300px超で穏やかに加速（旧200pxより緩やか）
+    if(absDx>300)delta=Math.floor(18+(absDx-300)/8);
     if(dx<0)delta=-delta;
     const newV=Math.max(0,startVal+delta);
     if(String(newV)!==inp.value){
@@ -2233,6 +2242,8 @@ window.addEventListener('load',fixHeaderOffset);
 window.addEventListener('resize',fixHeaderOffset);
 document.addEventListener('DOMContentLoaded',fixHeaderOffset);
 </script>
+
+<div id="appVersion" style="position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom, 0px) + 6px);font-family:var(--mono);font-size:9px;color:var(--sub2);opacity:0.4;pointer-events:none;z-index:10;letter-spacing:0.05em">v84</div>
 
 </body>
 </html>
