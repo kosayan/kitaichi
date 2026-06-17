@@ -225,7 +225,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
     <div class="dot" id="dot"></div>
     <span class="hdr-title" id="hdrTitle" onclick="renameMachine(ST.current)" style="cursor:pointer" title="タップで名前・機種を編集">KAITEN ANALYTICS</span>
     <div class="hdr-r">
-      <button id="undoBtn" onclick="doUndo()" disabled style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1;opacity:.35" title="直前の操作を取り消す">↩</button>
+      <button id="undoBtn" onclick="doUndo()" disabled style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);padding:4px 7px;cursor:pointer;line-height:0;opacity:.35;display:inline-flex;align-items:center;justify-content:center" title="直前の操作を取り消す"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg></button>
+      <button onclick="showBulkInput()" id="hdrBulkBtn" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);padding:4px 7px;cursor:pointer;line-height:0;display:inline-flex;align-items:center;justify-content:center" title="一括入力"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
       <button onclick="location.reload()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:16px;padding:4px 9px;cursor:pointer;line-height:1">↻</button>
       <button onclick="openExport()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-family:var(--mono);font-size:13px;padding:4px 9px;cursor:pointer">↓</button>
       <button class="gear" onclick="openSettings()">⚙</button>
@@ -252,6 +253,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
           <div id="hpInfoGainVal" style="font-family:var(--mono);font-size:10px;font-weight:700;line-height:1"></div>
         </div>
       </div>
+      <div id="hpItemsWrap" style="flex:1;overflow-y:auto;scrollbar-width:none;min-height:0;display:flex;flex-direction:column;justify-content:flex-start"></div>
+      <button onclick="addMachine()" id="hpNewBtn" style="flex-shrink:0;margin:6px 4px calc(env(safe-area-inset-bottom, 0px) + 6px);background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--amber);font-family:var(--mono);font-size:11px;font-weight:600;padding:10px 4px;cursor:pointer;line-height:1.3">＋<br>新台</button>
     </div>
     <div class="main-content">
       <!-- 総合評価カード（データあり時のみ表示） -->
@@ -325,7 +328,6 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
             <button type="button" onclick="adjustInput(1)" style="background:transparent;border:none;color:var(--sub);font-family:var(--mono);font-size:18px;font-weight:700;padding:0 12px;cursor:pointer;flex-shrink:0;line-height:1">+</button>
           </div>
           <button type="submit" class="add-btn">ADD</button>
-          <button type="button" id="bulkBtn" class="add-btn" onclick="showBulkInput()" style="background:var(--card2);color:var(--text);border:1px solid var(--border2);font-size:10px;line-height:1.3;padding:0 10px">一括<br>入力</button>
         </div>
         </form>
         <div style="display:flex;gap:6px;align-items:stretch">
@@ -460,8 +462,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
   </div>
 </div>
 
-<div id="cmodal" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:24px">
-  <div style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:16px;padding:20px;width:100%;max-width:320px">
+<div id="cmodal" onclick="if(event.target.id==='cmodal')_cmodalDismiss()" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:24px">
+  <div onclick="event.stopPropagation()" style="background:#1c1c1c;border:1px solid #3a3a3a;border-radius:16px;padding:20px;width:100%;max-width:320px">
     <div id="cmodal-msg" style="font-size:13px;color:#909090;line-height:1.7;margin-bottom:14px"></div>
     <div style="position:relative;margin-bottom:14px">
     <input type="number" id="cmodal-inp" inputmode="numeric" style="display:none;width:100%;background:#111;border:1px solid #444;border-radius:8px;color:#e8e8e8;font-family:var(--mono);font-size:20px;font-weight:600;padding:10px 38px 10px 12px;outline:none;-webkit-appearance:none">
@@ -912,10 +914,10 @@ function render(){
     if(showPro)setProBalls(_proNextBalls);
   }
   // 一括入力ボタン：proMode中はグレーアウト
-  const bulkBtn=document.getElementById('bulkBtn');
+  const bulkBtn=document.getElementById('hdrBulkBtn');
   if(bulkBtn){
-    bulkBtn.style.opacity=ST.cfg.proMode?'0.4':'1';
-    bulkBtn.title=ST.cfg.proMode?'プロモード中は使用不可':'';
+    bulkBtn.style.opacity=ST.cfg.proMode?'0.35':'1';
+    bulkBtn.title=ST.cfg.proMode?'プロモード中は使用不可':'一括入力';
   }
   renderDrawerList();renderHistPanel(s);renderKPI(s,m,hasData);
   updateUndoBtn();
@@ -1159,8 +1161,14 @@ function renderVar(s){
 }
 
 function renderHistPanel(s){
-  const panel=document.getElementById('histPanel');const events=allEvents();
-  panel.querySelectorAll('.hp-item,.hp-hit,.hp-base').forEach(el=>el.remove());
+  const panel=document.getElementById('histPanel');
+  const wrap=document.getElementById('hpItemsWrap');
+  const events=allEvents();
+  // panel と wrap の両方をクリーンアップ（旧データ互換）
+  panel.querySelectorAll('.hp-item,.hp-hit,.hp-base').forEach(el=>{
+    if(el.parentElement!==wrap)el.remove();
+  });
+  wrap.innerHTML='';
   const hasAnyBase=mach().sessions.some(s=>s.base!==null),isEmpty=!hasAnyBase;
   document.getElementById('hpEmpty').classList.toggle('hidden',!isEmpty);
   if(isEmpty)return;
@@ -1206,7 +1214,7 @@ function renderHistPanel(s){
       div.innerHTML=`<div class="hp-num">#${ev.idx}${halfMark}</div><div class="hp-row2"><span class="hp-cumul">${ev.cumul}</span><span class="hp-rot-sm" style="color:${rotColor}">${rotDisp}</span></div>`;
       div.addEventListener('click',function(){openHpEdit('data',ev.si,ev.di);});
     }
-    panel.appendChild(div);
+    wrap.appendChild(div);
   });
   panel.scrollTop=0;
 }
@@ -1601,11 +1609,21 @@ function addEntry(){
   } else if(statsAfter){
     _lastInfoGain=null; // 初回データは比較できない
   }
-  save();inp.value='';inp.focus();killCharts();render();
+  save();inp.value='';inp.blur();killCharts();render();
+  // キーボードが閉じた後、画面の一番上に戻す
+  setTimeout(()=>{window.scrollTo({top:0,behavior:'smooth'});},100);
 }
 
 function addHit(){const cur=curSess();if(cur.base===null||cur.data.length===0){showAlert('回転数データを少なくとも1件入力してください');return;}pushUndo('当たり記録');cur.hit=true;mach().sessions.push({base:null,data:[],hit:false});mach().updatedAt=Date.now();save();render();}
 
+let _cmodalCb=null;
+let _cmodalLastAction=null; // 'ok' | 'cancel' | 'dismiss'
+function _cmodalDismiss(){
+  const el=document.getElementById('cmodal');
+  el.style.display='none';
+  _cmodalLastAction='dismiss';
+  if(_cmodalCb){const cb=_cmodalCb;_cmodalCb=null;cb(null);}
+}
 function _cmodal(msg,withInput,defVal,cb,isText){
   const el=document.getElementById('cmodal'),inp=document.getElementById('cmodal-inp');
   document.getElementById('cmodal-msg').innerHTML=msg;inp.style.display=withInput?'block':'none';
@@ -1613,13 +1631,21 @@ function _cmodal(msg,withInput,defVal,cb,isText){
   if(clearBtn){clearBtn.style.display=withInput?'flex':'none';clearBtn.onclick=()=>{inp.value='';inp.focus();};}
   if(withInput){inp.value=defVal!==undefined?defVal:'';inp.type=isText?'text':'number';inp.inputMode=isText?'text':'numeric';}
   el.style.display='flex';
-  const ok=()=>{el.style.display='none';cb(withInput?inp.value:true);};
-  const cancel=()=>{el.style.display='none';cb(null);};
+  _cmodalCb=cb;
+  _cmodalLastAction=null;
+  const ok=()=>{el.style.display='none';_cmodalCb=null;_cmodalLastAction='ok';cb(withInput?inp.value:true);};
+  const cancel=()=>{el.style.display='none';_cmodalCb=null;_cmodalLastAction='cancel';cb(null);};
   document.getElementById('cmodal-ok').onclick=ok;document.getElementById('cmodal-cancel').onclick=cancel;
   if(withInput){setTimeout(()=>inp.focus(),100);inp.onkeydown=e=>{if(e.key==='Enter')ok();};}
 }
 function showAlert(msg){_cmodal(msg,false,undefined,()=>{});document.getElementById('cmodal-cancel').style.display='none';setTimeout(()=>document.getElementById('cmodal-cancel').style.display='',50);}
-function showConfirm(msg,cb){_cmodal(msg,false,undefined,v=>cb(v===true));}
+function showConfirm(msg,cb,dismissAsOk){
+  _cmodal(msg,false,undefined,v=>{
+    if(v===true)cb(true); // OK 押し
+    else if(_cmodalLastAction==='cancel')cb(false); // キャンセル押し
+    else cb(dismissAsOk?true:false); // 枠外タップ
+  });
+}
 function showPrompt(msg,def,cb,isText){_cmodal(msg,true,def,cb,isText);}
 
 function undoHit(){
@@ -2134,14 +2160,15 @@ function editModel(){
   });
 }
 function addMachine(){
-  // Fix 2: undo対応
-  pushUndoFull('新規台追加');
-  // Fix 6: 機種なしで即作成、後で追加可能
-  const num=ST.machines.length+1;
-  const newM=defMachine(`台${String(num).padStart(4,'0')}`);
-  ST.machines.push(newM);
-  ST.current=ST.machines.length-1;
-  save();killCharts();closeDrawer();render();
+  showConfirm('新しい台を追加しますか？',ok=>{
+    if(!ok)return; // キャンセルのみ：何もしない
+    pushUndoFull('新規台追加');
+    const num=ST.machines.length+1;
+    const newM=defMachine(`台${String(num).padStart(4,'0')}`);
+    ST.machines.push(newM);
+    ST.current=ST.machines.length-1;
+    save();killCharts();closeDrawer();render();
+  },true); // 枠外タップは OK 扱い
 }
 function switchMachine(i){ST.current=i;save();killCharts();closeDrawer();render();}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('show');}
