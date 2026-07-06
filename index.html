@@ -235,6 +235,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
 
   <div style="display:flex">
     <div class="hist-panel" id="histPanel" ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()">
+      <button onclick="addMachine()" id="hpNewBtn" style="flex-shrink:0;margin:calc(env(safe-area-inset-top, 0px) + 6px) 4px 6px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--amber);font-family:var(--mono);font-size:11px;font-weight:600;padding:10px 4px;cursor:pointer;line-height:1.3">＋<br>新台</button>
       <div class="hp-empty" id="hpEmpty">履 歴</div>
       <div class="hp-stats" id="hpStats" style="display:none;border-bottom:3px solid var(--amber-dim);padding:8px 2px;flex-shrink:0;background:rgba(245,158,11,.08)">
         <div style="display:flex;align-items:center;justify-content:center;gap:0">
@@ -254,7 +255,6 @@ header{position:fixed;top:0;left:0;right:0;z-index:200;padding-top:max(env(safe-
         </div>
       </div>
       <div id="hpItemsWrap" style="flex:1;overflow-y:auto;scrollbar-width:none;min-height:0;display:flex;flex-direction:column;justify-content:flex-start"></div>
-      <button onclick="addMachine()" id="hpNewBtn" style="flex-shrink:0;margin:6px 4px calc(env(safe-area-inset-bottom, 0px) + 6px);background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--amber);font-family:var(--mono);font-size:11px;font-weight:600;padding:10px 4px;cursor:pointer;line-height:1.3">＋<br>新台</button>
     </div>
     <div class="main-content">
       <!-- 総合評価カード（データあり時のみ表示） -->
